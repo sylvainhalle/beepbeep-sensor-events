@@ -1,0 +1,48 @@
+[{
+  "_id": {
+    "$oid": "60a82d936add5577c27e5a9e"
+  },
+  "protocol": null,
+  "serial": null,
+  "subject": "coffeemaker",
+  "sensor": "instant_current",
+  "model": "dmof1",
+  "location": "kitchen",
+  "sentAt": {
+    "$date": "2021-05-21T21:53:53.971Z"
+  },
+  "state": 0,
+  "home": "nears-hub-0032"
+},
+{
+  "_id": {
+    "$oid": "60a82d936add5577c27e5a9f"
+  },
+  "protocol": null,
+  "serial": null,
+  "subject": "living",
+  "sensor": "motion",
+  "model": "fgms001",
+  "location": "living",
+  "sentAt": {
+    "$date": "2021-05-21T21:54:07.582Z"
+  },
+  "state": "OFF",
+  "home": "nears-hub-0032"
+},
+{
+  "_id": {
+    "$oid": "60a82d936add5577c27e5aa0"
+  },
+  "protocol": null,
+  "serial": null,
+  "subject": "living",
+  "sensor": "tamper_alarm",
+  "model": "fgms001",
+  "location": "living",
+  "sentAt": {
+    "$date": "2021-05-21T21:54:07.587Z"
+  },
+  "state": "OFF",
+  "home": "nears-hub-0032"
+}]
