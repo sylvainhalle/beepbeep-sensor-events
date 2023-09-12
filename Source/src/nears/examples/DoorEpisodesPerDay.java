@@ -53,10 +53,10 @@ import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.cep.util.Booleans.And;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonString;
 import nears.DateFunction;
 import nears.DateToTimestamp;
+import nears.LogRepository;
 import nears.SensorEvent;
 import nears.MultiDaySource;
 
@@ -106,7 +106,7 @@ public class DoorEpisodesPerDay
 		int first_day = 1, last_day = 7;
 
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("DoorEpisodesPerDay.txt");
 		fs.chdir("0032");
 

@@ -36,10 +36,10 @@ import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonNumber;
 import ca.uqac.lif.json.JsonString;
 import nears.JsonLineFeeder;
+import nears.LogRepository;
 import nears.PrettyPrint;
 import nears.ReadTemperature;
 
@@ -60,7 +60,7 @@ public class ListStates
 {
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
 		OutputStream os = fs.writeTo("ListStates.txt");
 		

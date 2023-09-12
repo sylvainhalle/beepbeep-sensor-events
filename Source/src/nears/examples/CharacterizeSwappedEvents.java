@@ -9,7 +9,6 @@ import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
-import ca.uqac.lif.cep.functions.IfThenElse;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.json.JPathFunction;
@@ -19,20 +18,19 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Trim;
-import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import nears.DateToTimestamp;
 import nears.JsonFeeder;
+import nears.LogRepository;
 
 public class CharacterizeSwappedEvents
 {
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032.json");
 		
 		JsonFeeder feeder = new JsonFeeder(is);

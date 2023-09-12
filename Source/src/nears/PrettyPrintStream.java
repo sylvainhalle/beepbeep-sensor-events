@@ -25,6 +25,13 @@ import java.io.PrintStream;
  */
 public class PrettyPrintStream extends PrintStream
 {
+	public static interface PrettyPrintable
+	{
+		public void print(PrettyPrintStream ps);
+		
+		public int countRows();
+	}
+	
 	/**
 	 * The characters to add for each level of indentation in the stream.
 	 */

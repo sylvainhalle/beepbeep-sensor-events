@@ -42,12 +42,12 @@ import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonString;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
 import nears.DateToTimestamp;
 import nears.Integrate;
+import nears.LogRepository;
 import nears.MultiDaySource;
 import nears.ToConstant;
 
@@ -81,7 +81,7 @@ public class LastSensorUpdate
 		int first_day = 1, last_day = 126;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("LastSensorUpdate2.txt");
 		fs.chdir("0034");
 		

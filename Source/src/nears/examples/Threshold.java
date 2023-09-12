@@ -95,6 +95,6 @@ public class Threshold
 		connect(ins, OUTPUT, new_warning, TOP);
 		connect(f1, BOTTOM, new_warning, BOTTOM);
 		
-;	}
+	}
 
 }

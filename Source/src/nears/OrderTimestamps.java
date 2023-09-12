@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.util;
+package nears;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -27,8 +27,6 @@ import ca.uqac.lif.cep.SynchronousProcessor;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonPath;
 import ca.uqac.lif.json.JsonString;
-import nears.DateToTimestamp;
-import nears.SensorEvent;
 
 /**
  * Processor that ingests a stream of events, and, upon reaching the end,

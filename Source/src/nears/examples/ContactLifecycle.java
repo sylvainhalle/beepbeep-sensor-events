@@ -53,9 +53,9 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonString;
 import nears.SensorEvent;
+import nears.LogRepository;
 import nears.MultiDaySource;
 
 /**
@@ -76,7 +76,7 @@ public class ContactLifecycle
 		int first_day = 1, last_day = 182;
 
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("ContactLifecycle.txt");
 		fs.chdir("0034");
 

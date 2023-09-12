@@ -38,9 +38,9 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import nears.DateToTimestamp;
 import nears.JsonLineFeeder;
+import nears.LogRepository;
 import nears.PrettyPrintStream;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -62,7 +62,7 @@ public class MaxUpdateInterval
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
 		
 		JsonLineFeeder feeder = new JsonLineFeeder(is);

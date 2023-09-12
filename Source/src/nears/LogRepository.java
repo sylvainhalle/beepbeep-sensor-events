@@ -15,12 +15,21 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.util;
+package nears;
 
-public class WildcardFileSource extends Source
+import ca.uqac.lif.fs.HardDisk;
+
+/**
+ * A {@link HardDisk} that is open on the local folder where the data files for
+ * the examples reside. This avoids repeating the hard-coded path in each
+ * individual code example.
+ */
+public class LogRepository extends HardDisk
 {
-  public WildcardFileSource(String ... filenames)
-  {
-    super(1);
-  }
+	protected static final String FOLDER = "/home/sylvain/sensor-data";
+	
+	public LogRepository()
+	{
+		super(FOLDER);
+	}
 }

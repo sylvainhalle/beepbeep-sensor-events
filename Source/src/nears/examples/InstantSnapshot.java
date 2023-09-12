@@ -15,53 +15,64 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.util;
+package nears.examples;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import ca.uqac.lif.cep.io.Print;
+import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.Integrate;
+import ca.uqac.lif.cep.json.JPathFunction;
+import ca.uqac.lif.cep.tmf.FilterOn;
 import ca.uqac.lif.cep.tmf.Pump;
+import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
-import nears.JsonFeeder;
+import ca.uqac.lif.json.JsonString;
+import nears.House;
+import nears.HtmlPrint;
+import nears.LogRepository;
+import nears.MultiDaySource;
+import nears.SensorEvent;
 
 /**
- * From a JSON file, create a new JSON file where events are physically
- * occurring in the order defined by their timestamp. A side effect of
- * calling this program is that the resulting file also reformats each event so
- * that it is written on a single text line.
+ * Calculates a stream of snapshots of the house's state using integration.
  * 
  * @author Sylvain Hallé
  */
-public class ReorderFile
+public class InstantSnapshot
 {
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
+		/* Define the range of days to process. */
+		int first_day = 1, last_day = 1;
+
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
-		InputStream is = fs.readFrom("nears-hub-0034.json");
-		OutputStream os = fs.writeTo("nears-hub-0034-sorted.json");
+		FileSystem fs = new LogRepository().open();
+		OutputStream os = fs.writeTo("InstantSnapshot.html");
+		fs.chdir("0032");
 		
 		/* Create the pipeline. */
-		JsonFeeder feeder = new JsonFeeder(is);
+		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
-		OrderTimestamps o = new OrderTimestamps();
-		connect(p, o);
-
-		/* Connect the pipeline to an output and run. */
-		connect(o, new Print(new PrintStream(os)).setSeparator("\n"));
+		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, new JPathFunction(SensorEvent.JP_LOCATION), new Constant(new JsonString("kitchen"))));
+		connect(p, filter);
+		ApplyFunction to_delta = new ApplyFunction(new House.EventToHouseDelta());
+		connect(filter, to_delta);
+		Integrate instant = new Integrate(new House());
+		connect(to_delta, instant);
+		connect(instant, new HtmlPrint(new PrintStream(os)));
 		p.run();
-		
+
 		/* Clean up. */
+		feeder.stop();
 		os.close();
-		is.close();
 		fs.close();
 	}
 

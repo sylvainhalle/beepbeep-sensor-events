@@ -15,56 +15,53 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.examples;
+package nears;
+
+import static ca.uqac.lif.cep.Connector.connect;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import ca.uqac.lif.cep.GroupProcessor;
-import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.tmf.KeepLast;
+import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.cep.tmf.Slice;
-import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import nears.JsonFeeder;
-import nears.LogRepository;
-import nears.PrettyPrint;
+import ca.uqac.lif.fs.HardDisk;
 
-import static ca.uqac.lif.cep.Connector.connect;
-
-public class ListSensors
+/**
+ * From a JSON file, create a new JSON file where events are physically
+ * occurring in the order defined by their timestamp. A side effect of
+ * calling this program is that the resulting file also reformats each event so
+ * that it is written on a single text line.
+ * 
+ * @author Sylvain Hallé
+ */
+public class ReorderFile
 {
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032.json");
-		OutputStream os = fs.writeTo("ListSensors.txt");
+		InputStream is = fs.readFrom("nears-hub-0034.json");
+		OutputStream os = fs.writeTo("nears-hub-0034-sorted.json");
 		
 		/* Create the pipeline. */
-		Pump p = (Pump) connect(new JsonFeeder(is),
-				new Slice(new JPathFunction("model"), 
-						new GroupProcessor(1, 1) {{
-							ApplyFunction f = new ApplyFunction(new JPathFunction("sensor"));
-							Processor p = connect(f, new Sets.PutInto());
-							addProcessors(f, p).associateInput(f).associateOutput(p);
-						}}),
-				new KeepLast(),
-				new Pump());
-		connect(p, new PrettyPrint(new PrintStream(os)));
-		
-		/* Run the pipeline. */
+		JsonFeeder feeder = new JsonFeeder(is);
+		Pump p = new Pump();
+		connect(feeder, p);
+		OrderTimestamps o = new OrderTimestamps();
+		connect(p, o);
+
+		/* Connect the pipeline to an output and run. */
+		connect(o, new Print(new PrintStream(os)).setSeparator("\n"));
 		p.run();
 		
-		/* Close the resources. */
+		/* Clean up. */
 		os.close();
 		is.close();
 		fs.close();
 	}
+
 }

@@ -16,8 +16,8 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import nears.JsonFeeder;
+import nears.LogRepository;
 import nears.PrettyPrint;
 
 public class ListUniqueDevices
@@ -26,7 +26,7 @@ public class ListUniqueDevices
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032.json");
 		OutputStream os = fs.writeTo("ListUniqueDevices.txt");
 		

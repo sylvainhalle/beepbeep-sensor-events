@@ -27,9 +27,9 @@ import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonString;
 import nears.DateToTimestamp;
+import nears.LogRepository;
 import nears.MultiDaySource;
 import nears.QuietenDown;
 
@@ -42,7 +42,7 @@ public class QuietVoltage
 		int first_day = 30, last_day = 30;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("LoudVoltage.txt");
 		fs.chdir("0032");
 		

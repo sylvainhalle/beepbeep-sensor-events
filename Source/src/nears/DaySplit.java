@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.util;
+package nears;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,8 +30,6 @@ import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonPath;
 import ca.uqac.lif.json.JsonString;
-import nears.DateToTimestamp;
-import nears.JsonLineFeeder;
 
 /**
  * Utility program that splits an input JSON file into separate files for each
@@ -47,7 +45,7 @@ public class DaySplit
 	{
 		/* Define the input file and output directory. */
 		String file_number = "0032";
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-" + file_number + "-sorted.json");
 		fs.mkdir(file_number);
 		fs.chdir(file_number);

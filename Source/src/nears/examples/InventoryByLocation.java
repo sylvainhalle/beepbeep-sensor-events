@@ -32,8 +32,8 @@ import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import nears.JsonLineFeeder;
+import nears.LogRepository;
 import nears.PrettyPrint;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -57,7 +57,7 @@ public class InventoryByLocation
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new HardDisk("/home/sylvain/domus-capteurs").open();
+		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
 		OutputStream os = fs.writeTo("ListSensorsByLocation.txt");
 		
