@@ -18,6 +18,11 @@
 package nears.examples;
 
 import static ca.uqac.lif.cep.Connector.connect;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+
 import static ca.uqac.lif.cep.Connector.BOTTOM;
 import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
@@ -31,13 +36,26 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.IfThenElse;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.TurnInto;
+import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.json.NumberValue;
+import ca.uqac.lif.cep.tmf.FilterOn;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Insert;
+import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Window;
+import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
+import ca.uqac.lif.cep.tuples.MergeScalars;
+import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.util.Booleans;
+import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
+import ca.uqac.lif.fs.FileSystem;
+import ca.uqac.lif.fs.FileSystemException;
+import ca.uqac.lif.json.JsonString;
+import nears.JsonLineFeeder;
+import nears.LogRepository;
+import nears.SensorEvent;
 
 /**
  * Detects when a sensor produces values exceeding a specific threshold.
@@ -58,17 +76,36 @@ import ca.uqac.lif.cep.util.Numbers;
 public class Threshold
 {
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* The threshold value that must not be exceeded. */
-		int k = 100;
+		float k = 121.5f;
 		
 		/* The width of the window (n) and the number of times an outlier must be
 		 * observed to report a warning (m). */
 		int m = 3, n = 5;
 		
+		/* The ID of the sensor on wishes to examine. */
+		FixedTupleBuilder builder = new FixedTupleBuilder("location", "subject", "model", "sensor");
+		Tuple sensor_id = builder.createTuple(new JsonString("kitchen"), new JsonString("coffeemaker"), new JsonString("dmof1"), new JsonString("instant_voltage"));
 		
+		/* Prepare to read from an offline log. */
+		FileSystem fs = new LogRepository().open();
+		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
+		PrintStream os = new PrintStream(fs.writeTo("Threshold.txt"));
+		
+		/* Filter the events of a single sensor. */
+		JsonLineFeeder f = new JsonLineFeeder(is);
+		Pump p = new Pump();
+		connect(f, p);
+		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance,
+				new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"), new JPathFunction(SensorEvent.JP_LOCATION), new JPathFunction(SensorEvent.JP_SUBJECT), new JPathFunction(SensorEvent.JP_MODEL), new JPathFunction(SensorEvent.JP_SENSOR)),
+				new Constant(sensor_id)));
+		connect(p, filter);
+		
+		/* Detect excessive values according to the pattern. */
 		ApplyFunction exceeds = new ApplyFunction(new FunctionTree(Numbers.isGreaterThan, new FunctionTree(NumberValue.instance, new JPathFunction("state")), new Constant(k)));
+		connect(filter, exceeds);
 		Window win = new Window(new GroupProcessor(1, 1) {{ 
 			Fork f = new Fork(3);
 			ApplyFunction ite = new ApplyFunction(IfThenElse.instance);
@@ -76,16 +113,16 @@ public class Threshold
 			TurnInto one = new TurnInto(1);
 			connect(f, 1, one, INPUT);
 			TurnInto zero = new TurnInto(0);
-			connect(f, 0, zero, INPUT);
+			connect(f, 2, zero, INPUT);
 			connect(one, OUTPUT, ite, 1);
 			connect(zero, OUTPUT, ite, 2);
 			Cumulate sum = new Cumulate(Numbers.addition);
 			connect(ite, sum);
-			ApplyFunction gt = new ApplyFunction(new FunctionTree(Numbers.isGreaterThan, StreamVariable.X, new Constant(n)));
+			ApplyFunction gt = new ApplyFunction(new FunctionTree(Numbers.isGreaterThan, StreamVariable.X, new Constant(m)));
 			connect(sum, gt);
 			addProcessors(f, ite, one, zero, sum, gt);
 			associateInput(f).associateOutput(gt);
-		}}, m);
+		}}, n);
 		connect(exceeds, win);
 		Fork f1 = new Fork();
 		connect(win, f1);
@@ -94,7 +131,15 @@ public class Threshold
 		ApplyFunction new_warning = new ApplyFunction(new FunctionTree(Booleans.and, new FunctionTree(Booleans.not, StreamVariable.X), StreamVariable.Y));
 		connect(ins, OUTPUT, new_warning, TOP);
 		connect(f1, BOTTOM, new_warning, BOTTOM);
+
+		/* Run the pipeline and print its results in the output stream. */
+		connect(new_warning, new Print.Println(os));
+		p.run();
 		
+		/* Close the resources. */
+		os.close();
+		is.close();
+		fs.close();
 	}
 
 }
