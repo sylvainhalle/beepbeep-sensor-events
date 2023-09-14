@@ -39,6 +39,11 @@ public class SpliceInputStream extends Source
 
 	protected int m_streamIndex;
 	
+	public static SpliceInputStream readFrom(String ...filenames) throws FileSystemException
+	{
+	  return new SpliceInputStream(filenames);
+	}
+	
 	public SpliceInputStream(FileSystem fs, boolean read_stdin, String ... filenames)
 	{
 		super(1);
