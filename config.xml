@@ -41,14 +41,13 @@
   <srcdir>Source/src</srcdir>
   <depdir>Source/dep</depdir>
   <libdir>Source/lib</libdir>
-  <docdir>Source/lib</docdir>
+  <docdir>doc</docdir>
   <bindir>Source/bin</bindir>
   
   <test>
     <srcdir>Source/srctest</srcdir>
     <depdir>Source/dep</depdir>
     <libdir>Source/lib</libdir>
-    <docdir>Source/lib</docdir>
     <bindir>Source/bintest</bindir>
     <!-- The filename pattern to recognize test files -->
     <!-- <filenamepattern>

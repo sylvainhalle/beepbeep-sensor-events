@@ -83,7 +83,7 @@ public class LastSensorUpdate
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("LastSensorUpdate2.txt");
-		fs.chdir("0034");
+		fs.chdir("0032");
 		
 		/* Create the pipeline. */
 		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);

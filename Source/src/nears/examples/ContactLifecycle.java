@@ -73,12 +73,12 @@ public class ContactLifecycle
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 182;
+		int first_day = 1, last_day = 120;
 
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("ContactLifecycle.txt");
-		fs.chdir("0034");
+		fs.chdir("0032");
 
 		/* Create the pipeline. */
 		//JsonLineFeeder feeder = new JsonLineFeeder(fs.readFrom("../OnOffEpisodes_raw.txt"));
@@ -87,8 +87,8 @@ public class ContactLifecycle
 		connect(feeder, p);
 		Fork f0 = new Fork();
 		connect(p, f0);
-		ApplyFunction is_clap = new ApplyFunction(land(eq(new JPathFunction(SensorEvent.JP_SENSOR), new Constant(new JsonString(SensorEvent.V_CONTACT))),eq(new JPathFunction(SensorEvent.JP_SUBJECT), new Constant(new JsonString("vanity")))));
-		//ApplyFunction is_clap = new ApplyFunction(eq(new JPathFunction(EventFields.JP_SENSOR), new Constant(new JsonString(EventFields.V_CONTACT))));
+		//ApplyFunction is_clap = new ApplyFunction(land(eq(new JPathFunction(SensorEvent.JP_SENSOR), new Constant(new JsonString(SensorEvent.V_CONTACT))),eq(new JPathFunction(SensorEvent.JP_SUBJECT), new Constant(new JsonString("vanity")))));
+		ApplyFunction is_clap = new ApplyFunction(eq(new JPathFunction(SensorEvent.JP_SENSOR), new Constant(new JsonString(SensorEvent.V_CONTACT))));
 		Filter f_is_clap = new Filter();
 		connect(f0, TOP, f_is_clap, TOP);
 		connect(f0, BOTTOM, is_clap, INPUT);

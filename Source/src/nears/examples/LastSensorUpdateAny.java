@@ -62,12 +62,12 @@ public class LastSensorUpdateAny
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 182;
+		int first_day = 1, last_day = 120;
 		
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
 		OutputStream os = fs.writeTo("LastSensorUpdateAny.gp");
-		fs.chdir("0034");
+		fs.chdir("0032");
 		
 		/* Create the pipeline. */
 		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
