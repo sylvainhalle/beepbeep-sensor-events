@@ -5,29 +5,10 @@ This repository contains an extension to the [BeepBeep](https://liflab.github.io
 
 To learn more about BeepBeep, a [presentation](https://www.slideshare.net/sylvainhalle/event-stream-processing-with-beepbeep-3-258079731) is available, as well as a complete (and free) [textbook](https://www.puq.ca/catalogue/livres/event-stream-processing-with-beep-beep-3663.html).
 
-Building the extension
-----------------------
-
-The repository is structured as an [AntRun](https://github.com/sylvainhalle/AntRun) Java project, which comes with a command line build script that can automatically download dependencies, compile, test and bundle the stand-alone library as a JAR file.
-
-To compile the extension, make sure you have the following:
-
-- The Java Development Kit (JDK) to compile. The palette complies
-  with Java version 8; it is probably safe to use any later version.
-- [Ant](http://ant.apache.org) to automate the compilation and build process
-
-At the command line, in the project's root folder, simply typing:
-
-    ant
-
-should take care of downloading all dependencies and compiling the project. The result is a set of three JAR files:
-
-- `beepbeep-sensor-toolbox-x.x.jar`: the library itself
-- `beepbeep-sensor-toolbox-x.x-sources.jar`: the source code
-- `beepbeep-sensor-toolbox-x.x-javadoc.jar`: the Javadoc documentation; unzip in a folder and open `index.html` to view the document (yes, there is documentation for all the classes in the library)
-
 Using the extension
 -------------------
+
+You can use the toolbox by simply downloading the latest precompiled [release](https://github.com/sylvainhalle/beepbeep-sensor-events/releases). Otherwise you can build the extension directly from the sources (instructions at the end).
 
 The library is stand-alone: in addition to the new processors and functions it defines, it bundles BeepBeep and all the [palettes](https://github.com/liflab/beepbeep-3-palettes) it needs to operate. No other JAR file is needed.
 
@@ -64,5 +45,26 @@ Code examples
 -------------
 
 The library comes with code examples that showcase the operations that can be done on sensor logs. Explanations and illustrations of the corresponding BeepBeep pipelines can be accessed in the Javadoc, by looking for the `nears.examples` package.
+
+Building the extension
+----------------------
+
+The repository is structured as an [AntRun](https://github.com/sylvainhalle/AntRun) Java project, which comes with a command line build script that can automatically download dependencies, compile, test and bundle the stand-alone library as a JAR file.
+
+To compile the extension, make sure you have the following:
+
+- The Java Development Kit (JDK) to compile. The palette complies
+  with Java version 8; it is probably safe to use any later version.
+- [Ant](http://ant.apache.org) to automate the compilation and build process
+
+At the command line, in the project's root folder, simply typing:
+
+    ant
+
+should take care of downloading all dependencies and compiling the project. The result is a set of three JAR files:
+
+- `beepbeep-sensor-toolbox-x.x.jar`: the library itself
+- `beepbeep-sensor-toolbox-x.x-sources.jar`: the source code
+- `beepbeep-sensor-toolbox-x.x-javadoc.jar`: the Javadoc documentation; unzip in a folder and open `index.html` to view the document (yes, there is documentation for all the classes in the library)
 
 <!-- :wrap=soft:maxLineLen=76: -->
