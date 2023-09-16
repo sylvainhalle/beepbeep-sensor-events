@@ -5,6 +5,8 @@ This repository contains an extension to the [BeepBeep](https://liflab.github.io
 
 To learn more about BeepBeep, a [presentation](https://www.slideshare.net/sylvainhalle/event-stream-processing-with-beepbeep-3-258079731) is available, as well as a complete (and free) [textbook](https://www.puq.ca/catalogue/livres/event-stream-processing-with-beep-beep-3663.html).
 
+![An example of a BeepBeep pipeline]([jerrydog.jpg](https://github.com/sylvainhalle/beepbeep-sensor-events/blob/main/Source/src/doc-files/ContactLifecycle.png?raw=true)
+
 Using the extension
 -------------------
 
