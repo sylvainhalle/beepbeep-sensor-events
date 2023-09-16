@@ -36,6 +36,8 @@ export CLASSPATH=/path/to/xxx.jar
 
 Once done the `-cp` option is no longer necessary when running the scripts.
 
+A few examples of Groovy scripts using the toolbox are available in the project's root folder.
+
 Groovy shortcuts
 ----------------
 
