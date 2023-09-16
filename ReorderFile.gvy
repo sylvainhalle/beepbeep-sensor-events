@@ -11,6 +11,6 @@
 import static nears.Shortcuts.*
 import nears.*
 
-cmd = new SpliceInputStream(args)
+cmd = readJsonFrom(args)
 cmd | new OrderTimestamps() | new Print().setSeparator("\n")
 cmd.start()

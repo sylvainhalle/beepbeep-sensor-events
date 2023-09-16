@@ -46,6 +46,21 @@ public class Shortcuts
 		super();
 	}
 	
+	public static SpliceSource readLinesFrom(String ... filenames)
+	{
+		return new SpliceSource.SpliceLineSource(false, filenames);
+	}
+	
+	public static SpliceSource readJsonStreamFrom(String ... filenames)
+	{
+		return new SpliceSource.SpliceJsonStreamSource(false, filenames);
+	}
+	
+	public static SpliceSource readJsonFrom(String ... filenames)
+	{
+		return new SpliceSource.SpliceJsonSource(false, filenames);
+	}
+	
 	public static class GroupProcessor extends ca.uqac.lif.cep.GroupProcessor
 	{
 		public GroupProcessor(int in, int out)
