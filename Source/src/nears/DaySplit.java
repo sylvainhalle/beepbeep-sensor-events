@@ -26,7 +26,6 @@ import java.util.GregorianCalendar;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonPath;
 import ca.uqac.lif.json.JsonString;

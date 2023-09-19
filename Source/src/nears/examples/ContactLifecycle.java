@@ -22,7 +22,6 @@ import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
-import static ca.uqac.lif.cep.util.Booleans.land;
 import static ca.uqac.lif.cep.util.Booleans.lor;
 import static ca.uqac.lif.cep.util.Equals.eq;
 

@@ -28,7 +28,6 @@ import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.fs.HardDisk;
 
 /**
  * From a JSON file, create a new JSON file where events are physically
