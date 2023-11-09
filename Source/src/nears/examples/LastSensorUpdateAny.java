@@ -62,15 +62,14 @@ public class LastSensorUpdateAny
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 120;
+		int first_day = 1, last_day = -1;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		FileSystem fs = new LogRepository("0105").open();
 		OutputStream os = fs.writeTo("LastSensorUpdateAny.gp");
-		fs.chdir("0032");
+		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		
 		/* Create the pipeline. */
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
 		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
@@ -91,7 +90,7 @@ public class LastSensorUpdateAny
 		connect(minus, OUTPUT, table, BOTTOM);
 		KeepLast last = new KeepLast();
 		connect(table, last);
-		PrintGnuPlot to_plot = new PrintGnuPlot(new Scatterplot(), ImageType.PDF);
+		PrintGnuPlot to_plot = new PrintGnuPlot(new Scatterplot(), ImageType.PNG);
 		connect(last, to_plot);
 		
 		/* Connect the pipeline to an output and run. */

@@ -43,9 +43,9 @@ public class DaySplit
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input file and output directory. */
-		String file_number = "0032";
+		String file_number = "0105";
 		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-" + file_number + "-sorted.json");
+		InputStream is = fs.readFrom("NH-" + file_number + "-sorted.json");
 		fs.mkdir(file_number);
 		fs.chdir(file_number);
 		

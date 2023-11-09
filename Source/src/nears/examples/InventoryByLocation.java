@@ -18,7 +18,6 @@
 package nears.examples;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -32,8 +31,8 @@ import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import nears.JsonLineFeeder;
 import nears.LogRepository;
+import nears.MultiDaySource;
 import nears.PrettyPrint;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -57,12 +56,12 @@ public class InventoryByLocation
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
+		FileSystem fs = new LogRepository("0102").open();
+		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListSensorsByLocation.txt");
 		
 		/* Create the pipeline. */
-		Pump p = (Pump) connect(new JsonLineFeeder(is),
+		Pump p = (Pump) connect(feeder,
 				new Slice(new JPathFunction("location"),
 						new Slice(new JPathFunction("subject"),
 								new GroupProcessor(1, 1) {{
@@ -79,7 +78,6 @@ public class InventoryByLocation
 		
 		/* Close the resources. */
 		os.close();
-		is.close();
 		fs.close();
 	}
 }

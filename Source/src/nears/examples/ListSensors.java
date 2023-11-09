@@ -18,7 +18,6 @@
 package nears.examples;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -32,8 +31,8 @@ import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import nears.JsonFeeder;
 import nears.LogRepository;
+import nears.MultiDaySource;
 import nears.PrettyPrint;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -43,12 +42,12 @@ public class ListSensors
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032.json");
+		FileSystem fs = new LogRepository("0102").open();
+		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListSensors.txt");
 		
 		/* Create the pipeline. */
-		Pump p = (Pump) connect(new JsonFeeder(is),
+		Pump p = (Pump) connect(feeder,
 				new Slice(new JPathFunction("model"), 
 						new GroupProcessor(1, 1) {{
 							ApplyFunction f = new ApplyFunction(new JPathFunction("sensor"));
@@ -64,7 +63,6 @@ public class ListSensors
 		
 		/* Close the resources. */
 		os.close();
-		is.close();
 		fs.close();
 	}
 }

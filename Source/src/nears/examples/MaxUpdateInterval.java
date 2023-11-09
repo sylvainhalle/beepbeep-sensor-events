@@ -18,7 +18,7 @@
 package nears.examples;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
@@ -39,8 +39,8 @@ import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import nears.DateToTimestamp;
-import nears.JsonLineFeeder;
 import nears.LogRepository;
+import nears.MultiDaySource;
 import nears.PrettyPrintStream;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -62,10 +62,9 @@ public class MaxUpdateInterval
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
-		
-		JsonLineFeeder feeder = new JsonLineFeeder(is);
+		FileSystem fs = new LogRepository("0102").open();
+		OutputStream os = fs.writeTo("MaxUpdateInterval.txt");
+		MultiDaySource feeder = new MultiDaySource(fs);
 		
 		Slice s = new Slice(new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"), new JPathFunction("location"), new JPathFunction("subject"), new JPathFunction("model"), new JPathFunction("sensor")),
 				new GroupProcessor(1, 1) {{
@@ -109,11 +108,11 @@ public class MaxUpdateInterval
 		connect(s, p);
 		KeepLast kl = new KeepLast();
 		connect(p, kl);
-		Print print = new Print(new PrettyPrintStream(System.out));
+		Print print = new Print(new PrettyPrintStream(os));
 		connect(kl, print);
 		
 		p.run();
-		is.close();
+		os.close();
 		fs.close();
 	}
 }

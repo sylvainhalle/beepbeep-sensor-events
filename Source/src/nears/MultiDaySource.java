@@ -18,6 +18,8 @@
 package nears;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import ca.uqac.lif.cep.tmf.Splice;
 import ca.uqac.lif.fs.FileSystem;
@@ -47,6 +49,19 @@ public class MultiDaySource extends Splice
 	}
 	
 	/**
+	 * Creates a new multi-day source by reading all events from a given folder.
+	 * The source assumes the first file is called {@code 1.json} and
+	 * iterates by incrementing the filename until no file of a given number is
+	 * found.
+	 * @param fs A {@link FileSystem} instance open on the folder where the JSON
+	 * files to read reside
+	 */
+	public MultiDaySource(FileSystem fs)
+	{
+		this(fs, 1, -1);
+	}
+	
+	/**
 	 * Gets the array of {@link JsonLineFeeder} corresponding to each of the
 	 * files to read from. This method is used by the constructor of this class.
 	 * @param fs A {@link FileSystem} instance open on the folder where the JSON
@@ -57,19 +72,29 @@ public class MultiDaySource extends Splice
 	 */
 	protected static JsonLineFeeder[] getFeeders(FileSystem fs, int first_day, int last_day)
 	{
-		JsonLineFeeder[] feeders = new JsonLineFeeder[last_day - first_day + 1];
-		for (int i = first_day; i <= last_day; i++)
+		List<JsonLineFeeder> l_feeders = new ArrayList<JsonLineFeeder>();
+		for (int i = first_day; i <= last_day || last_day < 0; i++)
 		{
 			try
 			{
 				InputStream is = fs.readFrom(i + ".json");
-				feeders[i - first_day] = new JsonLineFeeder(is);
+				l_feeders.add(new JsonLineFeeder(is));
 			}
 			catch (FileSystemException e)
 			{
-				e.printStackTrace();
+				if (last_day > 0)
+				{
+					// Show error only if a file was expected
+					e.printStackTrace();
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
+		JsonLineFeeder[] feeders = new JsonLineFeeder[l_feeders.size()];
+		l_feeders.toArray(feeders);
 		return feeders;
 	}
 }

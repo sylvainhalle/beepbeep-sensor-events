@@ -78,15 +78,14 @@ public class LastSensorUpdate
 		Tuple sensor_id = builder.createTuple(new JsonString("kitchen"), new JsonString("coffeemaker"), new JsonString("dmof1"));
 		
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 126;
+		int first_day = 1, last_day = -1;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
-		OutputStream os = fs.writeTo("LastSensorUpdate2.txt");
-		fs.chdir("0032");
+		FileSystem fs = new LogRepository("0102").open();
+		OutputStream os = fs.writeTo("LastSensorUpdate.txt");
+		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		
 		/* Create the pipeline. */
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
 		Fork f1 = new Fork();

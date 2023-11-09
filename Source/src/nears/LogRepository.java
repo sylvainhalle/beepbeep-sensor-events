@@ -17,6 +17,7 @@
  */
 package nears;
 
+import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.fs.HardDisk;
 
 /**
@@ -26,10 +27,42 @@ import ca.uqac.lif.fs.HardDisk;
  */
 public class LogRepository extends HardDisk
 {
+	/**
+	 * The folder name where the data files are located. Make sure to change this
+	 * to the actual path on your computer!
+	 */
 	protected static final String FOLDER = "/home/sylvain/sensor-data";
 	
-	public LogRepository()
+	/**
+	 * The name of the (optional) sub-folder of the root data folder.
+	 */
+	protected final String m_subFolder;
+	
+	public LogRepository() throws FileSystemException
+	{
+		this("");
+	}
+	
+	public LogRepository(String sub_folder) throws FileSystemException
 	{
 		super(FOLDER);
+		m_subFolder = sub_folder;
+	}
+	
+	/**
+	 * Gets the name of the sub-folder of the root data folder.
+	 * @return The sub-folder
+	 */
+	public String getSubFolder()
+	{
+		return m_subFolder;
+	}
+	
+	@Override
+	public LogRepository open() throws FileSystemException
+	{
+		super.open();
+		chdir(m_subFolder);
+		return this;
 	}
 }

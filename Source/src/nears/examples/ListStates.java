@@ -18,7 +18,6 @@
 package nears.examples;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -38,8 +37,8 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonNumber;
 import ca.uqac.lif.json.JsonString;
-import nears.JsonLineFeeder;
 import nears.LogRepository;
+import nears.MultiDaySource;
 import nears.PrettyPrint;
 import nears.ReadTemperature;
 
@@ -60,11 +59,10 @@ public class ListStates
 {
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
+		FileSystem fs = new LogRepository("0105").open();
+		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListStates.txt");
 		
-		JsonLineFeeder f = new JsonLineFeeder(is);
 		Slice s = new Slice(new JPathFunction("model"), 
 				new Slice(new JPathFunction("sensor"), 
 						new GroupProcessor(1, 1) {{
@@ -82,7 +80,7 @@ public class ListStates
 						}}
 				)
 		);
-		connect(f, s);
+		connect(feeder, s);
 		Pump p = new Pump();
 		connect(s, p);
 		KeepLast kl = new KeepLast();
@@ -91,7 +89,6 @@ public class ListStates
 		connect(kl, print);
 		p.run();
 		os.close();
-		is.close();
 		fs.close();
 	}
 	
