@@ -24,7 +24,6 @@ import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -48,8 +47,9 @@ import ca.uqac.lif.cep.util.Strings.ToString;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
-import nears.JsonLineFeeder;
+import nears.HighlightedGraph;
 import nears.LogRepository;
+import nears.MultiDaySource;
 
 /**
  * Draws a graph showing successive locations of motion sensor events.
@@ -78,12 +78,11 @@ public class FollowsGraph
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
-		OutputStream os = fs.writeTo("FollowsGraph.txt");
+		FileSystem fs = new LogRepository("0102").open();
+		MultiDaySource feeder = new MultiDaySource(fs);
+		OutputStream os = fs.writeTo("FollowsGraph.dot");
 		
 		/* Create the pipeline. */
-		JsonLineFeeder feeder = new JsonLineFeeder(is);
 		Pump p = new Pump();
 		connect(feeder, p);
 		Fork f0 = new Fork();
@@ -97,7 +96,7 @@ public class FollowsGraph
 		connect(f0, TOP, f_is_motion, TOP);
 		GetEdges ge = new GetEdges();
 		connect(f_is_motion, ge);
-		UpdateGraph u_graph = new UpdateGraph();
+		UpdateGraph u_graph = new UpdateGraph(new HighlightedGraph());
 		connect(ge, TOP, u_graph, TOP);
 		connect(ge, BOTTOM, u_graph, BOTTOM);
 		KeepLast last = new KeepLast();
@@ -112,7 +111,6 @@ public class FollowsGraph
 		
 		/* Clean up. */
 		os.close();
-		is.close();
 		fs.close();
 	}
 	
