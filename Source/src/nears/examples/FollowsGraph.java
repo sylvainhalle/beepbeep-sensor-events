@@ -23,6 +23,8 @@ import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
 
+import static nears.SensorEvent.JP_SENSOR;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -88,7 +90,7 @@ public class FollowsGraph
 		Fork f0 = new Fork();
 		connect(p, f0);
 		ApplyFunction is_motion = new ApplyFunction(new FunctionTree(Equals.instance,
-				new JPathFunction("sensor"),
+				new JPathFunction(JP_SENSOR),
 				new Constant(new JsonString("motion"))));
 		connect(f0, BOTTOM, is_motion, INPUT);
 		Filter f_is_motion = new Filter();
