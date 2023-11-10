@@ -43,8 +43,8 @@ public class ReorderFile
 	{
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
-		InputStream is = fs.readFrom("NH-0105.json");
-		OutputStream os = fs.writeTo("NH-0105-sorted.json");
+		InputStream is = fs.readFrom("NH-0102.json");
+		OutputStream os = fs.writeTo("NH-0102-sorted.json");
 		
 		/* Create the pipeline. */
 		JsonFeeder feeder = new JsonFeeder(is);

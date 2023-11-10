@@ -42,7 +42,7 @@ public class ListSensors
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0102").open();
+		FileSystem fs = new LogRepository("0105").open();
 		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListSensors.txt");
 		

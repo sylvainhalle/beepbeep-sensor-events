@@ -24,6 +24,8 @@ import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
 
 import static nears.SensorEvent.JP_SENSOR;
+import static nears.SensorEvent.JP_STATE;
+import static nears.SensorEvent.V_ON;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +46,7 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Booleans.Not;
+import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Strings.ToString;
 import ca.uqac.lif.fs.FileSystem;
@@ -80,7 +83,7 @@ public class FollowsGraph
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0102").open();
+		FileSystem fs = new LogRepository("0105").open();
 		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("FollowsGraph.dot");
 		
@@ -89,9 +92,13 @@ public class FollowsGraph
 		connect(feeder, p);
 		Fork f0 = new Fork();
 		connect(p, f0);
-		ApplyFunction is_motion = new ApplyFunction(new FunctionTree(Equals.instance,
-				new JPathFunction(JP_SENSOR),
-				new Constant(new JsonString("motion"))));
+		ApplyFunction is_motion = new ApplyFunction(new FunctionTree(Booleans.and,
+				new FunctionTree(Equals.instance,
+						new JPathFunction(JP_SENSOR),
+						new Constant(new JsonString("motion"))),
+				new FunctionTree(Equals.instance,
+						new JPathFunction(JP_STATE),
+						new Constant(new JsonString(V_ON)))));
 		connect(f0, BOTTOM, is_motion, INPUT);
 		Filter f_is_motion = new Filter();
 		connect(is_motion, OUTPUT, f_is_motion, BOTTOM);

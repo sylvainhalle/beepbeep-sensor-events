@@ -106,13 +106,12 @@ public class DoorEpisodesPerDay
 		int first_day = 1, last_day = 7;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		FileSystem fs = new LogRepository("0102").open();
 		OutputStream os = fs.writeTo("DoorEpisodesPerDay.txt");
-		fs.chdir("0032");
+		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 
 		/* Create the pipeline. */
 		//JsonLineFeeder feeder = new JsonLineFeeder(fs.readFrom("../OnOffEpisodes_raw.txt"));
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
 		Fork f0 = new Fork();

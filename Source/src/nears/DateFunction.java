@@ -40,6 +40,11 @@ public abstract class DateFunction extends UnaryFunction<Number,Number>
 	public static final DayOfYear dayOfYear = new DayOfYear();
 	
 	/**
+	 * A publicly visible instance of the {@link WeekOfYear} function.
+	 */
+	public static final WeekOfYear weekOfYear = new WeekOfYear();
+	
+	/**
 	 * A publicly visible instance of the {@link TimeOfDay} function.
 	 */
 	public static final TimeOfDay timeOfDay = new TimeOfDay();
@@ -74,6 +79,24 @@ public abstract class DateFunction extends UnaryFunction<Number,Number>
 		{
 			s_calendar.setTimeInMillis(x.longValue());
 			return s_calendar.get(Calendar.DAY_OF_YEAR);
+		}	
+	}
+	
+	/**
+	 * Function that extracts the week of the year of a given timestamp.
+	 */
+	public static class WeekOfYear extends DateFunction
+	{
+		protected WeekOfYear()
+		{
+			super();
+		}
+
+		@Override
+		public Number getValue(Number x)
+		{
+			s_calendar.setTimeInMillis(x.longValue());
+			return s_calendar.get(Calendar.WEEK_OF_YEAR);
 		}	
 	}
 

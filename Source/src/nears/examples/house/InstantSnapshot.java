@@ -50,17 +50,17 @@ public class InstantSnapshot
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 1;
+		int first_day = 3, last_day = 3;
 
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0105").open();
-    MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
+		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		OutputStream os = fs.writeTo("InstantSnapshot.html");
 		
 		/* Create the pipeline. */
 		Pump p = new Pump();
 		connect(feeder, p);
-		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, new JPathFunction(SensorEvent.JP_LOCATION), new Constant(new JsonString("kitchen"))));
+		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, new JPathFunction(SensorEvent.JP_SUBJECT), new Constant(new JsonString("stove"))));
 		connect(p, filter);
 		ApplyFunction to_delta = new ApplyFunction(new House.EventToHouseDelta());
 		connect(filter, to_delta);

@@ -65,7 +65,7 @@ public class LastSensorUpdateAny
 		int first_day = 1, last_day = -1;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
+		FileSystem fs = new LogRepository("0102").open();
 		OutputStream os = fs.writeTo("LastSensorUpdateAny.gp");
 		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		
