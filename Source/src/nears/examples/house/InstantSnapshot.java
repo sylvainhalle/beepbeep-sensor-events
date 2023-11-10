@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears.examples;
+package nears.examples.house;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -34,11 +34,11 @@ import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
-import nears.House;
 import nears.HtmlPrint;
 import nears.LogRepository;
 import nears.MultiDaySource;
 import nears.SensorEvent;
+import nears.house.House;
 
 /**
  * Calculates a stream of snapshots of the house's state using integration.
@@ -53,12 +53,11 @@ public class InstantSnapshot
 		int first_day = 1, last_day = 1;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		FileSystem fs = new LogRepository("0105").open();
+    MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		OutputStream os = fs.writeTo("InstantSnapshot.html");
-		fs.chdir("0032");
 		
 		/* Create the pipeline. */
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
 		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, new JPathFunction(SensorEvent.JP_LOCATION), new Constant(new JsonString("kitchen"))));

@@ -15,13 +15,15 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package nears.house;
 
 import java.io.ByteArrayOutputStream;
 
 import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonPath;
+import nears.PrettyPrintStream;
+import nears.SensorEvent;
 import nears.PrettyPrintStream.PrettyPrintable;
 
 /**
@@ -42,7 +44,7 @@ import nears.PrettyPrintStream.PrettyPrintable;
  * @author Sylvain Hallé
  */
 @SuppressWarnings("serial")
-public class House extends PrettyTreeMap<nears.House.Location>
+public class House extends PrettyTreeMap<nears.house.House.Location>
 {
 	/**
 	 * A location is a map from subject names to subjects.
