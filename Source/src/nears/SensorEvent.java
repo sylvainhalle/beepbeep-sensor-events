@@ -54,6 +54,8 @@ public abstract class SensorEvent
   /*@ non_null @*/ public static final String JP_TIMESTAMP = "sentAt/$date";
 
   /*@ non_null @*/ public static final String V_CONTACT = "contact";
+  
+  /*@ non_null @*/ public static final String V_ON = "ON";
 
   /*@ non_null @*/ public static final String V_TEMPERATURE = "temperature";
 

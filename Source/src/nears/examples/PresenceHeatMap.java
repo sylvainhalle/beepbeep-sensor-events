@@ -24,7 +24,9 @@ import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
 import static nears.SensorEvent.JP_LOCATION;
 import static nears.SensorEvent.JP_SENSOR;
+import static nears.SensorEvent.JP_STATE;
 import static nears.SensorEvent.JP_TIMESTAMP;
+import static nears.SensorEvent.V_ON;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,25 +37,35 @@ import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.complex.RangeCep;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.IdentityFunction;
+import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.json.StringValue;
+import ca.uqac.lif.cep.mtnp.UpdateTableMap;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Freeze;
-import ca.uqac.lif.cep.tmf.Insert;
+import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
+import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tmf.Trim;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
+import ca.uqac.lif.cep.tuples.MapToTuple;
 import ca.uqac.lif.cep.tuples.MergeScalars;
+import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
+import nears.DateFunction;
 import nears.DateToTimestamp;
 import nears.LogRepository;
 import nears.MultiDaySource;
+import nears.StutterFirst;
 
 public class PresenceHeatMap
 {
@@ -61,7 +73,7 @@ public class PresenceHeatMap
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
+		FileSystem fs = new LogRepository("0102").open();
 		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("PresenceHeatMap.txt");
 		
@@ -70,30 +82,54 @@ public class PresenceHeatMap
 		connect(feeder, p);
 		Fork f0 = new Fork();
 		connect(p, f0);
-		ApplyFunction is_motion = new ApplyFunction(new FunctionTree(Equals.instance,
-				new JPathFunction(JP_SENSOR),
-				new Constant(new JsonString("motion"))));
-		connect(f0, BOTTOM, is_motion, INPUT);
+		ApplyFunction is_motion_on = new ApplyFunction(new FunctionTree(Booleans.and,
+				new FunctionTree(Equals.instance,
+						new JPathFunction(JP_SENSOR),
+						new Constant(new JsonString("motion"))),
+				new FunctionTree(Equals.instance,
+						new JPathFunction(JP_STATE),
+						new Constant(new JsonString(V_ON)))));
+		connect(f0, BOTTOM, is_motion_on, INPUT);
 		Filter f_is_motion = new Filter();
-		connect(is_motion, OUTPUT, f_is_motion, BOTTOM);
+		connect(is_motion_on, OUTPUT, f_is_motion, BOTTOM);
 		connect(f0, TOP, f_is_motion, TOP);
 		
 		RangeCep rc = new RangeCep(new GroupProcessor(1, 1) {{
 				ApplyFunction loc = new ApplyFunction(new JPathFunction(JP_LOCATION));
+				StutterFirst sf = new StutterFirst(2);
+				connect(loc, sf);
 				Fork f = new Fork();
-				connect(loc, f);
+				connect(sf, f);
 				Trim t = new Trim(1);
 				connect(f, TOP, t, INPUT);
 				ApplyFunction eq = new ApplyFunction(Equals.instance);
 				connect(t, OUTPUT, eq, TOP);
 				connect(f, BOTTOM, eq, BOTTOM);
-				Insert ins = new Insert(1, true);
-				connect(eq, ins);
-				addProcessors(loc, f, t, eq, ins);
-				associateInput(loc).associateOutput(ins);
+				addProcessors(loc, f, t, eq, sf);
+				associateInput(loc).associateOutput(eq);
 			}},
 				new Processor[] {
-					new ApplyFunction(new JPathFunction(JP_LOCATION)),
+					new GroupProcessor(1, 1) {{
+						Freeze f = new Freeze();
+						ApplyFunction ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(JP_TIMESTAMP))));
+						connect(f, ts);
+						addProcessors(f, ts);
+						associateInput(f).associateOutput(ts);
+					}},
+					new GroupProcessor(1, 1) {{
+						Freeze f = new Freeze();
+						ApplyFunction l = new ApplyFunction(new JPathFunction(JP_LOCATION));
+						connect(f, l);
+						addProcessors(f, l);
+						associateInput(f).associateOutput(l);
+					}},
+					new GroupProcessor(1, 1) {{
+						TurnInto one = new TurnInto(1);
+						Cumulate sum = new Cumulate(Numbers.addition);
+						connect(one, sum);
+						addProcessors(one, sum);
+						associateInput(one).associateOutput(sum);
+					}},
 					new GroupProcessor(1, 1) {{
 						ApplyFunction ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(JP_TIMESTAMP))));
 						Fork f = new Fork();
@@ -106,11 +142,42 @@ public class PresenceHeatMap
 						addProcessors(ts, f, minus, fr);
 						associateInput(ts).associateOutput(minus);
 					}}},
-				new MergeScalars("location", "duration")).allowRestarts(true).includesLast(true).isContiguous(true);
+				new MergeScalars("start", "location", "events", "duration")).allowRestarts(true).includesLast(true).isContiguous(true);
 		connect(f_is_motion, rc);
+		RangeCep week_summary = new RangeCep(
+				new GroupProcessor(1, 1) {{
+					ApplyFunction week = new ApplyFunction(new FunctionTree(DateFunction.weekOfYear, new FunctionTree(Numbers.numberCast, new FetchAttribute("start"))));
+					StutterFirst sf = new StutterFirst(2);
+					connect(week, sf);
+					Fork f = new Fork();
+					connect(sf, f);
+					Trim t = new Trim(1);
+					connect(f, TOP, t, INPUT);
+					ApplyFunction eq = new ApplyFunction(Equals.instance);
+					connect(t, OUTPUT, eq, TOP);
+					connect(f, BOTTOM, eq, BOTTOM);
+					addProcessors(week, f, t, eq, sf);
+					associateInput(week).associateOutput(eq);
+				}},
+				new Processor[] {new Slice(new FetchAttribute("location"),
+						new GroupProcessor(1, 1) {{
+							ApplyFunction dur = new ApplyFunction(new FunctionTree(Numbers.numberCast, new FetchAttribute("duration")));
+							Cumulate sum = new Cumulate(Numbers.addition);
+							connect(dur, sum);
+							addProcessors(dur, sum);
+							associateInput(dur).associateOutput(sum);
+						}})},
+				new IdentityFunction(1)).allowRestarts(true).includesLast(true).isContiguous(true);
+		connect(rc, week_summary);
+		ApplyFunction tuple = new ApplyFunction(MapToTuple.instance);
+		connect(week_summary, tuple);
+		UpdateTableMap table = new UpdateTableMap("\"living\"", "\"bedroom\"", "\"kitchen\"", "\"bathroom\"", "\"entrance\"");
+		connect(tuple, table);
+		KeepLast last = new KeepLast();
+		connect(table, last);
 		
 		/* Connect the pipeline to an output and run. */
-		connect(rc, new Print(new PrintStream(os)).setSeparator("\n"));
+		connect(last, new Print(new PrintStream(os)).setSeparator("\n"));
 		p.run();
 		
 		/* Clean up. */
