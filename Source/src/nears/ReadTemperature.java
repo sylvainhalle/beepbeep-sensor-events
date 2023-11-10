@@ -21,7 +21,7 @@ import ca.uqac.lif.cep.functions.UnaryFunction;
 
 /**
  * Converts a temperature string in the form "10.9 °C" or "2E+1 °C" into a
- * number (e.g. 10.9 or 20).
+ * number (e.g.<!-- --> 10.9 or 20).
  * 
  * @author Sylvain Hallé
  */

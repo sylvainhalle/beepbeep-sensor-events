@@ -31,18 +31,15 @@ public class HighlightedGraph extends Graph
 	public String renderEdge(Edge e)
 	{
 		float cur_weight = e.getWeight();
-		boolean max = true;
+		float total_weight = 0;
 		Set<Edge> outgoing = m_edges.get(e.getSource());
 		for (Edge out : outgoing)
 		{
-			if (out.getWeight() > cur_weight)
-			{
-				max = false;
-				break;
-			}
+			total_weight += out.getWeight();
 		}
-		String color = max ? "red" : "grey";
-	  return "label=\"" + formatWeight(cur_weight) + "\"" + ",color=\"" + color + "\",fontcolor=\"" + color + "\"";
+		float fraction = cur_weight / total_weight;
+		String color = getColor(fraction);
+	  return "label=\"" + formatWeight(fraction) + "\"" + ",color=\"" + color + "\",fontcolor=\"" + color + "\"";
 	}
 	
 	@Override
@@ -51,4 +48,48 @@ public class HighlightedGraph extends Graph
 		String v = vertex.replaceAll("\\(location,\"(.*?)\"\\)", "$1");
     return "label=\"" + v + "\"";
   }
+	
+	protected static String getColor(float fraction)
+	{
+		if (fraction < 0.1)
+		{
+			return "#0A2F51";
+		}
+		else if (fraction < 0.2)
+		{
+			return "#0E4D64";
+		}
+		else if (fraction < 0.3)
+		{
+			return "#137177";
+		}
+		else if (fraction < 0.4)
+		{
+			return "#188977";
+		}
+		else if (fraction < 0.5)
+		{
+			return "#1D9A6C";
+		}
+		else if (fraction < 0.6)
+		{
+			return "#39A96B";
+		}
+		else if (fraction < 0.7)
+		{
+			return "#56B870";
+		}
+		else if (fraction < 0.8)
+		{
+			return "#74C67A";
+		}
+		else if (fraction < 0.9)
+		{
+			return "#99D492";
+		}
+		else
+		{
+			return "#BFE1B0";
+		}
+	}
 }
