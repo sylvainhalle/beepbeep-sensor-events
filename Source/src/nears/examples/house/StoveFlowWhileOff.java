@@ -5,6 +5,7 @@ import static ca.uqac.lif.cep.Connector.connect;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
 
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
@@ -23,6 +24,9 @@ import nears.LogRepository;
 import nears.MultiDaySource;
 import nears.SensorEvent;
 import nears.house.House;
+import nears.house.House.Device;
+import nears.house.House.Location;
+import nears.house.House.Subject;
 
 public class StoveFlowWhileOff
 {
@@ -30,7 +34,7 @@ public class StoveFlowWhileOff
   public static void main(String[] args) throws FileSystemException, IOException
   {
     /* Define the range of days to process. */
-    int first_day = 1, last_day = 1;
+    int first_day = 4, last_day = 4;
 
     /* Define the input and output file. */
     FileSystem fs = new LogRepository("0105").open();
@@ -44,7 +48,10 @@ public class StoveFlowWhileOff
     connect(p, to_delta);
     Integrate house = new Integrate(new House());
     connect(to_delta, house);
-    ApplyFunction e1 = new ApplyFunction(new Maps.Get("kitchen"));
+    ApplyFunction e1 = new ApplyFunction(new FunctionTree(
+    		new Maps.Get("stove_monitoring_devices_binder", new Device()), 
+    		new FunctionTree(new Maps.Get("stove", new Subject()), 
+    				new Maps.Get("kitchen", new Location()))));
     connect(house, e1);
     
     connect(e1, new HtmlPrint(new PrintStream(os)));

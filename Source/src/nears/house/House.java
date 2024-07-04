@@ -18,7 +18,9 @@
 package nears.house;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
+import ca.uqac.lif.cep.Duplicable;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonPath;
@@ -49,24 +51,92 @@ public class House extends PrettyTreeMap<nears.house.House.Location>
 	/**
 	 * A location is a map from subject names to subjects.
 	 */
-	public static class Location extends PrettyTreeMap<Subject> { }
+	public static class Location extends PrettyTreeMap<Subject> implements Duplicable
+	{
+		@Override
+		public Location duplicate()
+		{
+			return duplicate(false);
+		}
+		
+		@Override
+		public Location duplicate(boolean with_state)
+		{
+			Location l = new Location();
+			for (Map.Entry<String,Subject> e : entrySet())
+			{
+				l.put(e.getKey(), e.getValue().duplicate());
+			}
+			return l;
+		}
+	}
 
 	/**
 	 * A subject is a map from device names to devices.
 	 */
-	public static class Subject extends PrettyTreeMap<Device> { }
+	public static class Subject extends PrettyTreeMap<Device> implements Duplicable
+	{
+		@Override
+		public Subject duplicate()
+		{
+			return duplicate(false);
+		}
+		
+		@Override
+		public Subject duplicate(boolean with_state)
+		{
+			Subject s = new Subject();
+			for (Map.Entry<String,Device> e : entrySet())
+			{
+				s.put(e.getKey(), e.getValue().duplicate());
+			}
+			return s;
+		}
+	}
 
 	/**
 	 * A device is a map from sensor names to sensors.
 	 */
-	public static class Device extends PrettyTreeMap<Sensor> { }
+	public static class Device extends PrettyTreeMap<Sensor> implements Duplicable
+	{
+		@Override
+		public Device duplicate()
+		{
+			return duplicate(false);
+		}
+		
+		@Override
+		public Device duplicate(boolean with_state)
+		{
+			Device d = new Device();
+			for (Map.Entry<String,Sensor> e : entrySet())
+			{
+				d.put(e.getKey(), e.getValue().duplicate());
+			}
+			return d;
+		}
+	}
 
 	/**
 	 * A sensor is a map from attributes to (arbitrary) values.
 	 */
-	public static class Sensor extends PrettyTreeMap<Object> implements PrettyPrintable
+	public static class Sensor extends PrettyTreeMap<Object> implements PrettyPrintable, Duplicable
 	{
 		protected int m_tag = 0;
+		
+		@Override
+		public Sensor duplicate()
+		{
+			return duplicate(false);
+		}
+		
+		@Override
+		public Sensor duplicate(boolean with_state)
+		{
+			Sensor s = new Sensor();
+			s.putAll(this);
+			return s;
+		}
 		
 		public void tag()
 		{
