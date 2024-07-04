@@ -15,33 +15,50 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package sensors;
 
-import static org.junit.Assert.*;
+import java.util.Queue;
 
-import org.junit.Test;
+import ca.uqac.lif.cep.SynchronousProcessor;
 
-import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.json.JsonElement;
-import sensors.JsonFeeder;
-
-/**
- * Unit tests for {@link JsonFeeder}.
- */
-public class JsonFeederTest
+public class StutterFirst extends SynchronousProcessor
 {
-	@Test
-	public void test1()
+	protected Object m_first;
+	
+	protected final int m_times;
+	
+	public StutterFirst(int times)
 	{
-		JsonFeeder f = new JsonFeeder(JsonFeederTest.class.getResourceAsStream("data/sample.json"));
-		Pullable p = f.getPullableOutput();
-		int pull_cnt = 0;
-		while (p.hasNext())
+		super(1, 1);
+		m_times = times;
+	}
+
+	@Override
+	protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
+	{
+		if (m_first == null)
 		{
-			Object o = p.pull();
-			assertTrue(o instanceof JsonElement);
-			pull_cnt++;
+			m_first = inputs[0];
+			for (int i = 0; i < m_times; i++)
+			{
+				outputs.add(new Object[] {m_first});
+			}
 		}
-		assertEquals(3, pull_cnt);
+		else
+		{
+			outputs.add(new Object[] {inputs[0]});
+		}
+		return true;
+	}
+
+	@Override
+	public StutterFirst duplicate(boolean with_state)
+	{
+		StutterFirst sf = new StutterFirst(m_times);
+		if (with_state)
+		{
+			sf.m_first = m_first;
+		}
+		return sf;
 	}
 }

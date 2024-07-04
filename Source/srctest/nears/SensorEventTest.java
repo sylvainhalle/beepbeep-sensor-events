@@ -18,6 +18,7 @@
 package nears;
 
 import static org.junit.Assert.*;
+import static sensors.SensorEvent.*;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -27,8 +28,7 @@ import org.junit.Test;
 import ca.uqac.lif.json.JsonMap;
 import ca.uqac.lif.json.JsonPath;
 import ca.uqac.lif.json.JsonString;
-
-import static nears.SensorEvent.*;
+import sensors.SensorEvent;
 
 public class SensorEventTest
 {

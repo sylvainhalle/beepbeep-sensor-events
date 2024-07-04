@@ -15,33 +15,23 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package sensors.house;
 
-import static org.junit.Assert.*;
+import ca.uqac.lif.cep.Duplicable;
+import ca.uqac.lif.cep.functions.UnaryFunction;
 
-import org.junit.Test;
-
-import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.json.JsonElement;
-import sensors.JsonFeeder;
-
-/**
- * Unit tests for {@link JsonFeeder}.
- */
-public class JsonFeederTest
+public class Duplicate extends UnaryFunction<Object,Object>
 {
-	@Test
-	public void test1()
+	public static final Duplicate instance = new Duplicate();
+	
+	protected Duplicate()
 	{
-		JsonFeeder f = new JsonFeeder(JsonFeederTest.class.getResourceAsStream("data/sample.json"));
-		Pullable p = f.getPullableOutput();
-		int pull_cnt = 0;
-		while (p.hasNext())
-		{
-			Object o = p.pull();
-			assertTrue(o instanceof JsonElement);
-			pull_cnt++;
-		}
-		assertEquals(3, pull_cnt);
+		super(Object.class, Object.class);
+	}
+
+	@Override
+	public Object getValue(Object x)
+	{
+		return ((Duplicable) x).duplicate();
 	}
 }

@@ -26,14 +26,14 @@
   <name>BeepBeep Sensor Event Toolbox</name>
   
   <!-- The project's version -->
-  <version>1.0</version>
+  <version>1.1</version>
   
   <!-- The project's author. Currently this only
   shows up in the footer of the Javadoc documentation. -->
   <author>Sylvain Hallé</author>
   
   <!-- The project's main class -->
-  <mainclass>nears.Main</mainclass>
+  <mainclass>sensors.Main</mainclass>
   
   <!-- The target JDK for which we are compiling -->
   <targetjdk>8</targetjdk>
@@ -68,7 +68,7 @@
       <name>lif-fs</name>
       <classname>ca.uqac.lif.fs.FileSystem</classname>
       <files>
-        <jar>https://github.com/liflab/lif-fs/releases/download/v0.2.1/lif-fs-core-0.2.1.jar</jar>
+        <jar>https://github.com/liflab/lif-fs/releases/download/v0.2.2/lif-fs-core-0.2.2.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -76,7 +76,7 @@
       <name>BeepBeep 3</name>
       <classname>ca.uqac.lif.cep.Processor</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3/releases/download/v0.11.1/beepbeep-3-0.11.1.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3/releases/download/v0.11.2/beepbeep-3-0.11.2.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -84,7 +84,7 @@
       <name>BeepBeep 3 Complex palette</name>
       <classname>ca.uqac.lif.cep.complex.RangeCep</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/complex-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/complex-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -92,7 +92,7 @@
       <name>BeepBeep 3 FSM palette</name>
       <classname>ca.uqac.lif.cep.fsm.MooreMachine</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/fsm-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/fsm-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -100,7 +100,7 @@
       <name>BeepBeep 3 Graphviz palette</name>
       <classname>ca.uqac.lif.cep.graphviz.ToDot</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/graphviz-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/graphviz-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -108,7 +108,7 @@
       <name>BeepBeep 3 JSON palette</name>
       <classname>ca.uqac.lif.json.JsonElement</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/json-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/json-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -116,7 +116,7 @@
       <name>BeepBeep 3 MTNP palette</name>
       <classname>ca.uqac.lif.cep.mtnp.DrawPlot</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/mtnp-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/mtnp-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -124,7 +124,7 @@
       <name>BeepBeep 3 signal palette</name>
       <classname>ca.uqac.lif.cep.signal.Threshold</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/signal-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/signal-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -132,7 +132,7 @@
       <name>BeepBeep 3 tuples palette</name>
       <classname>ca.uqac.lif.cep.tuples.Tuple</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.7/tuples-0.7.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/tuples-0.8.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>

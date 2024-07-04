@@ -15,33 +15,37 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package sensors;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
-import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.json.JsonElement;
-import sensors.JsonFeeder;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.functions.RaiseArity;
+import ca.uqac.lif.cep.functions.UnaryFunction;
 
 /**
- * Unit tests for {@link JsonFeeder}.
+ * Function that transforms an object <i>a</i> into the unary
+ * function <i>f</i>(<i>x</i>) = <i>a</i>.
+ * 
+ * @author Sylvain Hallé
  */
-public class JsonFeederTest
+public class ToConstant extends UnaryFunction<Object,Function>
 {
-	@Test
-	public void test1()
+	/**
+	 * A single publicly visible instance of the function.
+	 */
+	public static final ToConstant instance = new ToConstant();
+	
+	/**
+	 * Creates a new instance of the function.
+	 */
+	protected ToConstant()
 	{
-		JsonFeeder f = new JsonFeeder(JsonFeederTest.class.getResourceAsStream("data/sample.json"));
-		Pullable p = f.getPullableOutput();
-		int pull_cnt = 0;
-		while (p.hasNext())
-		{
-			Object o = p.pull();
-			assertTrue(o instanceof JsonElement);
-			pull_cnt++;
-		}
-		assertEquals(3, pull_cnt);
+		super(Object.class, Function.class);
+	}
+
+	@Override
+	public Function getValue(Object x)
+	{
+		return new RaiseArity(1, new Constant(x));
 	}
 }

@@ -1,7 +1,9 @@
 A BeepBeep toolbox to manipulate sensor events
 ==============================================
 
-This repository contains an extension to the [BeepBeep](https://liflab.github.io/beepbeep-3) event stream processing engine for the manipulation of sensor events produced by the [NEARS](https://domus.recherche.usherbrooke.ca/nears/) smart home platform.
+This repository contains an extension to the [BeepBeep](https://liflab.github.io/beepbeep-3) event stream processing engine for the manipulation of sensor events produced by smart home
+platforms such as [NEARS](https://domus.recherche.usherbrooke.ca/nears/)
+and [CASAS](https://casas.wsu.edu/datasets/).
 
 To learn more about BeepBeep, a [presentation](https://www.slideshare.net/sylvainhalle/event-stream-processing-with-beepbeep-3-258079731) is available, as well as a complete (and free) [textbook](https://www.puq.ca/catalogue/livres/event-stream-processing-with-beep-beep-3663.html).
 
@@ -48,7 +50,7 @@ A few "shortcuts" are available when using the toolbox in Groovy scripts. Import
 Code examples
 -------------
 
-The library comes with code examples that showcase the operations that can be done on sensor logs. Explanations and illustrations of the corresponding BeepBeep pipelines can be accessed in the Javadoc, by looking for the `nears.examples` package.
+The library comes with code examples that showcase the operations that can be done on sensor logs. Explanations and illustrations of the corresponding BeepBeep pipelines can be accessed in the Javadoc, by looking for the `sensors.examples` package.
 
 Building the extension
 ----------------------
