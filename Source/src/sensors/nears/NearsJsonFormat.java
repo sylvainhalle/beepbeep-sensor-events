@@ -15,8 +15,9 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.examples;
+package sensors.nears;
 
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -223,6 +224,18 @@ public class NearsJsonFormat implements EventFormat
 	public String getClosedConstant()
 	{
 		return V_CLOSED;
+	}
+	
+	@Override
+	public String getExtension()
+	{
+		return ".json";
+	}
+	
+	@Override
+	public JsonLineFeeder getFeeder(InputStream is)
+	{
+		return new JsonLineFeeder(is);
 	}
 
 	/**

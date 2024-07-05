@@ -48,11 +48,12 @@ import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
-import sensors.JsonLineFeeder;
 import sensors.LogRepository;
+import sensors.nears.JsonLineFeeder;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 
 /**
  * Detects when a sensor produces values exceeding a specific threshold.
@@ -88,7 +89,7 @@ public class Threshold
 		Tuple sensor_id = format.createId("kitchen", "coffeemaker", "dmof1", "instant_voltage");
 		
 		/* Prepare to read from an offline log. */
-		FileSystem fs = new LogRepository().open();
+		LogRepository fs = new NearsLogRepository().open();
 		InputStream is = fs.readFrom("nears-hub-0032-sorted.json");
 		PrintStream os = new PrintStream(fs.writeTo("Threshold.txt"));
 		

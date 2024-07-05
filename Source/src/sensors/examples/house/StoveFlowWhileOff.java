@@ -34,11 +34,12 @@ import sensors.EventFormat;
 import sensors.HtmlPrint;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
-import sensors.examples.NearsJsonFormat;
 import sensors.house.House;
 import sensors.house.House.Device;
 import sensors.house.House.Location;
 import sensors.house.House.Subject;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 public class StoveFlowWhileOff
 {
@@ -54,7 +55,7 @@ public class StoveFlowWhileOff
 
     /* Define the input and output file. */
     FileSystem fs = new LogRepository("0105").open();
-    MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
+    MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
     OutputStream os = fs.writeTo("InstantSnapshot.html");
     
     /* Create the pipeline. */

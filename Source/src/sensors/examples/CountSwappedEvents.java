@@ -36,18 +36,20 @@ import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.util.Numbers;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.DateToTimestamp;
-import sensors.JsonFeeder;
 import sensors.LogRepository;
+import sensors.nears.JsonFeeder;
+import sensors.nears.NearsLogRepository;
 
 public class CountSwappedEvents
 {
-
+	/* The folder where the data files reside. */
+	protected static final LogRepository fs = new NearsLogRepository();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new LogRepository().open();
+		fs.open();
 		InputStream is = fs.readFrom("nears-hub-0034.json");
 		
 		JsonFeeder feeder = new JsonFeeder(is);

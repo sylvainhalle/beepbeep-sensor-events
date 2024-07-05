@@ -25,10 +25,22 @@ import java.io.PrintStream;
  */
 public class PrettyPrintStream extends PrintStream
 {
+	/**
+	 * Interface implemented by objects that can print themselves to a
+	 * {@link PrettyPrintStream}.
+	 */
 	public static interface PrettyPrintable
 	{
+		/**
+		 * Prints the current object to a {@link PrettyPrintStream}.
+		 * @param ps The stream to print the object to
+		 */
 		public void print(PrettyPrintStream ps);
 		
+		/**
+		 * Determines the number of rows used in the printing of an object.
+		 * @return The number of rows
+		 */
 		public int countRows();
 	}
 	

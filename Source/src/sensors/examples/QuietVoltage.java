@@ -46,9 +46,10 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
 import sensors.DateToTimestamp;
-import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.QuietenDown;
+import sensors.nears.NearsLogRepository;
+import sensors.nears.NearsMultiDaySource;
 
 public class QuietVoltage
 {
@@ -59,12 +60,12 @@ public class QuietVoltage
 		int first_day = 30, last_day = 30;
 		
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		FileSystem fs = new NearsLogRepository().open();
 		OutputStream os = fs.writeTo("LoudVoltage.txt");
 		fs.chdir("0032");
 		
 		/* Create the pipeline. */
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
+		MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
 		Pump p = new Pump();
 		connect(feeder, p);
 		Fork f0 = new Fork();

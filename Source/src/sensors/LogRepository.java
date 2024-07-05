@@ -28,24 +28,19 @@ import ca.uqac.lif.fs.HardDisk;
 public class LogRepository extends HardDisk
 {
 	/**
-	 * The folder name where the data files are located. Make sure to change this
-	 * to the actual path on your computer!
-	 */
-	protected static final String FOLDER = "/home/sylvain/sensor-data";
-	
-	/**
 	 * The name of the (optional) sub-folder of the root data folder.
 	 */
 	protected final String m_subFolder;
 	
-	public LogRepository() throws FileSystemException
+	public LogRepository(String folder)
 	{
-		this("");
+		super(folder);
+		m_subFolder = "";
 	}
 	
-	public LogRepository(String sub_folder) throws FileSystemException
+	public LogRepository(String folder, String sub_folder) throws FileSystemException
 	{
-		super(FOLDER);
+		super(folder);
 		m_subFolder = sub_folder;
 	}
 	

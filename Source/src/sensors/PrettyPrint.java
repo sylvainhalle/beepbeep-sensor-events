@@ -32,8 +32,14 @@ import ca.uqac.lif.cep.tmf.Sink;
  */
 public class PrettyPrint extends Sink
 {
+	/**
+	 * The print stream where events should be printed.
+	 */
 	protected final PrintStream m_out;
 	
+	/**
+	 * The print stream that formats the incoming events.
+	 */
 	protected final PrettyPrintStream m_ps;
 	
 	/**

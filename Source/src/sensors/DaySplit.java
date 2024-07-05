@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -24,14 +24,14 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import ca.uqac.lif.cep.Pullable;
-import ca.uqac.lif.fs.FileSystem;
+import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonElement;
-import ca.uqac.lif.json.JsonPath;
-import ca.uqac.lif.json.JsonString;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 
 /**
- * Utility program that splits an input JSON file into separate files for each
+ * Utility program that splits an input file into separate files for each
  * day, numbered sequentially (i.e. <tt>1.json</tt>, <tt>2.json</tt>, etc.
  * The files are placed in a folder corresponding to the number of the original
  * JSON file.
@@ -40,11 +40,17 @@ import ca.uqac.lif.json.JsonString;
  */
 public class DaySplit
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
+	/* The folder where the data files reside. */
+	protected static final LogRepository fs = new NearsLogRepository();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input file and output directory. */
 		String file_number = "0102";
-		FileSystem fs = new LogRepository().open();
+		fs.open();
 		InputStream is = fs.readFrom("NH-" + file_number + "-sorted.json");
 		fs.mkdir(file_number);
 		fs.chdir(file_number);
@@ -52,16 +58,16 @@ public class DaySplit
 		/* Read file line by line, and start a new file every time the day of
 		 * the year in the timestamp changes. */
 		Calendar cal = new GregorianCalendar();
-		JsonLineFeeder feeder = new JsonLineFeeder(is);
+		Source feeder = format.getFeeder(is);
 		int cnt = 0;
 		int cur_day = -1;
 		PrintStream os = null;
 		Pullable p = feeder.getPullableOutput();
+		Function ts_function = format.timestamp();
 		while (p.hasNext())
 		{
 			Object event = p.pull();
-			JsonString js = (JsonString) JsonPath.get((JsonElement) event, "sentAt/$date");
-			cal.setTimeInMillis(DateToTimestamp.getTimestamp(js.stringValue()));
+			cal.setTimeInMillis((Long) EventFormat.evaluateUnary(ts_function, event));
 			int day = cal.get(Calendar.DAY_OF_YEAR);
 			if (cur_day != day)
 			{
@@ -70,7 +76,7 @@ public class DaySplit
 					os.close();
 				}
 				cnt++;
-				os = new PrintStream(fs.writeTo(cnt + ".json"));
+				os = new PrintStream(fs.writeTo(cnt + format.getExtension()));
 				cur_day = day;
 			}
 			os.println(event);

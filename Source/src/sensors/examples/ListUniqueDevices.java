@@ -28,22 +28,26 @@ import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.util.Sets;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
-import sensors.JsonFeeder;
 import sensors.LogRepository;
 import sensors.PrettyPrint;
+import sensors.nears.JsonFeeder;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 
 public class ListUniqueDevices
 {
 	/* The adapter for the event format. */
 	protected static EventFormat format = new NearsJsonFormat();
 	
+	/* The folder where the data files reside. */
+	protected static final LogRepository fs = new NearsLogRepository();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		fs.open();
 		InputStream is = fs.readFrom("nears-hub-0032.json");
 		OutputStream os = fs.writeTo("ListUniqueDevices.txt");
 		

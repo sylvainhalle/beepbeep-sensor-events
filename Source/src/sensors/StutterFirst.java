@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -21,12 +21,26 @@ import java.util.Queue;
 
 import ca.uqac.lif.cep.SynchronousProcessor;
 
+/**
+ * A processor that repeats the first event it receives a specified number of
+ * times, after which it lets all other events through.
+ */
 public class StutterFirst extends SynchronousProcessor
 {
+	/**
+	 * The event to repeat.
+	 */
 	protected Object m_first;
 	
+	/**
+	 * The number of times to repeat the first event.
+	 */
 	protected final int m_times;
 	
+	/**
+	 * Creates a new instance of the processor.
+	 * @param times The number of times to repeat the first event
+	 */
 	public StutterFirst(int times)
 	{
 		super(1, 1);

@@ -37,6 +37,8 @@ import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
 import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 import static ca.uqac.lif.cep.Connector.connect;
 import static ca.uqac.lif.cep.Connector.BOTTOM;
@@ -66,7 +68,7 @@ public class LastSensorUpdateAny
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0102").open();
 		OutputStream os = fs.writeTo("LastSensorUpdateAny.gp");
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
+		MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
 		
 		/* Create the pipeline. */
 		Pump p = new Pump();

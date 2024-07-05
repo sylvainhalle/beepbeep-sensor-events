@@ -21,11 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import ca.uqac.lif.cep.Duplicable;
-import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 import sensors.EventFormat;
 import sensors.PrettyPrintStream;
 import sensors.PrettyPrintStream.PrettyPrintable;
+
+import static sensors.EventFormat.evaluateUnary;
 
 /**
  * Nested data structure representing the instantaneous state of a "house".
@@ -290,18 +291,5 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Evaluates an unary BeepBeep function.
-	 * @param f The function
-	 * @param inputs The arguments given to the function
-	 * @return The output value of the function
-	 */
-	protected static Object evaluateUnary(Function f, Object input)
-	{
-		Object[] outs = new Object[1];
-		f.evaluate(new Object[] {input}, outs);
-		return outs[0];
 	}
 }

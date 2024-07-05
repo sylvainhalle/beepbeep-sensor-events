@@ -52,6 +52,8 @@ import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 /**
  * Checks that each contact sensor follows its expected lifecycle, and reports
@@ -76,7 +78,7 @@ public class ContactLifecycle
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0102").open();
 		OutputStream os = fs.writeTo("ContactLifecycle.txt");
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 
 		/* Create the pipeline. */
 		//JsonLineFeeder feeder = new JsonLineFeeder(fs.readFrom("../OnOffEpisodes_raw.txt"));

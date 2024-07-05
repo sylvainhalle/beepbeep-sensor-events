@@ -36,8 +36,9 @@ import sensors.EventFormat;
 import sensors.HtmlPrint;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
-import sensors.examples.NearsJsonFormat;
 import sensors.house.House;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 /**
  * Calculates a stream of snapshots of the house's state using integration.
@@ -58,7 +59,7 @@ public class InstantSnapshot
 
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new MultiDaySource(fs, first_day, last_day);
+		MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
 		OutputStream os = fs.writeTo("InstantSnapshot.html");
 		
 		/* Create the pipeline. */

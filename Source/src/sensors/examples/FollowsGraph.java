@@ -51,6 +51,8 @@ import sensors.EventFormat;
 import sensors.HighlightedGraph;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 /**
  * Draws a graph showing successive locations of motion sensor events.
@@ -83,7 +85,7 @@ public class FollowsGraph
 	{
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		OutputStream os = fs.writeTo("FollowsGraph.dot");
 		
 		/* Create the pipeline. */
@@ -97,7 +99,7 @@ public class FollowsGraph
 						new Constant("motion")),
 				new FunctionTree(Equals.instance,
 						format.stateString(),
-						new Constant(NearsJsonFormat.V_ON))));
+						new Constant(format.getOnConstant()))));
 		connect(f0, BOTTOM, is_motion, INPUT);
 		Filter f_is_motion = new Filter();
 		connect(is_motion, OUTPUT, f_is_motion, BOTTOM);

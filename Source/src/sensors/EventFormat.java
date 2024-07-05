@@ -17,9 +17,11 @@
  */
 package sensors;
 
+import java.io.InputStream;
 import java.util.Date;
 
 import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.cep.tuples.Tuple;
 
 /**
@@ -173,4 +175,31 @@ public interface EventFormat
 	 * @return The sensor value
 	 */
 	public Object getClosedConstant();
+	
+	/**
+	 * Gets the extension that filenames of this format are expected to have.
+	 * @return The extension, including the leading period (i.e. <tt>.json</tt>)
+	 */
+	public String getExtension();
+	
+	/**
+	 * Gets a processor instance that can read events in the given format from
+	 * an input stream.
+	 * @param is The input stream to read from
+	 * @return The source
+	 */
+	public Source getFeeder(InputStream is);
+	
+	/**
+	 * Evaluates an unary BeepBeep function.
+	 * @param f The function
+	 * @param inputs The arguments given to the function
+	 * @return The output value of the function
+	 */
+	public static Object evaluateUnary(Function f, Object input)
+	{
+		Object[] outs = new Object[1];
+		f.evaluate(new Object[] {input}, outs);
+		return outs[0];
+	}
 }

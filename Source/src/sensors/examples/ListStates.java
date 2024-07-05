@@ -40,7 +40,9 @@ import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
-import sensors.ReadTemperature;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
+import sensors.nears.ReadTemperature;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -63,7 +65,7 @@ public class ListStates
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListStates.txt");
 		
 		Slice s = new Slice(format.modelString(), 

@@ -34,6 +34,8 @@ import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -46,7 +48,7 @@ public class ListSensors
 	{
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListSensors.txt");
 		
 		/* Create the pipeline. */

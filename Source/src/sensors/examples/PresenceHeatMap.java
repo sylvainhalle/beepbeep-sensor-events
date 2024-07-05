@@ -59,6 +59,8 @@ import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.StutterFirst;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsMultiDaySource;
 
 public class PresenceHeatMap
 {
@@ -69,7 +71,7 @@ public class PresenceHeatMap
 	{
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository("0102").open();
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		OutputStream os = fs.writeTo("PresenceHeatMap.txt");
 		
 		/* Keep only motion sensor events */
@@ -83,7 +85,7 @@ public class PresenceHeatMap
 						new Constant(new JsonString("motion"))),
 				new FunctionTree(Equals.instance,
 						format.stateString(),
-						new Constant(NearsJsonFormat.V_ON))));
+						new Constant(format.getOnConstant()))));
 		connect(f0, BOTTOM, is_motion_on, INPUT);
 		Filter f_is_motion = new Filter();
 		connect(is_motion_on, OUTPUT, f_is_motion, BOTTOM);

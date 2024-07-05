@@ -15,25 +15,33 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package sensors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import sensors.DateToTimestamp;
+import ca.uqac.lif.cep.Pullable;
+import ca.uqac.lif.json.JsonElement;
+import sensors.nears.JsonFeeder;
 
 /**
- * Unit tests for {@link DateToTimestamp}.
+ * Unit tests for {@link JsonFeeder}.
  */
-public class DateToTimestampTest
+public class JsonFeederTest
 {
 	@Test
 	public void test1()
 	{
-		long ts1 = DateToTimestamp.getTimestamp("2021-09-02T00:02:04.786-05:00");
-		long ts2 = DateToTimestamp.getTimestamp("2021-07-02T00:02:37.615Z");
-		System.out.println(ts1);
-		assertTrue(ts2 < ts1);
+		JsonFeeder f = new JsonFeeder(JsonFeederTest.class.getResourceAsStream("data/sample.json"));
+		Pullable p = f.getPullableOutput();
+		int pull_cnt = 0;
+		while (p.hasNext())
+		{
+			Object o = p.pull();
+			assertTrue(o instanceof JsonElement);
+			pull_cnt++;
+		}
+		assertEquals(3, pull_cnt);
 	}
 }

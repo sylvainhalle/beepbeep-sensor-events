@@ -40,6 +40,9 @@ import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrintStream;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
+import sensors.nears.NearsMultiDaySource;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -58,13 +61,13 @@ import static ca.uqac.lif.cep.Connector.connect;
 public class MaxUpdateInterval
 {
 	/* The adapter for the event format. */
-	protected static EventFormat format = new NearsJsonFormat();
+	protected static final EventFormat format = new NearsJsonFormat();
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		FileSystem fs = new LogRepository("0102").open();
+		FileSystem fs = new NearsLogRepository("0102").open();
 		OutputStream os = fs.writeTo("MaxUpdateInterval.txt");
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		
 		Slice s = new Slice(format.sensorId(),
 				new GroupProcessor(1, 1) {{

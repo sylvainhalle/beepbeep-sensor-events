@@ -26,9 +26,10 @@ import java.io.PrintStream;
 
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.examples.NearsJsonFormat;
+import sensors.nears.JsonFeeder;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 
 /**
  * From a JSON file, create a new JSON file where events are physically
@@ -40,16 +41,18 @@ import sensors.examples.NearsJsonFormat;
  */
 public class ReorderFile
 {
+	/* The input event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
+	/* The folder where the data files reside. */
+	protected static final LogRepository fs = new NearsLogRepository();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		/* The input event format. */
-		EventFormat format = new NearsJsonFormat();
-		
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository().open();
+		fs.open();
 		InputStream is = fs.readFrom("NH-0102.json");
 		OutputStream os = fs.writeTo("NH-0102-sorted.json");
-		
 		
 		/* Create the pipeline. */
 		JsonFeeder feeder = new JsonFeeder(is);

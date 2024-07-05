@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -21,31 +21,36 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.cep.tmf.Splice;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 
 /**
- * Source feeding events from a range of files, each containing JSON events for
+ * Source feeding events from a range of files, each containing events for
  * a single day. The source provides these events as if each of these separate
  * files were concatenated as a single file.
  * @author Sylvain Hallé
  */
-public class MultiDaySource extends Splice
+public abstract class MultiDaySource extends Splice
 {
 	/**
 	 * Creates a new multi-day source, specifying the range of days to read from
 	 * a given folder. The source will sequentially feed events from files
-	 * names <tt>x.json</tt> through <tt>y.json</tt>, where <tt>x</tt> is the
-	 * number of the first day and <tt>x</tt> is the number of the last day. 
+	 * names <tt>x.ext</tt> through <tt>y.ext</tt>, where <tt>x</tt> is the
+	 * number of the first day, <tt>y</tt> is the number of the last day and
+	 * <tt>ext</tt> is the file extension.
 	 * @param fs A {@link FileSystem} instance open on the folder where the JSON
 	 * files to read reside
 	 * @param first_day The number of the first day of the range to read
 	 * @param last_day The number of the last day of the range to read
+	 * @param extension The extension to append to each filename
+	 * @param factory A factory producing instances of {@link Source} processors
+	 * for each input stream
 	 */
-	public MultiDaySource(FileSystem fs, int first_day, int last_day)
+	public MultiDaySource(FileSystem fs, int first_day, int last_day, String extension, FeederFactory factory)
 	{
-		super(getFeeders(fs, first_day, last_day));
+		super(getFeeders(fs, first_day, last_day, extension, factory));
 	}
 	
 	/**
@@ -55,30 +60,36 @@ public class MultiDaySource extends Splice
 	 * found.
 	 * @param fs A {@link FileSystem} instance open on the folder where the JSON
 	 * files to read reside
+	 * @param extension The extension to append to each filename
+	 * @param factory A factory producing instances of {@link Source} processors
+	 * for each input stream
 	 */
-	public MultiDaySource(FileSystem fs)
+	public MultiDaySource(FileSystem fs, String extension, FeederFactory factory)
 	{
-		this(fs, 1, -1);
+		this(fs, 1, -1, extension, factory);
 	}
 	
 	/**
-	 * Gets the array of {@link JsonLineFeeder} corresponding to each of the
+	 * Gets the array of {@link Source}s corresponding to each of the
 	 * files to read from. This method is used by the constructor of this class.
-	 * @param fs A {@link FileSystem} instance open on the folder where the JSON
-	 * files to read reside
+	 * @param fs A {@link FileSystem} instance open on the folder where the files
+	 * to read reside
 	 * @param first_day The number of the first day of the range to read
 	 * @param last_day The number of the last day of the range to read
+	 * @param extension The extension to append to each filename
+	 * @param factory A factory producing instances of {@link Source} processors
+	 * for each input stream
 	 * @return The array of line feeders
 	 */
-	protected static JsonLineFeeder[] getFeeders(FileSystem fs, int first_day, int last_day)
+	protected static Source[] getFeeders(FileSystem fs, int first_day, int last_day, String extension, FeederFactory factory)
 	{
-		List<JsonLineFeeder> l_feeders = new ArrayList<JsonLineFeeder>();
+		List<Source> l_feeders = new ArrayList<>();
 		for (int i = first_day; i <= last_day || last_day < 0; i++)
 		{
 			try
 			{
 				InputStream is = fs.readFrom(i + ".json");
-				l_feeders.add(new JsonLineFeeder(is));
+				l_feeders.add(factory.getFeeder(is));
 			}
 			catch (FileSystemException e)
 			{
@@ -93,8 +104,16 @@ public class MultiDaySource extends Splice
 				}
 			}
 		}
-		JsonLineFeeder[] feeders = new JsonLineFeeder[l_feeders.size()];
+		Source[] feeders = new Source[l_feeders.size()];
 		l_feeders.toArray(feeders);
 		return feeders;
+	}
+	
+	/**
+	 * Produces instances of {@link Source} processors for each input stream.
+	 */
+	protected interface FeederFactory
+	{
+		public Source getFeeder(InputStream is);
 	}
 }

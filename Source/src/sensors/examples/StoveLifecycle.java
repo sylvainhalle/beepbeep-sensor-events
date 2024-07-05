@@ -46,11 +46,13 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
+import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
+import sensors.nears.NearsMultiDaySource;
 
 /**
  * Checks that each contact sensor follows its expected lifecycle, and reports
@@ -73,9 +75,9 @@ public class StoveLifecycle
 		int first_day = 1, last_day = 120;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
+		LogRepository fs = new NearsLogRepository("0105").open();
 		OutputStream os = fs.writeTo("StoveLifecycle.txt");
-		MultiDaySource feeder = new MultiDaySource(fs);
+		MultiDaySource feeder = new NearsMultiDaySource(fs);
 
 		/* Create the pipeline. */
 		//JsonLineFeeder feeder = new JsonLineFeeder(fs.readFrom("../OnOffEpisodes_raw.txt"));

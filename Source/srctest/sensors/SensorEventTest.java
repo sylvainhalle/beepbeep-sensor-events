@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nears;
+package sensors;
 
 import static org.junit.Assert.*;
 
@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.json.JsonMap;
-import sensors.examples.NearsJsonFormat;
+import sensors.nears.NearsJsonFormat;
 
 public class SensorEventTest
 {

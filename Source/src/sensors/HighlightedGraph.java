@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2-24 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -23,7 +23,9 @@ import ca.uqac.lif.cep.graphviz.Graph;
 
 /**
  * A {@link Graph} with a customized display of its edges when exported to the
- * DOT format.
+ * DOT format. More precisely, when an edge is associated to a weight in the
+ * interval [0,1], a different color is used depending on the sub-interval in
+ * which its weight lies.
  */
 public class HighlightedGraph extends Graph
 {
@@ -49,6 +51,11 @@ public class HighlightedGraph extends Graph
     return "label=\"" + v + "\"";
   }
 	
+	/**
+	 * Gets the HTML color associated to a fraction in the interval [0,1].
+	 * @param fraction The fraction
+	 * @return A string representing the HTML color
+	 */
 	protected static String getColor(float fraction)
 	{
 		if (fraction < 0.1)
