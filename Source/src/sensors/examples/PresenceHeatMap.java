@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -22,11 +22,6 @@ import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
-import static sensors.SensorEvent.JP_LOCATION;
-import static sensors.SensorEvent.JP_SENSOR;
-import static sensors.SensorEvent.JP_STATE;
-import static sensors.SensorEvent.JP_TIMESTAMP;
-import static sensors.SensorEvent.V_ON;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,8 +37,6 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.mtnp.UpdateTableMap;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
@@ -62,14 +55,16 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
 import sensors.DateFunction;
-import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.StutterFirst;
 
 public class PresenceHeatMap
 {
-
+	/* The adapter for the event format. */
+	protected static final EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
@@ -84,18 +79,18 @@ public class PresenceHeatMap
 		connect(p, f0);
 		ApplyFunction is_motion_on = new ApplyFunction(new FunctionTree(Booleans.and,
 				new FunctionTree(Equals.instance,
-						new JPathFunction(JP_SENSOR),
+						format.sensorString(),
 						new Constant(new JsonString("motion"))),
 				new FunctionTree(Equals.instance,
-						new JPathFunction(JP_STATE),
-						new Constant(new JsonString(V_ON)))));
+						format.stateString(),
+						new Constant(NearsJsonFormat.V_ON))));
 		connect(f0, BOTTOM, is_motion_on, INPUT);
 		Filter f_is_motion = new Filter();
 		connect(is_motion_on, OUTPUT, f_is_motion, BOTTOM);
 		connect(f0, TOP, f_is_motion, TOP);
 		
 		RangeCep rc = new RangeCep(new GroupProcessor(1, 1) {{
-				ApplyFunction loc = new ApplyFunction(new JPathFunction(JP_LOCATION));
+				ApplyFunction loc = new ApplyFunction(format.locationString());
 				StutterFirst sf = new StutterFirst(2);
 				connect(loc, sf);
 				Fork f = new Fork();
@@ -111,14 +106,14 @@ public class PresenceHeatMap
 				new Processor[] {
 					new GroupProcessor(1, 1) {{
 						Freeze f = new Freeze();
-						ApplyFunction ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(JP_TIMESTAMP))));
+						ApplyFunction ts = new ApplyFunction(format.timestamp());
 						connect(f, ts);
 						addProcessors(f, ts);
 						associateInput(f).associateOutput(ts);
 					}},
 					new GroupProcessor(1, 1) {{
 						Freeze f = new Freeze();
-						ApplyFunction l = new ApplyFunction(new JPathFunction(JP_LOCATION));
+						ApplyFunction l = new ApplyFunction(format.locationString());
 						connect(f, l);
 						addProcessors(f, l);
 						associateInput(f).associateOutput(l);
@@ -131,7 +126,7 @@ public class PresenceHeatMap
 						associateInput(one).associateOutput(sum);
 					}},
 					new GroupProcessor(1, 1) {{
-						ApplyFunction ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(JP_TIMESTAMP))));
+						ApplyFunction ts = new ApplyFunction(format.timestamp());
 						Fork f = new Fork();
 						connect(ts, f);
 						ApplyFunction minus = new ApplyFunction(Numbers.subtraction);

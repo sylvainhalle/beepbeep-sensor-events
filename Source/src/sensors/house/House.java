@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -21,11 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import ca.uqac.lif.cep.Duplicable;
+import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.UnaryFunction;
-import ca.uqac.lif.json.JsonElement;
-import ca.uqac.lif.json.JsonPath;
+import sensors.EventFormat;
 import sensors.PrettyPrintStream;
-import sensors.SensorEvent;
 import sensors.PrettyPrintStream.PrettyPrintable;
 
 /**
@@ -162,7 +161,7 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 	 */
 	public static class HouseDelta extends UnaryFunction<House,House>
 	{
-		protected final String m_timestamp;
+		protected final long m_timestamp;
 		
 		protected final String m_location;
 
@@ -174,7 +173,7 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 
 		protected final Object m_state;
 
-		public HouseDelta(String timestamp, String location, String subject, String device, String sensor, Object state)
+		public HouseDelta(long timestamp, String location, String subject, String device, String sensor, Object state)
 		{
 			super(House.class, House.class);
 			m_location = location;
@@ -240,22 +239,25 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 	 * Turns a JSON event from the sensor infrastructure into the corresponding
 	 * {@link HouseDelta} function instance.
 	 */
-	public static class EventToHouseDelta extends UnaryFunction<JsonElement,HouseDelta>
+	public static class EventToHouseDelta extends UnaryFunction<Object,HouseDelta>
 	{
-		public EventToHouseDelta()
+		protected final EventFormat s_format;
+		
+		public EventToHouseDelta(EventFormat format)
 		{
-			super(JsonElement.class, HouseDelta.class);
+			super(Object.class, HouseDelta.class);
+			s_format = format;
 		}
 
 		@Override
-		public HouseDelta getValue(JsonElement x)
+		public HouseDelta getValue(Object x)
 		{
-			String timestamp = JsonPath.getString(x, SensorEvent.JP_TIMESTAMP);
-			String location = JsonPath.getString(x, SensorEvent.JP_LOCATION);
-			String subject = JsonPath.getString(x, SensorEvent.JP_SUBJECT);
-			String device = JsonPath.getString(x, SensorEvent.JP_MODEL);
-			String sensor = JsonPath.getString(x, SensorEvent.JP_SENSOR);
-			JsonElement state = JsonPath.get(x, SensorEvent.JP_STATE);
+			Long timestamp = (Long) evaluateUnary(s_format.timestamp(), x);
+			String location = (String) evaluateUnary(s_format.locationString(), x);
+			String subject = (String) evaluateUnary(s_format.subjectString(), x);
+			String device = (String) evaluateUnary(s_format.modelString(), x);
+			String sensor = (String) evaluateUnary(s_format.sensorString(), x);
+			String state = (String) evaluateUnary(s_format.stateString(), x);
 			return new HouseDelta(timestamp, location, subject, device, sensor, state);
 		}
 	}
@@ -288,5 +290,18 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Evaluates an unary BeepBeep function.
+	 * @param f The function
+	 * @param inputs The arguments given to the function
+	 * @return The output value of the function
+	 */
+	protected static Object evaluateUnary(Function f, Object input)
+	{
+		Object[] outs = new Object[1];
+		f.evaluate(new Object[] {input}, outs);
+		return outs[0];
 	}
 }

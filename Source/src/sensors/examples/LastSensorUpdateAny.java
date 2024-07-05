@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -22,10 +22,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.mtnp.PrintGnuPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableStream;
 import ca.uqac.lif.cep.tmf.Fork;
@@ -37,7 +34,7 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
-import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 
@@ -58,7 +55,9 @@ import static ca.uqac.lif.cep.Connector.TOP;
  */
 public class LastSensorUpdateAny
 {
-
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
@@ -72,7 +71,7 @@ public class LastSensorUpdateAny
 		/* Create the pipeline. */
 		Pump p = new Pump();
 		connect(feeder, p);
-		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
+		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 		connect(p, TOP, get_ts, INPUT);
 		Fork f1 = new Fork(3);
 		connect(get_ts, f1);

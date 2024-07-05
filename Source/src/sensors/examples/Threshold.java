@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -44,18 +44,15 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Insert;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Window;
-import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
-import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
+import sensors.EventFormat;
 import sensors.JsonLineFeeder;
 import sensors.LogRepository;
-import sensors.SensorEvent;
 
 /**
  * Detects when a sensor produces values exceeding a specific threshold.
@@ -75,7 +72,9 @@ import sensors.SensorEvent;
  */
 public class Threshold
 {
-
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* The threshold value that must not be exceeded. */
@@ -86,8 +85,7 @@ public class Threshold
 		int m = 3, n = 5;
 		
 		/* The ID of the sensor on wishes to examine. */
-		FixedTupleBuilder builder = new FixedTupleBuilder("location", "subject", "model", "sensor");
-		Tuple sensor_id = builder.createTuple(new JsonString("kitchen"), new JsonString("coffeemaker"), new JsonString("dmof1"), new JsonString("instant_voltage"));
+		Tuple sensor_id = format.createId("kitchen", "coffeemaker", "dmof1", "instant_voltage");
 		
 		/* Prepare to read from an offline log. */
 		FileSystem fs = new LogRepository().open();
@@ -99,7 +97,7 @@ public class Threshold
 		Pump p = new Pump();
 		connect(f, p);
 		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance,
-				new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"), new JPathFunction(SensorEvent.JP_LOCATION), new JPathFunction(SensorEvent.JP_SUBJECT), new JPathFunction(SensorEvent.JP_MODEL), new JPathFunction(SensorEvent.JP_SENSOR)),
+				format.sensorId(),
 				new Constant(sensor_id)));
 		connect(p, filter);
 		

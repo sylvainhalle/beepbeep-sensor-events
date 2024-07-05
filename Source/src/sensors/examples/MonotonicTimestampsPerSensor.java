@@ -1,3 +1,20 @@
+/*
+    Processing of sensor events with BeepBeep
+    Copyright (C) 2023-2024 Sylvain Hallé
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package sensors.examples;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -8,26 +25,29 @@ import java.io.InputStream;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Cumulate;
-import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tmf.Trim;
-import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.JsonFeeder;
 import sensors.LogRepository;
 
+/**
+ * Determines if a log is such that all its events are ordered by timestamp,
+ * for a given sensor. The pipeline outputs a single Boolean value
+ * depending on whether this condition is satisfied or not for a given log.
+ */
 public class MonotonicTimestampsPerSensor
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
@@ -35,8 +55,8 @@ public class MonotonicTimestampsPerSensor
 		InputStream is = fs.readFrom("nears-hub-0032.json");
 
 		JsonFeeder feeder = new JsonFeeder(is);
-		Slice s = new Slice(new FunctionTree(new MergeScalars("location", "subject", "model"), new JPathFunction("location"), new JPathFunction("subject"), new JPathFunction("model")), new GroupProcessor(1, 1) {{
-			ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
+		Slice s = new Slice(format.sensorId(), new GroupProcessor(1, 1) {{
+			ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 			Fork f1 = new Fork(2);
 			connect(get_ts, f1);
 			ApplyFunction gt = new ApplyFunction(Numbers.isLessOrEqual);

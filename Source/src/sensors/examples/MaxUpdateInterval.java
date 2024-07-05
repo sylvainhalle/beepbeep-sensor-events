@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -27,8 +27,6 @@ import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
@@ -38,7 +36,7 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrintStream;
@@ -59,17 +57,19 @@ import static ca.uqac.lif.cep.Connector.connect;
  */
 public class MaxUpdateInterval
 {
-
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		FileSystem fs = new LogRepository("0102").open();
 		OutputStream os = fs.writeTo("MaxUpdateInterval.txt");
 		MultiDaySource feeder = new MultiDaySource(fs);
 		
-		Slice s = new Slice(new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"), new JPathFunction("location"), new JPathFunction("subject"), new JPathFunction("model"), new JPathFunction("sensor")),
+		Slice s = new Slice(format.sensorId(),
 				new GroupProcessor(1, 1) {{
 					ApplyFunction get_ts = new ApplyFunction(new FunctionTree(Numbers.division,
-							new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))), new Constant(1000f)));
+							format.timestamp(), new Constant(1000f)));
 					Fork f1 = new Fork(2);
 					connect(get_ts, f1);
 					Trim t = new Trim(1);

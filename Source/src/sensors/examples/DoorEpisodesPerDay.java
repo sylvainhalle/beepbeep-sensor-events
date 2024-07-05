@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -39,8 +39,6 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
@@ -53,12 +51,11 @@ import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.cep.util.Booleans.And;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
 import sensors.DateFunction;
 import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
-import sensors.SensorEvent;
 
 /**
  * Observes the entrance door contact sensor, and creates composite
@@ -97,11 +94,17 @@ import sensors.SensorEvent;
  */
 public class DoorEpisodesPerDay
 {
-	protected static final Constant CLOSE = new Constant("CLOSED");
-	protected static final Constant OPEN = new Constant("OPEN");
+	/**
+	 *  The adapter for the event format.
+	 */
+	protected static final EventFormat format = new NearsJsonFormat();
+	
+	protected static final Constant CLOSE = new Constant(format.getClosedConstant());
+	protected static final Constant OPEN = new Constant(format.getOpenConstant());
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
+
 		/* Define the range of days to process. */
 		int first_day = 1, last_day = 7;
 
@@ -118,18 +121,18 @@ public class DoorEpisodesPerDay
 		connect(p, f0);
 		ApplyFunction is_clap = new ApplyFunction(new FunctionTree(And.instance,
 				new FunctionTree(Equals.instance,
-						new JPathFunction(SensorEvent.JP_LOCATION),
-						new Constant(new JsonString("entrance"))),
+						format.locationString(),
+						new Constant("entrance")),
 				new FunctionTree(Equals.instance,
-						new JPathFunction(SensorEvent.JP_SENSOR),
-						new Constant(new JsonString(SensorEvent.V_CONTACT)))));
+						format.sensorString(),
+						new Constant(NearsJsonFormat.V_CONTACT))));
 		Filter f_is_clap = new Filter();
 		connect(f0, TOP, f_is_clap, TOP);
 		connect(f0, BOTTOM, is_clap, INPUT);
 		connect(is_clap, OUTPUT, f_is_clap, BOTTOM);
 		
 		Slice per_day = new Slice(new FunctionTree(DateFunction.dayOfYear,
-				new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(SensorEvent.JP_TIMESTAMP)))),
+				new FunctionTree(DateToTimestamp.instance, format.timestamp())),
 				new GroupProcessor(1, 1) {{
 					FindDoorEpisodes fe = new FindDoorEpisodes();
 					Sets.PutInto put = new Sets.PutInto();
@@ -177,11 +180,12 @@ public class DoorEpisodesPerDay
 
 		/**
 		 * Creates a new instance of the processor.
+		 * @param format The specific event format used to extract values
 		 */
 		public FindDoorEpisodes()
 		{
 			super(new GroupProcessor(1, 1) {{ 
-				ApplyFunction get_state = new ApplyFunction(new FunctionTree(StringValue.instance, new JPathFunction(SensorEvent.JP_STATE)));
+				ApplyFunction get_state = new ApplyFunction(format.stateString());
 				connect(get_state, s_lifecycle);
 				addProcessors(get_state, s_lifecycle);
 				associateInput(INPUT, get_state, INPUT);
@@ -190,7 +194,7 @@ public class DoorEpisodesPerDay
 					new Processor[] {
 							new GroupProcessor(1, 1) {{
 								ApplyFunction hr = new ApplyFunction(new FunctionTree(DateFunction.timeOfDay,
-										new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(SensorEvent.JP_TIMESTAMP)))));
+										new FunctionTree(format.timestamp())));
 								Cumulate min = new Cumulate(Numbers.minimum);
 								connect(hr, min);
 								addProcessors(hr, min);
@@ -199,7 +203,7 @@ public class DoorEpisodesPerDay
 							}},
 							new GroupProcessor(1, 1) {{
 								ApplyFunction hr = new ApplyFunction(new FunctionTree(DateFunction.timeOfDay,
-										new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction(SensorEvent.JP_TIMESTAMP)))));
+										format.timestamp()));
 								Cumulate max = new Cumulate(Numbers.maximum);
 								connect(hr, max);
 								addProcessors(hr, max);

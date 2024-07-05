@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -28,7 +28,6 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.functions.UnaryFunction;
-import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
@@ -37,6 +36,7 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonNumber;
 import ca.uqac.lif.json.JsonString;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
@@ -57,16 +57,19 @@ import static ca.uqac.lif.cep.Connector.connect;
  */
 public class ListStates
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		FileSystem fs = new LogRepository("0105").open();
 		MultiDaySource feeder = new MultiDaySource(fs);
 		OutputStream os = fs.writeTo("ListStates.txt");
 		
-		Slice s = new Slice(new JPathFunction("model"), 
-				new Slice(new JPathFunction("sensor"), 
+		Slice s = new Slice(format.modelString(), 
+				new Slice(format.sensorString(), 
 						new GroupProcessor(1, 1) {{
-							ApplyFunction f = new ApplyFunction(new FunctionTree(CoarsenValue.instance, new JPathFunction("state")));
+							ApplyFunction f = new ApplyFunction(new FunctionTree(CoarsenValue.instance, format.stateString()));
 							Slice in_s = new Slice(new IdentityFunction(), 
 									new GroupProcessor(1, 1) {{ 
 										TurnInto one = new TurnInto(1);

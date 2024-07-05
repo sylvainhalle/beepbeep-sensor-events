@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -27,17 +27,16 @@ import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.Integrate;
-import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.tmf.FilterOn;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
+import sensors.EventFormat;
 import sensors.HtmlPrint;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
-import sensors.SensorEvent;
+import sensors.examples.NearsJsonFormat;
 import sensors.house.House;
 
 /**
@@ -47,6 +46,11 @@ import sensors.house.House;
  */
 public class InstantSnapshot
 {
+	/**
+	 *  The adapter for the event format.
+	 */
+	protected static final EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
@@ -60,9 +64,9 @@ public class InstantSnapshot
 		/* Create the pipeline. */
 		Pump p = new Pump();
 		connect(feeder, p);
-		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, new JPathFunction(SensorEvent.JP_SUBJECT), new Constant(new JsonString("stove"))));
+		FilterOn filter = new FilterOn(new FunctionTree(Equals.instance, format.subjectString(), new Constant("stove")));
 		connect(p, filter);
-		ApplyFunction to_delta = new ApplyFunction(new House.EventToHouseDelta());
+		ApplyFunction to_delta = new ApplyFunction(new House.EventToHouseDelta(format));
 		connect(filter, to_delta);
 		Integrate instant = new Integrate(new House());
 		connect(to_delta, instant);

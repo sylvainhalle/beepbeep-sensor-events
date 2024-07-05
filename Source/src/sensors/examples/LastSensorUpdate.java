@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -28,24 +28,18 @@ import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.IfThenElse;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.mtnp.PrintGnuPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableStream;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
-import ca.uqac.lif.cep.tuples.MergeScalars;
-import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
-import sensors.DateToTimestamp;
+import sensors.EventFormat;
 import sensors.Integrate;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
@@ -70,12 +64,14 @@ import static ca.uqac.lif.cep.Connector.TOP;
  */
 public class LastSensorUpdate
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* The ID of the sensor on wishes to examine. */
-		FixedTupleBuilder builder = new FixedTupleBuilder("location", "subject", "model");
-		//Tuple sensor_id = builder.createTuple("bedroom", "bedhead", "fgms001");
-		Tuple sensor_id = builder.createTuple(new JsonString("kitchen"), new JsonString("coffeemaker"), new JsonString("dmof1"));
+		//Object sensor_id = format.createPlacement("bedroom", "bedhead", "fgms001");
+		Object sensor_id = format.createPlacement("kitchen", "coffeemaker", "dmof1");
 		
 		/* Define the range of days to process. */
 		int first_day = 1, last_day = -1;
@@ -90,7 +86,7 @@ public class LastSensorUpdate
 		connect(feeder, p);
 		Fork f1 = new Fork();
 		connect(p, f1);
-		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
+		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 		connect(f1, TOP, get_ts, INPUT);
 		Fork f2 = new Fork(3);
 		connect(get_ts, f2);
@@ -100,7 +96,7 @@ public class LastSensorUpdate
 		connect(f1, BOTTOM, f3, INPUT);
 		ApplyFunction is_x = new ApplyFunction(new FunctionTree(
 				Equals.instance,
-				new FunctionTree(new MergeScalars("location", "subject", "model"), new JPathFunction("location"), new JPathFunction("subject"), new JPathFunction("model")),
+				format.sensorPlacement(),
 				new Constant(sensor_id)));
 		connect(f3, TOP, is_x, INPUT);
 		TurnInto to_id = new TurnInto(new IdentityFunction());

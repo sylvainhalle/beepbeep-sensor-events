@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -24,13 +24,13 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
@@ -53,6 +53,9 @@ import static ca.uqac.lif.cep.Connector.connect;
  */
 public class InventoryByLocation
 {
+	/* The adapter for the event format. */
+	protected static final EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
@@ -62,10 +65,10 @@ public class InventoryByLocation
 		
 		/* Create the pipeline. */
 		Pump p = (Pump) connect(feeder,
-				new Slice(new JPathFunction("location"),
-						new Slice(new JPathFunction("subject"),
+				new Slice(format.locationString(),
+						new Slice(format.subjectString(),
 								new GroupProcessor(1, 1) {{
-									ApplyFunction f = new ApplyFunction(new JPathFunction("model"));
+									ApplyFunction f = new ApplyFunction(format.modelString());
 									Processor p = connect(f, new Sets.PutInto());
 									addProcessors(f, p).associateInput(f).associateOutput(p);
 								}})),

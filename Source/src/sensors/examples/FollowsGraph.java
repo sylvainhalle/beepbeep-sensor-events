@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -22,9 +22,6 @@ import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
-import static sensors.SensorEvent.JP_SENSOR;
-import static sensors.SensorEvent.JP_STATE;
-import static sensors.SensorEvent.V_ON;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,7 +47,7 @@ import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Strings.ToString;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
+import sensors.EventFormat;
 import sensors.HighlightedGraph;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
@@ -79,6 +76,9 @@ import sensors.MultiDaySource;
  */
 public class FollowsGraph
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
@@ -93,11 +93,11 @@ public class FollowsGraph
 		connect(p, f0);
 		ApplyFunction is_motion = new ApplyFunction(new FunctionTree(Booleans.and,
 				new FunctionTree(Equals.instance,
-						new JPathFunction(JP_SENSOR),
-						new Constant(new JsonString("motion"))),
+						format.sensorString(),
+						new Constant("motion")),
 				new FunctionTree(Equals.instance,
-						new JPathFunction(JP_STATE),
-						new Constant(new JsonString(V_ON)))));
+						format.stateString(),
+						new Constant(NearsJsonFormat.V_ON))));
 		connect(f0, BOTTOM, is_motion, INPUT);
 		Filter f_is_motion = new Filter();
 		connect(is_motion, OUTPUT, f_is_motion, BOTTOM);

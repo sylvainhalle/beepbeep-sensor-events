@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -37,12 +37,9 @@ import ca.uqac.lif.cep.fsm.TransitionOtherwise;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
-import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.json.JPathFunction;
-import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
@@ -52,10 +49,9 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
-import ca.uqac.lif.json.JsonString;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
-import sensors.SensorEvent;
 
 /**
  * Checks that each contact sensor follows its expected lifecycle, and reports
@@ -69,6 +65,9 @@ import sensors.SensorEvent;
  */
 public class ContactLifecycle
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the range of days to process. */
@@ -86,15 +85,15 @@ public class ContactLifecycle
 		Fork f0 = new Fork();
 		connect(p, f0);
 		//ApplyFunction is_clap = new ApplyFunction(land(eq(new JPathFunction(SensorEvent.JP_SENSOR), new Constant(new JsonString(SensorEvent.V_CONTACT))),eq(new JPathFunction(SensorEvent.JP_SUBJECT), new Constant(new JsonString("vanity")))));
-		ApplyFunction is_clap = new ApplyFunction(eq(new JPathFunction(SensorEvent.JP_SENSOR), new Constant(new JsonString(SensorEvent.V_CONTACT))));
+		ApplyFunction is_clap = new ApplyFunction(eq(format.sensorString(), new Constant(NearsJsonFormat.V_CONTACT)));
 		Filter f_is_clap = new Filter();
 		connect(f0, TOP, f_is_clap, TOP);
 		connect(f0, BOTTOM, is_clap, INPUT);
 		connect(is_clap, OUTPUT, f_is_clap, BOTTOM);
 		
-		Slice per_sensor = new Slice(new JPathFunction(SensorEvent.JP_SUBJECT),
+		Slice per_sensor = new Slice(format.subjectString(),
 				new GroupProcessor(1, 1) {{
-					ApplyFunction get_state = new ApplyFunction(new FunctionTree(StringValue.instance, new JPathFunction(SensorEvent.JP_STATE)));
+					ApplyFunction get_state = new ApplyFunction(format.stateString());
 					Fork f = new Fork();
 					connect(get_state, f);
 					ContactMooreMachine machine = new ContactMooreMachine();
@@ -129,10 +128,10 @@ public class ContactLifecycle
 	 */
 	public static class ContactMooreMachine extends MooreMachine
 	{
-		protected static final Constant CLOSE = new Constant("CLOSED");
-		protected static final Constant OFF = new Constant("OFF");
-		protected static final Constant ON = new Constant("ON");
-		protected static final Constant OPEN = new Constant("OPEN");
+		protected static final Constant CLOSE = new Constant(format.getClosedConstant());
+		protected static final Constant OFF = new Constant(format.getOffConstant());
+		protected static final Constant ON = new Constant(format.getOnConstant());
+		protected static final Constant OPEN = new Constant(format.getOpenConstant());
 		
 		public ContactMooreMachine()
 		{

@@ -24,13 +24,13 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
@@ -39,6 +39,9 @@ import static ca.uqac.lif.cep.Connector.connect;
 
 public class ListSensors
 {
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
@@ -48,9 +51,9 @@ public class ListSensors
 		
 		/* Create the pipeline. */
 		Pump p = (Pump) connect(feeder,
-				new Slice(new JPathFunction("model"), 
+				new Slice(format.modelString(), 
 						new GroupProcessor(1, 1) {{
-							ApplyFunction f = new ApplyFunction(new JPathFunction("sensor"));
+							ApplyFunction f = new ApplyFunction(format.sensorString());
 							Processor p = connect(f, new Sets.PutInto());
 							addProcessors(f, p).associateInput(f).associateOutput(p);
 						}}),

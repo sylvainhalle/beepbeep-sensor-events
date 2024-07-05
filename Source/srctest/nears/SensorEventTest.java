@@ -18,35 +18,37 @@
 package nears;
 
 import static org.junit.Assert.*;
-import static sensors.SensorEvent.*;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import org.junit.Test;
 
+import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.json.JsonMap;
-import ca.uqac.lif.json.JsonPath;
-import ca.uqac.lif.json.JsonString;
-import sensors.SensorEvent;
+import sensors.examples.NearsJsonFormat;
 
 public class SensorEventTest
 {
+	NearsJsonFormat s_format = new NearsJsonFormat();
+	
   @Test
   public void testNewEvent1()
   {
-    JsonMap e = (JsonMap) SensorEvent.newEvent("living", "tv", "dmof1", "2023-01-01T00:00:00.000Z", "temperature", 23.4);
+    JsonMap e = (JsonMap) NearsJsonFormat.newEvent("living", "tv", "dmof1", "2023-01-01T00:00:00.000Z", "temperature", 23.4);
     assertNotNull(e);
-    assertEquals("living", ((JsonString) e.get(JP_LOCATION)).stringValue());
-    assertEquals("23.40 °C", ((JsonString) e.get(JP_STATE)).stringValue());
+    assertEquals("living", s_format.locationString());
+    assertEquals("23.40 °C", s_format.stateString());
   }
   
   @Test
-  public void testNewEvent2() throws ParseException
+  public void testNewEvent2()
   {
-    Date d = DATE_FORMAT.parse("2023-01-01T00:00:00.000Z");
-    JsonMap e = (JsonMap) SensorEvent.newEvent("living", "tv", "dmof1", d.getTime(), "temperature", 23.4);
+    Date d = s_format.parseDate("2023-01-01T00:00:00.000Z");
+    JsonMap e = (JsonMap) NearsJsonFormat.newEvent("living", "tv", "dmof1", d.getTime(), "temperature", 23.4);
     assertNotNull(e);
-    assertEquals("2023-01-01T00:00:00.000Z", ((JsonString) JsonPath.get(e, JP_TIMESTAMP)).stringValue());
+    Function get_ts = s_format.timestamp();
+    Object[] outs = new Object[1];
+    get_ts.evaluate(new Object[] {e}, outs);
+    assertEquals(d.getTime(), outs[0]);
   }
 }

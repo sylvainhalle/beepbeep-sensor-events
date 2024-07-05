@@ -1,3 +1,20 @@
+/*
+    Processing of sensor events with BeepBeep
+    Copyright (C) 2023-2024 Sylvain Hallé
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package sensors.examples;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -8,21 +25,21 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.functions.FunctionTree;
-import ca.uqac.lif.cep.json.JPathFunction;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.EventFormat;
 import sensors.JsonFeeder;
 import sensors.LogRepository;
 import sensors.PrettyPrint;
 
 public class ListUniqueDevices
 {
-
+	/* The adapter for the event format. */
+	protected static EventFormat format = new NearsJsonFormat();
+	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
@@ -34,7 +51,7 @@ public class ListUniqueDevices
 		JsonFeeder feeder = new JsonFeeder(is);
 		Pump p = new Pump();
 		connect(feeder, p);
-		ApplyFunction scal = new ApplyFunction(new FunctionTree(new MergeScalars("location", "subject", "model"), new JPathFunction("location"), new JPathFunction("subject"), new JPathFunction("model")));
+		ApplyFunction scal = new ApplyFunction(format.sensorPlacement());
 		connect(p, scal);
 		Sets.PutInto pi = new Sets.PutInto();
 		connect(scal, pi);

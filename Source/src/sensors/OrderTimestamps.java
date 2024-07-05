@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -24,9 +24,7 @@ import java.util.TreeSet;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.ProcessorException;
 import ca.uqac.lif.cep.SynchronousProcessor;
-import ca.uqac.lif.json.JsonElement;
-import ca.uqac.lif.json.JsonPath;
-import ca.uqac.lif.json.JsonString;
+import ca.uqac.lif.cep.functions.Function;
 
 /**
  * Processor that ingests a stream of events, and, upon reaching the end,
@@ -42,33 +40,41 @@ public class OrderTimestamps extends SynchronousProcessor
 	 * The {@link TreeSet} used to store the events and enumerate them in sorted
 	 * timestamp order. 
 	 */
-	/*@ non_null @*/ protected final TreeSet<JsonEvent> m_events;
+	/*@ non_null @*/ protected final TreeSet<TimedEvent> m_events;
+	
+	/**
+	 * The function that extracts a (Unix) timestamp from an event.
+	 */
+	protected final Function m_timestampFunction;
 	
 	/**
 	 * Creates a new instance of the processor.
+	 * @param The function that extracts a (Unix) timestamp from an event
 	 */
-	public OrderTimestamps()
+	public OrderTimestamps(Function ts_function)
 	{
 		super(1, 1);
-		m_events = new TreeSet<JsonEvent>();
+		m_timestampFunction = ts_function;
+		m_events = new TreeSet<TimedEvent>();
 	}
 	
 	@Override
 	protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
 	{
-		JsonElement e = (JsonElement) inputs[0];
-		long ts = DateToTimestamp.getTimestamp(((JsonString) JsonPath.get(e, SensorEvent.JP_TIMESTAMP)).stringValue());
-		m_events.add(new JsonEvent(ts, e));
+		Object[] outs = new Object[1];
+		m_timestampFunction.evaluate(inputs, outs);
+		long ts = (long) outs[0];
+		m_events.add(new TimedEvent(ts, inputs[0]));
 		return true;
 	}
 	
 	@Override
 	protected boolean onEndOfTrace(Queue<Object[]> outputs) throws ProcessorException
   {
-		Iterator<JsonEvent> it = m_events.iterator();
+		Iterator<TimedEvent> it = m_events.iterator();
 		while (it.hasNext())
 		{
-			JsonEvent je = it.next();
+			TimedEvent je = it.next();
 			outputs.add(new Object[] {je.m_event});
 		}
     return false;
@@ -82,16 +88,16 @@ public class OrderTimestamps extends SynchronousProcessor
 	}
 	
 	/**
-	 * A utility class that associates a JSON element to the timestamp it
+	 * A utility class that associates an event to the timestamp it
 	 * contains. This allows the {@link TreeMap} to sort them.
 	 */
-	protected static class JsonEvent implements Comparable<JsonEvent>
+	protected static class TimedEvent implements Comparable<TimedEvent>
 	{
 		protected final long m_timestamp;
 		
-		protected final JsonElement m_event;
+		protected final Object m_event;
 		
-		public JsonEvent(long timestamp, JsonElement e)
+		public TimedEvent(long timestamp, Object e)
 		{
 			super();
 			m_timestamp = timestamp;
@@ -99,7 +105,7 @@ public class OrderTimestamps extends SynchronousProcessor
 		}
 		
 		@Override
-		public int compareTo(JsonEvent e)
+		public int compareTo(TimedEvent e)
 		{
 			if (m_timestamp == e.m_timestamp)
 			{

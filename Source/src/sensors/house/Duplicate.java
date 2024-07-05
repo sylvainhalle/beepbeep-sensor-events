@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -20,10 +20,19 @@ package sensors.house;
 import ca.uqac.lif.cep.Duplicable;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 
+/**
+ * Function that creates a copy of a {@link Duplicable} object.
+ */
 public class Duplicate extends UnaryFunction<Object,Object>
 {
+	/**
+	 * A single publicly visible instance of the function.
+	 */
 	public static final Duplicate instance = new Duplicate();
 	
+	/**
+	 * Creates a new instance of the function.
+	 */
 	protected Duplicate()
 	{
 		super(Object.class, Object.class);

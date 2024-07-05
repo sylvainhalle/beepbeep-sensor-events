@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -28,6 +28,7 @@ import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.examples.NearsJsonFormat;
 
 /**
  * From a JSON file, create a new JSON file where events are physically
@@ -41,16 +42,20 @@ public class ReorderFile
 {
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
+		/* The input event format. */
+		EventFormat format = new NearsJsonFormat();
+		
 		/* Define the input and output file. */
 		FileSystem fs = new LogRepository().open();
 		InputStream is = fs.readFrom("NH-0102.json");
 		OutputStream os = fs.writeTo("NH-0102-sorted.json");
 		
+		
 		/* Create the pipeline. */
 		JsonFeeder feeder = new JsonFeeder(is);
 		Pump p = new Pump();
 		connect(feeder, p);
-		OrderTimestamps o = new OrderTimestamps();
+		OrderTimestamps o = new OrderTimestamps(format.timestamp());
 		connect(p, o);
 
 		/* Connect the pipeline to an output and run. */
