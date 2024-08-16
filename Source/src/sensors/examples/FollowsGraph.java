@@ -52,6 +52,7 @@ import sensors.HighlightedGraph;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
 
 /**
@@ -84,7 +85,7 @@ public class FollowsGraph
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
+		FileSystem fs = new NearsLogRepository("0105").open();
 		MultiDaySource feeder = new NearsMultiDaySource(fs);
 		OutputStream os = fs.writeTo("FollowsGraph.dot");
 		

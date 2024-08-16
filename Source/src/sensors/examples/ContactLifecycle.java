@@ -53,6 +53,7 @@ import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
 
 /**
@@ -76,7 +77,7 @@ public class ContactLifecycle
 		int first_day = 1, last_day = 120;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0102").open();
+		FileSystem fs = new NearsLogRepository("0102").open();
 		OutputStream os = fs.writeTo("ContactLifecycle.txt");
 		MultiDaySource feeder = new NearsMultiDaySource(fs);
 
