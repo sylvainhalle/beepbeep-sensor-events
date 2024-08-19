@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
@@ -40,8 +41,10 @@ import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.casas.CasasLogRepository;
+import sensors.casas.CasasTxtFormat;
 import sensors.casas.DateToTimestampCasas;
 
 
@@ -49,19 +52,17 @@ public class CountSwappedEvents
 {
 	/* The folder where the data files reside. */
 	protected static final LogRepository fs = new CasasLogRepository();
-
+	
+	/* The adapter for the event format. */
+	protected static final EventFormat format = new CasasTxtFormat();
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
-		ReadLines reader = new ReadLines(is);
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
+		Processor feeder = format.getFeeder(is);
 		
-		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestampCasas.instance, new FunctionTree(Strings.concat, 
-                new FunctionTree(Strings.concat, new FetchAttribute("date"), new Constant("T")),
-                new FetchAttribute("time"))));
+		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 		connect(feeder, get_ts);
 		Fork f1 = new Fork(2);
 		connect(get_ts, f1);
