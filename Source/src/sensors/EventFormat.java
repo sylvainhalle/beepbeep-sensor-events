@@ -20,8 +20,8 @@ package sensors;
 import java.io.InputStream;
 import java.util.Date;
 
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.Function;
-import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.cep.tuples.Tuple;
 
 /**
@@ -186,9 +186,9 @@ public interface EventFormat
 	 * Gets a processor instance that can read events in the given format from
 	 * an input stream.
 	 * @param is The input stream to read from
-	 * @return The source
+	 * @return A processor, which is expected to have an arity of 0:1
 	 */
-	public Source getFeeder(InputStream is);
+	public Processor getFeeder(InputStream is);
 	
 	/**
 	 * Evaluates an unary BeepBeep function.

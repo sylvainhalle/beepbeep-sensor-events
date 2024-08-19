@@ -23,9 +23,9 @@ import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.Pullable;
 import ca.uqac.lif.cep.functions.Function;
-import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsLogRepository;
@@ -58,7 +58,7 @@ public class DaySplit
 		/* Read file line by line, and start a new file every time the day of
 		 * the year in the timestamp changes. */
 		Calendar cal = new GregorianCalendar();
-		Source feeder = format.getFeeder(is);
+		Processor feeder = format.getFeeder(is);
 		int cnt = 0;
 		int cur_day = -1;
 		PrintStream os = null;
