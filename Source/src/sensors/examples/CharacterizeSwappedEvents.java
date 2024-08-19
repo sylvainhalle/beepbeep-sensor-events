@@ -22,6 +22,7 @@ import static ca.uqac.lif.cep.Connector.connect;
 import java.io.IOException;
 import java.io.InputStream;
 
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
@@ -37,7 +38,6 @@ import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
-import sensors.nears.JsonFeeder;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsLogRepository;
 
@@ -53,8 +53,7 @@ public class CharacterizeSwappedEvents
 	{
 		fs.open();
 		InputStream is = fs.readFrom("nears-hub-0032.json");
-		
-		JsonFeeder feeder = new JsonFeeder(is);
+		Processor feeder = format.getFeeder(is);
 		
 		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 		connect(feeder, get_ts);

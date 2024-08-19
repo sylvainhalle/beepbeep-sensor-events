@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.casas;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -25,7 +25,7 @@ import ca.uqac.lif.cep.functions.FunctionException;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 
 /**
- * Converts a date into a Unix timestamp.
+ * Converts a (string) date into a Unix timestamp.
  * 
  * @author Sylvain Hallé
  */
@@ -39,7 +39,7 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	/**
 	 * The date formatter used to parse the date string.
 	 */
-	/*@ non_null @*/ protected static final DateFormat s_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+	/*@ non_null @*/ protected static final DateFormat s_format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSSSSS");
 
 	/**
 	 * Creates a new instance of the function.

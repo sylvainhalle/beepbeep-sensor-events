@@ -35,8 +35,8 @@ import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonMap;
 import ca.uqac.lif.json.JsonParser;
 import ca.uqac.lif.json.JsonParser.JsonParseException;
-import sensors.DateToTimestamp;
 import sensors.EventFormat;
+import sensors.examples.DateToTimestampNears;
 
 /**
  * Extracts features from events in the format of the NEARS smart home
@@ -111,7 +111,7 @@ public class NearsJsonFormat implements EventFormat
 	@Override
 	public Function timestamp()
 	{
-		return new FunctionTree(DateToTimestamp.instance,
+		return new FunctionTree(DateToTimestampNears.instance,
 				new FunctionTree(StringValue.instance,
 						new JPathFunction(JP_TIMESTAMP)));
 	}

@@ -21,18 +21,18 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import sensors.DateToTimestamp;
+import sensors.examples.DateToTimestampNears;
 
 /**
- * Unit tests for {@link DateToTimestamp}.
+ * Unit tests for {@link DateToTimestampNears}.
  */
 public class DateToTimestampTest
 {
 	@Test
 	public void test1()
 	{
-		long ts1 = DateToTimestamp.getTimestamp("2021-09-02T00:02:04.786-05:00");
-		long ts2 = DateToTimestamp.getTimestamp("2021-07-02T00:02:37.615Z");
+		long ts1 = DateToTimestampNears.getTimestamp("2021-09-02T00:02:04.786-05:00");
+		long ts2 = DateToTimestampNears.getTimestamp("2021-07-02T00:02:37.615Z");
 		System.out.println(ts1);
 		assertTrue(ts2 < ts1);
 	}

@@ -37,7 +37,6 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.DateToTimestamp;
 import sensors.LogRepository;
 import sensors.nears.JsonFeeder;
 import sensors.nears.NearsLogRepository;
@@ -54,7 +53,7 @@ public class CountSwappedEvents
 		
 		JsonFeeder feeder = new JsonFeeder(is);
 		
-		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
+		ApplyFunction get_ts = new ApplyFunction(new FunctionTree(DateToTimestampNears.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))));
 		connect(feeder, get_ts);
 		Fork f1 = new Fork(2);
 		connect(get_ts, f1);

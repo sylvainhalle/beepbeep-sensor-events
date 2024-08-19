@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.complex.RangeCep;
@@ -39,7 +38,6 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.mtnp.UpdateTableMap;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
@@ -51,7 +49,6 @@ import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.MapToTuple;
 import ca.uqac.lif.cep.tuples.MergeScalars;
-import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
@@ -75,9 +72,7 @@ public class PresenceHeatMap
 		/* Define the input and output file. */
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
-		ReadLines reader = new ReadLines(is);
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
+		Processor feeder = format.getFeeder(is);
 		OutputStream os = fs.writeTo("PresenceHeatMap.txt");
 		
 		/* Keep only motion sensor events */

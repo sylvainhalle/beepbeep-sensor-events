@@ -52,7 +52,6 @@ import ca.uqac.lif.cep.util.Booleans.And;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.DateFunction;
-import sensors.DateToTimestamp;
 import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
@@ -134,7 +133,7 @@ public class DoorEpisodesPerDay
 		connect(is_clap, OUTPUT, f_is_clap, BOTTOM);
 		
 		Slice per_day = new Slice(new FunctionTree(DateFunction.dayOfYear,
-				new FunctionTree(DateToTimestamp.instance, format.timestamp())),
+				new FunctionTree(DateToTimestampNears.instance, format.timestamp())),
 				new GroupProcessor(1, 1) {{
 					FindDoorEpisodes fe = new FindDoorEpisodes();
 					Sets.PutInto put = new Sets.PutInto();

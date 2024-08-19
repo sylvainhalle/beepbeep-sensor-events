@@ -1,3 +1,20 @@
+/*
+    Processing of sensor events with BeepBeep
+    Copyright (C) 2023-2024 Sylvain Hallé, Rania Taleb
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package sensors.casas;
 
 import java.io.InputStream;
@@ -7,7 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.io.ReadLines;
@@ -15,8 +33,8 @@ import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Strings;
-import sensors.DateToTimestampCasas;
 import sensors.EventFormat;
 
 public class CasasTxtFormat implements EventFormat
@@ -25,8 +43,6 @@ public class CasasTxtFormat implements EventFormat
 	 * The date formatter used to parse the date string.
 	 */
 	/* @ non_null @ */ public static final DateFormat DATE_FORMAT;
-
-	/* @ non_null @ */ public static final String TXT_MODEL = "model";// the physical model
 
 	/* @ non_null @ */ public static final String TXT_SENSOR = "sensor"; // sensor name
 
@@ -40,15 +56,15 @@ public class CasasTxtFormat implements EventFormat
 	/* @ non_null @ */ public static final String TXT_SUBJECT = "subject"; // represents the more
 																																					// detailed location in
 																																					// the CASAS dataset
+	
+	/* @ non_null @ */ public static final String TXT_ACTIVITY = "activity"; // a field that is present only in the CASAS dataset 
 
-	/* @ non_null @ */ public static final String TXT_TIME = "time";
-
-	/* @ non_null @ */ public static final String TXT_DATE = "date";
+	/* @ non_null @ */ public static final String TXT_DATETIME = "datetime";
 
 	/* @ non_null @ */ public static final String TXT_CONTACT = "contact"; // We do not have a contact
 																																					// sensors in CASAS
 																																					// dataset
-
+	
 	/* @ non_null @ */ public static final String V_TEMPERATURE = "temperature";
 
 	/* @ non_null @ */ protected static final String V_ON = "ON";
@@ -60,11 +76,13 @@ public class CasasTxtFormat implements EventFormat
 	/* @ non_null @ */ protected static final String V_CLOSED = "CLOSE";
 
 	protected static final TimeZone s_utc = TimeZone.getTimeZone("UTC");
+	
+	protected static final FixedTupleBuilder s_globalTupleBuilder = new FixedTupleBuilder(TXT_DATETIME,	TXT_SENSOR, TXT_LOCATION, TXT_SUBJECT, TXT_STATE, TXT_ACTIVITY);
 
 	static
 	{
 		// Sets the date format to print in Zulu time
-		DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+		DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 		DATE_FORMAT.setTimeZone(s_utc);
 
 	}
@@ -73,10 +91,8 @@ public class CasasTxtFormat implements EventFormat
 	 * The builder creating objects identifying a sensor's uniquely defined
 	 * location.
 	 */
-	protected static final FixedTupleBuilder s_placementBuilder = new FixedTupleBuilder("location",
-			"subject", "model");
-	protected static final FixedTupleBuilder s_idBuilder = new FixedTupleBuilder("location",
-			"subject", "model", "sensor");
+	protected static final FixedTupleBuilder s_placementBuilder = new FixedTupleBuilder("location",	"subject", "model");
+	protected static final FixedTupleBuilder s_idBuilder = new FixedTupleBuilder("location", "subject", "model", "sensor");
 
 	@Override
 	public Date parseDate(String s)
@@ -95,18 +111,14 @@ public class CasasTxtFormat implements EventFormat
 	}
 
 	/**
-	 * In the CASAS dataset, the first two fields in an event corresponds to the
-	 * date in the form "yyyy-MM-dd' and time in the form 'HH:mm:ss.SSSSSX"
-	 * respectively. The two strings are extracted and then converted into a Unix
-	 * timestamp (i.e. a {@code long}).
+	 * In the CASAS dataset, the first fields in an event corresponds to the
+	 * date in the form "yyyy-MM-dd HH:mm:ss.SSSSSX". The strings isconverted
+	 * into a Unix timestamp (i.e. a {@code long}).
 	 */
 	@Override
 	public Function timestamp()
 	{
-		return new FunctionTree(DateToTimestampCasas.instance,
-				new FunctionTree(Strings.concat,
-						new FunctionTree(Strings.concat, new FetchAttribute(TXT_DATE), new Constant("T")),
-						new FetchAttribute(TXT_TIME)));
+		return new FunctionTree(DateToTimestampCasas.instance, new FetchAttribute(TXT_DATETIME));
 	}
 
 	/**
@@ -143,10 +155,16 @@ public class CasasTxtFormat implements EventFormat
 		return new FetchAttribute(TXT_SENSOR);
 	}
 
+	/**
+	 * In the CASAS platform, there is no dedicated "model" field in events.
+	 * Rather, the model can be extracted by the sequence of letters in the
+	 * "sensor" field. For example, in "LS008", the LS indicates that this is a
+	 * light sensor.
+	 */
 	@Override
 	public Function modelString()
 	{
-		return new FetchAttribute(TXT_MODEL);
+		return new FunctionTree(new Strings.FindRegex("([A-Z]+)\\d+"), new FetchAttribute(TXT_SENSOR));
 	}
 
 	/**
@@ -160,7 +178,7 @@ public class CasasTxtFormat implements EventFormat
 	{
 		return new FunctionTree(new MergeScalars("location", "subject", "model"),
 				new FetchAttribute(TXT_LOCATION), new FetchAttribute(TXT_SUBJECT),
-				new FetchAttribute(TXT_MODEL));
+				modelString());
 	}
 
 	/**
@@ -184,7 +202,7 @@ public class CasasTxtFormat implements EventFormat
 	{
 		return new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"),
 				new FetchAttribute(TXT_LOCATION), new FetchAttribute(TXT_SUBJECT),
-				new FetchAttribute(TXT_MODEL), new FetchAttribute(TXT_SENSOR));
+				modelString(), new FetchAttribute(TXT_SENSOR));
 	}
 
 	/**
@@ -192,7 +210,6 @@ public class CasasTxtFormat implements EventFormat
 	 * combination of three attributes in an event: {@code location},
 	 * {@code subject} and {@code model}.
 	 */
-
 	@Override
 	public Tuple createId(String location, String subject, String model, String sensor)
 	{
@@ -202,43 +219,44 @@ public class CasasTxtFormat implements EventFormat
 	@Override
 	public Object getOnConstant()
 	{
-
 		return V_ON;
 	}
 
 	@Override
 	public Object getOffConstant()
 	{
-
 		return V_OFF;
 	}
 
 	@Override
 	public Object getOpenConstant()
 	{
-
 		return V_OPEN;
 	}
 
 	@Override
 	public Object getClosedConstant()
 	{
-
 		return V_CLOSED;
 	}
 
 	@Override
 	public String getExtension()
 	{
-
 		return ".txt";
 	}
 
 	@Override
-	public ReadLines getFeeder(InputStream is)
+	public GroupProcessor getFeeder(InputStream is)
 	{
-		// TODO Auto-generated method stub
-		return new ReadLines(is);
+		GroupProcessor g = new GroupProcessor(0, 1);
+		{
+			ReadLines r = new ReadLines(is);
+			TupleFeeder f = new TupleFeeder(s_globalTupleBuilder).setSeparator("\t");
+			Connector.connect(r, f);
+			g.associateOutput(0, f, 0);
+		}
+		return g;
 	}
 
 }

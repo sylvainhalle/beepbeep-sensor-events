@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023-2024 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé, Rania Taleb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -21,22 +21,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.tuples.MergeScalars;
-import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
@@ -69,9 +67,7 @@ public class MaxUpdateInterval
 		LogRepository fs = new CasasLogRepository().open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
 		OutputStream os = fs.writeTo("MaxUpdateInterval.txt");
-		ReadLines reader = new ReadLines(is);
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
+		Processor feeder = format.getFeeder(is);
 		
 		Slice s = new Slice(format.sensorId(),
 				new GroupProcessor(1, 1) {{

@@ -66,9 +66,7 @@ public class InventoryByLocation
 		/* Define the input and output file. */
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
-		ReadLines reader = new ReadLines(is);
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
+		Processor feeder = format.getFeeder(is);
 		OutputStream os = fs.writeTo("ListSensorsByLocation.txt");
 		
 		/* Create the pipeline. */

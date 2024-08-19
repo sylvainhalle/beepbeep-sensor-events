@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023-2024 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé, Rania Taleb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -24,12 +24,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
@@ -37,7 +35,6 @@ import sensors.LogRepository;
 import sensors.PrettyPrint;
 import sensors.casas.CasasLogRepository;
 import sensors.casas.CasasTxtFormat;
-
 
 public class ListUniqueDevices
 {
@@ -53,12 +50,10 @@ public class ListUniqueDevices
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
 		OutputStream os = fs.writeTo("ListUniqueDevices.txt");
+		Processor feeder = format.getFeeder(is);
 		
 		/* Create the pipeline. */
-		ReadLines reader = new ReadLines(is);
 		Pump p = new Pump();
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
 		connect(feeder, p);
 		ApplyFunction scal = new ApplyFunction(format.sensorPlacement());
 		connect(p, scal);

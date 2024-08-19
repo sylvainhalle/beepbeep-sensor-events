@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.examples;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,12 +29,12 @@ import ca.uqac.lif.cep.functions.UnaryFunction;
  * 
  * @author Sylvain Hallé
  */
-public class DateToTimestamp extends UnaryFunction<String,Number>
+public class DateToTimestampNears extends UnaryFunction<String,Number>
 {	
 	/**
 	 * A publicly visible instance of the function.
 	 */
-	/*@ non_null @*/ public static final transient DateToTimestamp instance = new DateToTimestamp();
+	/*@ non_null @*/ public static final transient DateToTimestampNears instance = new DateToTimestampNears();
 	
 	/**
 	 * The date formatter used to parse the date string.
@@ -44,7 +44,7 @@ public class DateToTimestamp extends UnaryFunction<String,Number>
 	/**
 	 * Creates a new instance of the function.
 	 */
-	protected DateToTimestamp()
+	protected DateToTimestampNears()
 	{
 		super(String.class, Number.class);
 	}

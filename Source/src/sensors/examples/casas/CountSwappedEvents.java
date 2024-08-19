@@ -40,9 +40,9 @@ import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.DateToTimestampCasas;
 import sensors.LogRepository;
 import sensors.casas.CasasLogRepository;
+import sensors.casas.DateToTimestampCasas;
 
 
 public class CountSwappedEvents

@@ -45,7 +45,6 @@ import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.json.JsonString;
-import sensors.DateToTimestamp;
 import sensors.MultiDaySource;
 import sensors.QuietenDown;
 import sensors.nears.NearsLogRepository;
@@ -96,7 +95,7 @@ public class QuietVoltage
 		connect(qd, OUTPUT, pass, BOTTOM);
 		ApplyFunction tuple = new ApplyFunction(new FunctionTree(
 				new MergeScalars("t", "V"),
-					new FunctionTree(DateToTimestamp.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))),
+					new FunctionTree(DateToTimestampNears.instance, new FunctionTree(StringValue.instance, new JPathFunction("sentAt/$date"))),
 					new FunctionTree(NumberValue.instance, new JPathFunction("state"))
 				));
 		connect(pass, tuple);
