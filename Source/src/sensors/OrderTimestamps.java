@@ -86,36 +86,4 @@ public class OrderTimestamps extends SynchronousProcessor
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	/**
-	 * A utility class that associates an event to the timestamp it
-	 * contains. This allows the {@link TreeMap} to sort them.
-	 */
-	protected static class TimedEvent implements Comparable<TimedEvent>
-	{
-		protected final long m_timestamp;
-		
-		protected final Object m_event;
-		
-		public TimedEvent(long timestamp, Object e)
-		{
-			super();
-			m_timestamp = timestamp;
-			m_event = e;
-		}
-		
-		@Override
-		public int compareTo(TimedEvent e)
-		{
-			if (m_timestamp == e.m_timestamp)
-			{
-				return 0;
-			}
-			if (m_timestamp > e.m_timestamp)
-			{
-				return 1;
-			}
-			return -1;
-		}
-	}
 }
