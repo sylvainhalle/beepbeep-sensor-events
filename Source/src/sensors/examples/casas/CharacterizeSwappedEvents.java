@@ -21,10 +21,12 @@ import static ca.uqac.lif.cep.Connector.connect;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
@@ -43,7 +45,11 @@ import sensors.LogRepository;
 import sensors.casas.CasasLogRepository;
 import sensors.casas.CasasTxtFormat;
 
-
+/**
+ * Identifies pairs of successive events in the log that have decreasing
+ * timestamps, and calculates the largest time difference between these
+ * pairs in the whole log.
+ */
 public class CharacterizeSwappedEvents
 {
 	/* The folder where the data files reside. */
@@ -56,20 +62,19 @@ public class CharacterizeSwappedEvents
 	{
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");
-		ReadLines reader = new ReadLines(is);
-		TupleFeeder feeder = new TupleFeeder();
-		Connector.connect(reader, feeder);
+		OutputStream os = fs.writeTo("swapped.txt");
+		Processor feeder = format.getFeeder(is);
 		
 		ApplyFunction get_ts = new ApplyFunction(format.timestamp()); 
-		System.out.print(get_ts);
 		connect(feeder, get_ts);
 		Fork f1 = new Fork(2);
 		connect(get_ts, f1);
 		ApplyFunction min = new ApplyFunction(Numbers.subtraction);
-		connect(f1, 0, min, 0);
+		connect(f1, 0, min, 1);
 		Trim t = new Trim(1);
 		connect(f1, 1, t, 0);
-		connect(t, 0, min, 1);
+		connect(t, 0, min, 0);
+		/*
 		Fork f2 = new Fork();
 		connect(min, f2);
 		Filter fil = new Filter();
@@ -77,13 +82,14 @@ public class CharacterizeSwappedEvents
 		ApplyFunction lt0 = new ApplyFunction(new FunctionTree(Numbers.isLessThan, StreamVariable.X, new Constant(0)));
 		connect(f2, 1, lt0, 0);
 		connect(lt0, 0, fil, 1);
+		*/
 		Cumulate max = new Cumulate(Numbers.minimum);
-		connect(fil, max);
+		connect(min, max);
 		Pump p = new Pump();
 		connect(max, p);
 		KeepLast kl = new KeepLast();
 		connect(p, kl);
-		Print print = new Print();
+		Print print = new Print(new PrintStream(os)).setSeparator("\n");
 		connect(kl, print);
 		
 		/* Run the pipeline. */
@@ -91,6 +97,7 @@ public class CharacterizeSwappedEvents
 		
 		/* Close the resources. */
 		is.close();
+		os.close();
 		fs.close();
 		System.out.println();
 		System.out.print("Code runs successfully.");

@@ -24,6 +24,7 @@ import static ca.uqac.lif.cep.Connector.connect;
 import java.io.IOException;
 import java.io.InputStream;
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.io.Print;
@@ -59,10 +60,8 @@ public static void main(String[] args) throws FileSystemException, IOException
 {
 	fs.open();
 	InputStream is = fs.readFrom("casas-rawdata.txt");
-	ReadLines reader = new ReadLines(is);
-	
-	TupleFeeder feeder = new TupleFeeder();
-	Connector.connect(reader, feeder);
+	Processor feeder = format.getFeeder(is);
+
 	ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 	connect(feeder, get_ts);
 	Fork f1 = new Fork(2);

@@ -39,7 +39,7 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	/**
 	 * The date formatter used to parse the date string.
 	 */
-	/*@ non_null @*/ protected static final DateFormat s_format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSSSSS");
+	/*@ non_null @*/ protected static final DateFormat s_format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
 
 	/**
 	 * Creates a new instance of the function.
@@ -54,7 +54,8 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	{
 		try
 		{
-			return s_format.parse(s).getTime();
+			String sub = s.substring(0, s.length() - 3);
+			return s_format.parse(sub).getTime();
 		}
 		catch (ParseException e)
 		{
@@ -66,7 +67,7 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	{
 		try
 		{
-			return s_format.parse(s).getTime();
+			return s_format.parse(s.substring(0, s.length() - 3)).getTime();
 		}
 		catch (ParseException e)
 		{

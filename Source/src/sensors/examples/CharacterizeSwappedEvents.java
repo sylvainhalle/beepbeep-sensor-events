@@ -41,6 +41,11 @@ import sensors.LogRepository;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsLogRepository;
 
+/**
+ * Identifies pairs of successive events in the log that have decreasing
+ * timestamps, and calculates the largest time difference between these
+ * pairs in the whole log.
+ */
 public class CharacterizeSwappedEvents
 {
 	/* The folder where the data files reside. */
