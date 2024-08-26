@@ -53,15 +53,42 @@ import ca.uqac.lif.cep.tmf.Trim;
  */
 public class shortcuts extends beepbeep.groovy
 {
+	/**
+	 * The symbolic variable designating the first input stream or argument of
+	 * a function.
+	 */
 	public static ca.uqac.lif.cep.functions.StreamVariable X = ca.uqac.lif.cep.functions.StreamVariable.X;
 	
+	/**
+	 * The symbolic variable designating the second input stream or argument of
+	 * a function.
+	 */
 	public static ca.uqac.lif.cep.functions.StreamVariable Y = ca.uqac.lif.cep.functions.StreamVariable.Y;
 	
+	/**
+	 * The symbolic variable designating the third input stream or argument of
+	 * a function.
+	 */
+	public static ca.uqac.lif.cep.functions.StreamVariable Z = ca.uqac.lif.cep.functions.StreamVariable.Z;
+	
+	/**
+	 * Unreachable constructor.
+	 */
 	protected shortcuts()
 	{
 		super();
 	}
 	
+	/**
+	 * Creates a 1:1 processor chain that retains events in a stream at indices
+	 * where another processor chain <i>P</i> produces the value <em>true</em>
+	 * (&top;). The chain is represented graphically as:
+	 * <p>
+	 * <img src="{@docRoot}/doc-files/FilterPattern.png" alt="Pattern" />
+	 * @param p The 1:1 processor chain <i>P</i> producing the Boolean stream
+	 * used as the filtering criterion
+	 * @return The processor chain
+	 */
 	public static Processor Filter(Processor p)
 	{
 		GroupProcessor g = new GroupProcessor(1, 1);
@@ -76,6 +103,20 @@ public class shortcuts extends beepbeep.groovy
 		return g;
 	}
 	
+	public static Processor Filter(Function f)
+	{
+		return Filter(new ApplyFunction(f));
+	}
+	
+	/**
+	 * Creates a processor chain that outputs the indices in a stream where
+	 * another processor chain <i>P</i> processing that stream produces the value
+	 * <em>true</em> (&top;). The chain is represented graphically as:
+	 * <p>
+	 * <img src="{@docRoot}/doc-files/LocatePattern.png" alt="Pattern" />
+	 * @param p The 1:1 processor chain <i>P</i> producing the Boolean stream 
+	 * @return The processor chain
+	 */
 	public static Processor Locate(Processor p)
 	{
 		GroupProcessor g = new GroupProcessor(1, 1);
@@ -115,6 +156,14 @@ public class shortcuts extends beepbeep.groovy
 		return g;
 	}
 	
+	/**
+	 * Creates a processor chain that evaluates a function on every pair of
+	 * successive events. The chain is represented graphically as:
+	 * <p>
+	 * <img src="{@docRoot}/doc-files/SuccessivePattern.png" alt="Pattern" />
+	 * @param f The 2:1 function to evaluate 
+	 * @return The processor chain
+	 */
 	public static Processor Successive(Function f)
 	{
 		GroupProcessor g = new GroupProcessor(1, 1);
@@ -133,6 +182,26 @@ public class shortcuts extends beepbeep.groovy
 	public static Function LessThan(Object x, Object y)
 	{
 		return new FunctionTree(Numbers.isLessThan, liftFunction(x), liftFunction(y));
+	}
+	
+	public static Function GreaterThan(Object x, Object y)
+	{
+		return new FunctionTree(Numbers.isGreaterThan, liftFunction(x), liftFunction(y));
+	}
+	
+	public static Function Minus(Object x, Object y)
+	{
+		return new FunctionTree(Numbers.subtraction, liftFunction(x), liftFunction(y));
+	}
+	
+	public static Function Minutes(Object x)
+	{
+		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60000l));
+	}
+	
+	public static Function Hours(long x)
+	{
+		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60l * 60000l));
 	}
 	
 	public static SpliceSource readJsonStreamFrom(String ... filenames)
@@ -177,16 +246,6 @@ public class shortcuts extends beepbeep.groovy
 		}
 	}
 	
-	public static class KeepLast extends ca.uqac.lif.cep.tmf.KeepLast
-	{
-		
-	}
-	
-	public static class Print extends ca.uqac.lif.cep.io.Print
-	{
-		
-	}
-	
 	public static class Sets extends ca.uqac.lif.cep.util.Sets
 	{
 		private Sets()
@@ -222,7 +281,7 @@ public class shortcuts extends beepbeep.groovy
 		{
 			super(1, 0);
 			m_pump = new ca.uqac.lif.cep.tmf.Pump();
-			Print.Println pr = new Print.Println();
+			ca.uqac.lif.cep.io.Print.Println pr = new ca.uqac.lif.cep.io.Print.Println();
 			Connector.connect(m_pump, pr);
 			associateInput(m_pump);
 		}
