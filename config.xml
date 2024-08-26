@@ -136,5 +136,13 @@
       </files>
       <bundle>true</bundle>
     </dependency>
+    <dependency>
+      <name>BeepBeep 3 Groovy bridge</name>
+      <classname>beepbeep.groovy</classname>
+      <files>
+        <jar>https://github.com/liflab/beepbeep-3-groovy-bridge/releases/download/v0.11.2/beepbeep-groovy-0.11.2.jar</jar>
+      </files>
+      <bundle>true</bundle>
+    </dependency>
   </dependencies>
 </build>

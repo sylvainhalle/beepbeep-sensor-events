@@ -45,7 +45,7 @@ A few examples of Groovy scripts using the toolbox are available in the project'
 Groovy shortcuts
 ----------------
 
-A few "shortcuts" are available when using the toolbox in Groovy scripts. Importing the `nears.Shortcuts` package at the start of a script avoids importing many BeepBeep packages individually (see the Javadoc for details). More information can be found in the BeepBeep [slideshow](https://www.slideshare.net/sylvainhalle/event-stream-processing-with-beepbeep-3-258079731) (slide 347 onwards).
+A few "shortcuts" are available when using the toolbox in Groovy scripts. Importing the `sensors.Shortcuts` package at the start of a script avoids importing many BeepBeep packages individually (see the Javadoc for details). More information can be found in the BeepBeep [slideshow](https://www.slideshare.net/sylvainhalle/event-stream-processing-with-beepbeep-3-258079731) (slide 347 onwards).
 
 Code examples
 -------------

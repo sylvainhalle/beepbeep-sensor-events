@@ -17,7 +17,10 @@
  */
 package sensors.casas;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,6 +39,7 @@ import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Strings;
 import sensors.EventFormat;
+import sensors.ReadLinesStatus;
 
 public class CasasTxtFormat implements EventFormat
 {
@@ -258,5 +262,17 @@ public class CasasTxtFormat implements EventFormat
 		}
 		return g;
 	}
-
+	
+	public GroupProcessor getFeeder(String filename, PrintStream os) throws IOException
+	{
+		InputStream is = new FileInputStream(filename);
+		GroupProcessor g = new GroupProcessor(0, 1);
+		{
+			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
+			TupleFeeder f = new TupleFeeder(s_globalTupleBuilder).setSeparator("\t");
+			Connector.connect(r, f);
+			g.associateOutput(0, f, 0);
+		}
+		return g;
+	}
 }
