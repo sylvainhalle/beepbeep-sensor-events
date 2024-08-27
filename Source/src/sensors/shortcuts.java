@@ -28,6 +28,8 @@ import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Trim;
+import ca.uqac.lif.cep.util.Bags;
+import ca.uqac.lif.cep.util.NthElement;
 
 /**
  * A set of "dummy" classes extending BeepBeep processors and functions from
@@ -179,6 +181,26 @@ public class shortcuts extends beepbeep.groovy
 		return g;
 	}
 	
+	public static Function ApplyToAll(Function f, Object x)
+	{
+		return new FunctionTree(new Bags.ApplyToAll(f), liftFunction(x));
+	}
+	
+	public static Function Element(int index)
+	{
+		return new NthElement(index);
+	}
+	
+	public static Function ToList(int arity)
+	{
+		return new Bags.ToList(arity);
+	}
+	
+	public static Function ToList(int arity, Object x)
+	{
+		return new FunctionTree(new Bags.ToList(arity), liftFunction(x));
+	}
+	
 	public static Function LessThan(Object x, Object y)
 	{
 		return new FunctionTree(Numbers.isLessThan, liftFunction(x), liftFunction(y));
@@ -207,6 +229,21 @@ public class shortcuts extends beepbeep.groovy
 	public static Function Flatten()
 	{
 		return Flatten.instance;
+	}
+	
+	public static Function Flatten(Object o)
+	{
+		return new FunctionTree(Flatten.instance, liftFunction(o));
+	}
+	
+	public static Function Values()
+	{
+		return Maps.values;
+	}
+	
+	public static Function Values(Object o)
+	{
+		return new FunctionTree(Maps.values, liftFunction(o));
 	}
 	
 	public static SpliceSource readJsonStreamFrom(String ... filenames)

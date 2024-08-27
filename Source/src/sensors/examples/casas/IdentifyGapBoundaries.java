@@ -1,3 +1,20 @@
+/*
+    Processing of sensor events with BeepBeep
+    Copyright (C) 2023-2024 Sylvain Hallé
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package sensors.examples.casas;
 
 import java.io.IOException;
@@ -16,9 +33,8 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
-import ca.uqac.lif.cep.tmf.Window;
+import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.util.Bags;
-import ca.uqac.lif.cep.util.Lists;
 import ca.uqac.lif.cep.util.Maps;
 import ca.uqac.lif.cep.util.NthElement;
 import ca.uqac.lif.cep.util.Numbers;
@@ -36,6 +52,24 @@ import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 
+/**
+ * Identifies the indices of the events representing the start and end
+ * boundaries of gaps in the input stream. A pair of two events
+ * <i>e</i><sub>1</sub> and <i>e</i><sub>2</sub> is considered a gap if:
+ * <ol>
+ * <li><i>e</i><sub>1</sub> and <i>e</i><sub>2</sub> are emitted by the
+ * same sensor</li>
+ * <li>no other event of the same sensor lies between <i>e</i><sub>1</sub> and
+ * <i>e</i><sub>2</sub></li>
+ * <li>the elapsed time between <i>e</i><sub>1</sub> and
+ * <i>e</i><sub>2</sub> exceeds some predefined threshold <i>t</i></li>
+ * </ol>
+ * Intuitively, <i>e</i><sub>1</sub> and <i>e</i><sub>2</sub> mark the
+ * boundaries of an interval of time during which the sensor is unusually
+ * silent, and where there <em>may</em> be missing data.
+ * <p>
+ * <img src="{@docRoot}/doc-files/IdentifyGapBoundaries.png" alt="Pipeline" />
+ */
 public class IdentifyGapBoundaries
 {
 	/* The folder where the data files reside. */
@@ -43,6 +77,10 @@ public class IdentifyGapBoundaries
 	
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new CasasTxtFormat();
+	
+	/* The minimum number of milliseconds of silence for an interval to be
+	 * considered as a gap. */
+	protected static final long gapLength = 24 * 3600 * 1000;
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
@@ -52,22 +90,27 @@ public class IdentifyGapBoundaries
 		Processor feeder = format.getFeeder(is);
 		
 		Slice slice = new Slice(format.sensorId(), new GroupProcessor(1, 1) {{
-			Window win = new Window(new Lists.PutInto(), 2);
+			Fork f0 = new Fork();
+			ApplyFunction to_list = new ApplyFunction(new Bags.ToList(2));
+			connect(f0, TOP, to_list, TOP);
+			Trim trim = new Trim(1);
+			connect(f0, BOTTOM, trim, INPUT);
+			connect(trim, OUTPUT, to_list, BOTTOM);
 			Fork f = new Fork();
-			connect(win, f);
+			connect(to_list, f);
 			Filter fil = new Filter();
 			connect(f, TOP, fil, TOP);
 			ApplyFunction gt = new ApplyFunction(new FunctionTree(Numbers.isGreaterOrEqual,
 					new FunctionTree(Numbers.subtraction,
 							new FunctionTree(format.timestamp(), new NthElement(1)),
 							new FunctionTree(format.timestamp(), new NthElement(0))),
-					new Constant(24 * 3600 * 1000)));
+					new Constant(gapLength)));
 			connect(f, BOTTOM, gt, INPUT);
 			connect(gt, OUTPUT, fil, BOTTOM);
 			Sets.PutInto set = new Sets.PutInto();
 			connect(fil, set);
-			addProcessors(win, f, fil, gt, set);
-			associateInput(win);
+			addProcessors(f0, to_list, trim, f, fil, gt, set);
+			associateInput(f0);
 			associateOutput(set);
 		}});
 		connect(feeder, slice);

@@ -60,13 +60,23 @@ public class shortcuts extends sensors.shortcuts
 		return s_format.timestamp();
 	}
 	
-	public static Function Timestamp(ca.uqac.lif.cep.functions.StreamVariable v)
+	public static Function Timestamp(Object x)
 	{
-		return new FunctionTree(s_format.timestamp(), v);
+		return new FunctionTree(s_format.timestamp(), liftFunction(x));
 	}
 	
 	public static Function SensorId()
 	{
 		return s_format.sensorId();
+	}
+	
+	public static Function Index()
+	{
+		return s_format.index();
+	}
+	
+	public static Function Index(Object o)
+	{
+		return new FunctionTree(s_format.index(), liftFunction(o));
 	}
 }
