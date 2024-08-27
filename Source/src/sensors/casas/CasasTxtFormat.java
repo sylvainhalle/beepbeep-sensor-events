@@ -36,7 +36,6 @@ import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
-import ca.uqac.lif.cep.tuples.TupleFeeder;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
 import sensors.EventFormat;
@@ -265,7 +264,7 @@ public class CasasTxtFormat implements EventFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = new ReadLines(is);
-			TupleFeeder f = new TupleFeeder(s_globalTupleBuilder).setSeparator("\t");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATETIME,	TXT_SENSOR, TXT_LOCATION, TXT_SUBJECT, TXT_STATE, TXT_ACTIVITY).setSeparator("\t");
 			Connector.connect(r, f);
 			g.associateOutput(0, f, 0);
 		}
@@ -278,7 +277,7 @@ public class CasasTxtFormat implements EventFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
-			TupleFeeder f = new TupleFeeder(s_globalTupleBuilder).setSeparator("\t");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATETIME,	TXT_SENSOR, TXT_LOCATION, TXT_SUBJECT, TXT_STATE, TXT_ACTIVITY).setSeparator("\t");
 			Connector.connect(r, f);
 			g.associateOutput(0, f, 0);
 		}

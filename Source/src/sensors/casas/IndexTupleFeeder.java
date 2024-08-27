@@ -69,4 +69,11 @@ public class IndexTupleFeeder extends TupleFeeder
 		outputs.add(new Object[]{m_builder.createTupleFromString(ins)});
 		return true;
 	}
+	
+	@Override
+	public IndexTupleFeeder setSeparator(String s)
+	{
+		super.setSeparator(s);
+		return this;
+	}
 }

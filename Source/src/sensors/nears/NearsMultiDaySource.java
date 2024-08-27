@@ -19,7 +19,6 @@ package sensors.nears;
 
 import java.io.InputStream;
 
-import ca.uqac.lif.cep.json.JsonLineFeeder;
 import ca.uqac.lif.cep.tmf.Source;
 import ca.uqac.lif.fs.FileSystem;
 import sensors.MultiDaySource;

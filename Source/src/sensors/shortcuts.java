@@ -204,6 +204,11 @@ public class shortcuts extends beepbeep.groovy
 		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60l * 60000l));
 	}
 	
+	public static Function Flatten()
+	{
+		return Flatten.instance;
+	}
+	
 	public static SpliceSource readJsonStreamFrom(String ... filenames)
 	{
 		return new SpliceSource.SpliceJsonStreamSource(false, filenames);
