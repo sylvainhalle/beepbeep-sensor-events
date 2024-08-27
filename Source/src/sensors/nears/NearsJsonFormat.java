@@ -191,6 +191,13 @@ public class NearsJsonFormat implements EventFormat
 				new FunctionTree(StringValue.instance, new JPathFunction(JP_SENSOR)));
 	}
 	
+	@Override
+	public Function index()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	/**
 	 * In the NEARS platform, the placement of a sensor is uniquely determined
 	 * by the combination of three attributes in an event: {@code location},
@@ -340,5 +347,4 @@ public class NearsJsonFormat implements EventFormat
 			return null;
 		}
 	}
-
 }

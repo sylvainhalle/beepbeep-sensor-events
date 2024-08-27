@@ -37,6 +37,7 @@ import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleFeeder;
+import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
 import sensors.EventFormat;
 import sensors.ReadLinesStatus;
@@ -60,6 +61,8 @@ public class CasasTxtFormat implements EventFormat
 	/* @ non_null @ */ public static final String TXT_SUBJECT = "subject"; // represents the more
 																																					// detailed location in
 																																					// the CASAS dataset
+	
+	/* @ non_null @ */ public static final String TXT_INDEX = IndexTupleFeeder.INDEX_ATTRIBUTE; 
 	
 	/* @ non_null @ */ public static final String TXT_ACTIVITY = "activity"; // a field that is present only in the CASAS dataset 
 
@@ -157,6 +160,12 @@ public class CasasTxtFormat implements EventFormat
 	public Function sensorString()
 	{
 		return new FetchAttribute(TXT_SENSOR);
+	}
+	
+	@Override
+	public Function index()
+	{
+		return new FunctionTree(Numbers.numberCast, new FetchAttribute(TXT_INDEX));
 	}
 
 	/**

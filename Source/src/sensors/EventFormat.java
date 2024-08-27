@@ -34,6 +34,8 @@ import ca.uqac.lif.cep.tuples.Tuple;
  * produced by a sensor at a given moment</li> 
  * <li>A <em>timestamp</em> that determines the time at which
  * a specific state reading has been produced</li>
+ * <li>An <em>index</em>, which corresponds to the position of the
+ * event in the physical ordering of the input source</li>
  * <li>Two attributes specifying the placement of the sensor in the
  * environment:<ul>
  *   <li>The <em>location</em>, which is the broad area (e.g. room) where the
@@ -125,6 +127,13 @@ public interface EventFormat
 	 * @return The ID function
 	 */
 	public Function sensorId();
+	
+	/**
+	 * Returns the BeepBeep {@link Function} that fetches the event's index in
+	 * the original source.
+	 * @return The index function
+	 */
+	public Function index();
 	
 	/**
 	 * Creates an object that uniquely identifies the placement of a device event
