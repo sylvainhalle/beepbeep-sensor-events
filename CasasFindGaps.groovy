@@ -1,16 +1,11 @@
 import static sensors.casas.shortcuts.*
 
-g = new ca.uqac.lif.cep.GroupProcessor(1, 1) {{
-  s = Successive(ToList(2))
-  f = s | Filter(GreaterThan(Minus(Timestamp(Element(1)), Timestamp(Element(0))), 24 * 3600 * 1000))
-  addProcessors(s, f)
-  associateInput(s)
-  associateOutput(f)
-}}
-
 (
  Read(args) |
- Slice(SensorId(), g) |
+ Slice(SensorId(), new Group() {{
+   input(Successive(ToList(2))) |
+   output(Filter(GreaterThan(Minus(Timestamp(Element(1)), Timestamp(Element(0))), Day(1))))
+ }}) |
  KeepLast() |
  ApplyFunction(ApplyToAll(Index(), Flatten(Values()))) |
  Write()
