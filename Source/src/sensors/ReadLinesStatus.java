@@ -62,7 +62,7 @@ public class ReadLinesStatus extends ReadLines
 		super(new File(filename));
 		m_totalLines = Files.lines(Paths.get(filename)).count();
 		m_printStream = ps;
-		m_updateInterval = m_totalLines / 100;
+		m_updateInterval = 1; //m_totalLines / 1000;
 	}
 
 	@Override

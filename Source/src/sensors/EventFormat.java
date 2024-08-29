@@ -17,7 +17,9 @@
  */
 package sensors;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Date;
 
 import ca.uqac.lif.cep.Processor;
@@ -198,6 +200,16 @@ public interface EventFormat
 	 * @return A processor, which is expected to have an arity of 0:1
 	 */
 	public Processor getFeeder(InputStream is);
+	
+	/**
+	 * Gets a processor instance that can read events in the given format from
+	 * a file path, and optionally prints its progression into a print stream.
+	 * @param filename The filename to read from
+	 * @param out The print stream where status messages are to be sent
+	 * @return A processor, which is expected to have an arity of 0:1
+	 * @throws IOException If something goes wrong ;-)
+	 */
+	public Processor getFeeder(String filename, PrintStream out) throws IOException;
 	
 	/**
 	 * Evaluates an unary BeepBeep function.

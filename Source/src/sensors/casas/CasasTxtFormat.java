@@ -144,7 +144,7 @@ public abstract class CasasTxtFormat implements EventFormat
 	@Override
 	public Function modelString()
 	{
-		return new FunctionTree(new Strings.FindRegex("([A-Z]+)\\d+"), new FetchAttribute(TXT_SENSOR));
+		return new FunctionTree(new Strings.FindRegexOnce("([A-Z]+)\\d+"), new FetchAttribute(TXT_SENSOR));
 	}
 
 	@Override

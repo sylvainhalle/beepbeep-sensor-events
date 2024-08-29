@@ -17,7 +17,11 @@
  */
 package sensors.nears;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -243,6 +247,12 @@ public class NearsJsonFormat implements EventFormat
 	public JsonLineFeeder getFeeder(InputStream is)
 	{
 		return new JsonLineFeeder(is);
+	}
+	
+	@Override
+	public JsonLineFeeder getFeeder(String filename, PrintStream out) throws IOException
+	{
+		return new JsonLineFeeder(new FileInputStream(new File(filename)));
 	}
 
 	/**
