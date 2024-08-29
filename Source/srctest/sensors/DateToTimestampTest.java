@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import sensors.examples.DateToTimestampNears;
+import sensors.examples.nears.DateToTimestampNears;
 
 /**
  * Unit tests for {@link DateToTimestampNears}.

@@ -17,66 +17,10 @@
  */
 package sensors.casas;
 
-import java.io.IOException;
-
-import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.functions.Function;
-import ca.uqac.lif.cep.functions.FunctionTree;
-
 public class shortcuts extends sensors.shortcuts
 {
-	protected static final CasasTxtFormat s_format = new CasasTxtFormat();
-	
 	protected shortcuts()
 	{
 		super();
-	}
-	
-	public static Processor Read(String[] args) throws IOException
-	{
-		boolean show_progress = false;
-		String filename = "-";
-		for (int i = 0; i < args.length; i++)
-		{
-			String arg = args[i];
-			if (arg.compareTo("--show-progress") == 0 || arg.compareTo("-p") == 0)
-			{
-				show_progress = true;
-			}
-			else
-			{
-				filename = args[i];
-			}
-		}
-		if (filename.compareTo("-") == 0)
-		{
-			return s_format.getFeeder(System.in);
-		}
-		return s_format.getFeeder(filename, show_progress ? System.err : null);
-	}
-	
-	public static Function Timestamp()
-	{
-		return s_format.timestamp();
-	}
-	
-	public static Function Timestamp(Object x)
-	{
-		return new FunctionTree(s_format.timestamp(), liftFunction(x));
-	}
-	
-	public static Function SensorId()
-	{
-		return s_format.sensorId();
-	}
-	
-	public static Function Index()
-	{
-		return s_format.index();
-	}
-	
-	public static Function Index(Object o)
-	{
-		return new FunctionTree(s_format.index(), liftFunction(o));
 	}
 }

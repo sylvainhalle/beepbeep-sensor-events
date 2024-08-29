@@ -36,7 +36,7 @@ import ca.uqac.lif.json.JsonMap;
 import ca.uqac.lif.json.JsonParser;
 import ca.uqac.lif.json.JsonParser.JsonParseException;
 import sensors.EventFormat;
-import sensors.examples.DateToTimestampNears;
+import sensors.examples.nears.DateToTimestampNears;
 
 /**
  * Extracts features from events in the format of the NEARS smart home

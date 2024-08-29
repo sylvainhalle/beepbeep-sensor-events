@@ -1,4 +1,4 @@
-import static sensors.casas.shortcuts.*
+import static sensors.casas.hh.shortcuts.*
 
 (
  Read(args) |
