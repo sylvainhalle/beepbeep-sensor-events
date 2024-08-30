@@ -54,8 +54,7 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	{
 		try
 		{
-			String sub = s.substring(0, s.length() - 3);
-			return s_format.parse(sub).getTime();
+			return s_format.parse(pad(s)).getTime();
 		}
 		catch (ParseException e)
 		{
@@ -67,11 +66,47 @@ public class DateToTimestampCasas extends UnaryFunction<String,Number>
 	{
 		try
 		{
-			return s_format.parse(s.substring(0, s.length() - 3)).getTime();
+			return s_format.parse(pad(s)).getTime();
 		}
 		catch (ParseException e)
 		{
 			return 0l;
 		}
+	}
+	
+	/**
+	 * Pads the string to account for the fact that not all time values in the
+	 * log are formatted in the same way. The number of digits in the fractions
+	 * of a second may vary from 0 to 6, and the decimal period is not present
+	 * when there are 0 digits. The method formats it so that all time values
+	 * have exactly 3 decimals.
+	 * @param s The string
+	 * @return
+	 */
+	protected static String pad(String s)
+	{
+		int len = s.length();
+		// String has too many decimals, truncate
+		if (len > 23)
+		{
+			return s.substring(0, 22);
+		}
+		else if (len == 22)
+		{
+			return s + "0";
+		}
+		else if (len == 21)
+		{
+			return s + "00";
+		}
+		else if (len == 20)
+		{
+			return s + "000";
+		}
+		else if (len == 19)
+		{
+			return s + ".000";
+		}
+		return s; // Should not happen
 	}
 }
