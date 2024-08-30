@@ -17,9 +17,11 @@
  */
 package sensors;
 
+import java.util.ArrayList;
+
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
-import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
@@ -28,8 +30,6 @@ import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Trim;
-import ca.uqac.lif.cep.util.Bags;
-import ca.uqac.lif.cep.util.NthElement;
 
 /**
  * A set of "dummy" classes extending BeepBeep processors and functions from
@@ -93,7 +93,7 @@ public class shortcuts extends beepbeep.groovy
 	 */
 	public static Processor Filter(Processor p)
 	{
-		GroupProcessor g = new GroupProcessor(1, 1);
+		ca.uqac.lif.cep.GroupProcessor g = new ca.uqac.lif.cep.GroupProcessor(1, 1);
 		Fork fork = new Fork();
 		Filter fil = new Filter();
 		Connector.connect(fork, 0, fil, 0);
@@ -107,7 +107,7 @@ public class shortcuts extends beepbeep.groovy
 	
 	public static Processor Filter(Function f)
 	{
-		return Filter(new ApplyFunction(f));
+		return Filter(new ca.uqac.lif.cep.functions.ApplyFunction(f));
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public class shortcuts extends beepbeep.groovy
 	 */
 	public static Processor Locate(Processor p)
 	{
-		GroupProcessor g = new GroupProcessor(1, 1);
+		ca.uqac.lif.cep.GroupProcessor g = new ca.uqac.lif.cep.GroupProcessor(1, 1);
 		Fork fork = new Fork();
 		TurnInto one = new TurnInto(1);
 		Connector.connect(fork, 0, one, 0);
@@ -139,10 +139,10 @@ public class shortcuts extends beepbeep.groovy
 	
 	public static Processor Count(Processor p)
 	{
-		GroupProcessor g = new GroupProcessor(1, 1);
+		ca.uqac.lif.cep.GroupProcessor g = new ca.uqac.lif.cep.GroupProcessor(1, 1);
 		Fork fork = new Fork(3);
 		Connector.connect(p, fork);
-		ApplyFunction ite = new ApplyFunction(IfThenElse.instance);
+		ca.uqac.lif.cep.functions.ApplyFunction ite = new ca.uqac.lif.cep.functions.ApplyFunction(IfThenElse.instance);
 		Connector.connect(fork, 0, ite, 0);
 		TurnInto one = new TurnInto(1);
 		Connector.connect(fork, 1, one, 0);
@@ -168,11 +168,11 @@ public class shortcuts extends beepbeep.groovy
 	 */
 	public static Processor Successive(Function f)
 	{
-		GroupProcessor g = new GroupProcessor(1, 1);
+		ca.uqac.lif.cep.GroupProcessor g = new ca.uqac.lif.cep.GroupProcessor(1, 1);
 		Fork fork = new Fork();
 		Trim t = new Trim(1);
 		Connector.connect(fork, 1, t, 0);
-		ApplyFunction af = new ApplyFunction(f);
+		ca.uqac.lif.cep.functions.ApplyFunction af = new ca.uqac.lif.cep.functions.ApplyFunction(f);
 		Connector.connect(fork, 0, af, 0);
 		Connector.connect(t, 0, af, 1);
 		g.addProcessors(fork, t, af);
@@ -181,47 +181,24 @@ public class shortcuts extends beepbeep.groovy
 		return g;
 	}
 	
-	public static Function ApplyToAll(Function f, Object x)
-	{
-		return new FunctionTree(new Bags.ApplyToAll(f), liftFunction(x));
-	}
-	
-	public static Function Element(int index)
-	{
-		return new NthElement(index);
-	}
-	
-	public static Function ToList(int arity)
-	{
-		return new Bags.ToList(arity);
-	}
-	
-	public static Function ToList(int arity, Object x)
-	{
-		return new FunctionTree(new Bags.ToList(arity), liftFunction(x));
-	}
-	
-	public static Function LessThan(Object x, Object y)
-	{
-		return new FunctionTree(Numbers.isLessThan, liftFunction(x), liftFunction(y));
-	}
-	
-	public static Function GreaterThan(Object x, Object y)
-	{
-		return new FunctionTree(Numbers.isGreaterThan, liftFunction(x), liftFunction(y));
-	}
-	
-	public static Function Minus(Object x, Object y)
-	{
-		return new FunctionTree(Numbers.subtraction, liftFunction(x), liftFunction(y));
-	}
-	
+	/**
+	 * Creates a function that transforms a number of minutes into a number of
+	 * milliseconds.
+	 * @param x The number of minutes
+	 * @return The number of milliseconds
+	 */
 	public static Function Minutes(Object x)
 	{
 		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60000l));
 	}
 	
-	public static Function Hours(long x)
+	/**
+	 * Creates a function that transforms a number of hours into a number of
+	 * milliseconds.
+	 * @param x The number of hours
+	 * @return The number of milliseconds
+	 */
+	public static Function Hours(Object x)
 	{
 		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60l * 60000l));
 	}
@@ -234,6 +211,49 @@ public class shortcuts extends beepbeep.groovy
 	public static Function Flatten(Object o)
 	{
 		return new FunctionTree(Flatten.instance, liftFunction(o));
+	}
+	
+	public static Processor ToTable(String[] names, Object[] procs)
+	{
+		GroupProcessor g = new GroupProcessor(1, 1);
+		Fork f = new Fork(procs.length);
+		ca.uqac.lif.cep.mtnp.UpdateTableStream uts = new ca.uqac.lif.cep.mtnp.UpdateTableStream(names);
+		for (int i = 0; i < procs.length; i++)
+		{
+			Processor p = liftProcessor(procs[i]);
+			Connector.connect(f, i, p, 0);
+			Connector.connect(p, 0, uts, i);
+			g.addProcessor(p);
+		}
+		g.addProcessors(f, uts);
+		g.associateInput(f);
+		g.associateOutput(uts);
+		return g;
+	}
+	
+	//@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Processor ToTable(ArrayList<?> names, ArrayList<?> procs)
+	{
+		String[] a_names = new String[names.size()];
+		for (int i = 0; i < a_names.length; i++)
+		{
+			a_names[i] = names.get(i).toString();
+		}
+		Object[] a_procs = new Object[procs.size()];
+		procs.toArray(a_procs);
+		return ToTable(a_names, a_procs);
+	}
+	
+	public static Processor Counter()
+	{
+		GroupProcessor g = new GroupProcessor(1, 1);
+		TurnInto one = new TurnInto(1);
+		Cumulate sum = new Cumulate(Numbers.addition);
+		Connector.connect(one, sum);
+		g.addProcessors(one, sum);
+		g.associateInput(one);
+		g.associateOutput(sum);
+		return g;
 	}
 	
 	public static Function Values()
@@ -256,22 +276,6 @@ public class shortcuts extends beepbeep.groovy
 		return new SpliceSource.SpliceJsonSource(false, filenames);
 	}
 	
-	public static class GroupProcessor extends ca.uqac.lif.cep.GroupProcessor
-	{
-		public GroupProcessor(int in, int out)
-		{
-			super(in, out);
-		}
-	}
-	
-	public static class Slice extends ca.uqac.lif.cep.tmf.Slice
-	{
-		public Slice(ca.uqac.lif.cep.functions.Function f, ca.uqac.lif.cep.Processor p)
-		{
-			super(f, p);
-		}
-	}
-	
 	public static class JPathFunction extends ca.uqac.lif.cep.json.JPathFunction
 	{
 		public JPathFunction(String path)
@@ -280,42 +284,36 @@ public class shortcuts extends beepbeep.groovy
 		}
 	}
 	
-	public static class ApplyFunction extends ca.uqac.lif.cep.functions.ApplyFunction
-	{
-		public ApplyFunction(ca.uqac.lif.cep.functions.Function f)
-		{
-			super(f);
-		}
-	}
-	
-	public static class Sets extends ca.uqac.lif.cep.util.Sets
-	{
-		private Sets()
-		{
-			super();
-		}
-		
-		public static class PutInto extends ca.uqac.lif.cep.util.Sets.PutInto
-		{
-			
-		}
-	}
-	
-	protected static Function liftFunction(Object o)
-	{
-		if (o instanceof Function)
-		{
-			return (Function) o;
-		}
-		return new Constant(o);
-	}
-	
 	public static PullPrintln Write()
 	{
 		return new PullPrintln();
 	}
 	
-	protected static class PullPrintln extends GroupProcessor
+	public static PullWrite WriteBinary()
+	{
+		return new PullWrite();
+	}
+	
+	protected static class PullWrite extends ca.uqac.lif.cep.GroupProcessor 
+	{
+		private final ca.uqac.lif.cep.tmf.Pump m_pump;
+		
+		public PullWrite()
+		{
+			super(1, 0);
+			m_pump = new ca.uqac.lif.cep.tmf.Pump();
+			ca.uqac.lif.cep.io.WriteOutputStream pr = new ca.uqac.lif.cep.io.WriteOutputStream(System.out);
+			Connector.connect(m_pump, pr);
+			associateInput(m_pump);
+		}
+		
+		public void run()
+		{
+			m_pump.run();
+		}
+	}
+	
+	protected static class PullPrintln extends ca.uqac.lif.cep.GroupProcessor
 	{
 		private final ca.uqac.lif.cep.tmf.Pump m_pump;
 		
@@ -332,5 +330,25 @@ public class shortcuts extends beepbeep.groovy
 		{
 			m_pump.run();
 		}
+	}
+	
+	public static Function Eq(Object x, Object y)
+	{
+		return new FunctionTree(new EqualsVerbose(), liftFunction(x), liftFunction(y));
+	}
+	
+	protected static class EqualsVerbose extends ca.uqac.lif.cep.util.Equals
+	{
+		public EqualsVerbose()
+		{
+			super();
+		}
+		
+		@Override
+	  public Boolean getValue(Object x, Object y)
+	  {
+			System.out.println("Comparing " + x + " to " + y);
+	    return isEqualTo(x, y);
+	  }
 	}
 }
