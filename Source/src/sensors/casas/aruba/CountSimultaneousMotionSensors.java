@@ -25,9 +25,13 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
+import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
+import ca.uqac.lif.cep.mtnp.PrintGnuPlot;
+import ca.uqac.lif.cep.mtnp.UpdateTableStream;
 import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
@@ -37,8 +41,11 @@ import ca.uqac.lif.cep.util.Bags;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Lists;
 import ca.uqac.lif.cep.util.Maps;
+import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Sets;
+import ca.uqac.lif.cep.util.Size;
 import ca.uqac.lif.fs.FileSystemException;
+import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
 import sensors.EventFormat;
 import sensors.LogRepository;
 
@@ -61,10 +68,9 @@ public class CountSimultaneousMotionSensors
 	{
 		fs.open();
 		InputStream is = fs.readFrom("data");
-		OutputStream os = fs.writeTo("pairs.txt");
-		OutputStream os_err = fs.writeTo("err.txt");
-		//Processor feeder = format.getFeeder(is, new PrintStream(os_err));
-		Processor feeder = format.getFeeder("/home/sylvain/Workspaces/BeepBeep/beepbeep-sensor-events/Source/data/aruba/data", new PrintStream(os_err));
+		OutputStream os = fs.writeTo("pairs-num.txt");
+		Processor feeder = format.getFeeder(is);
+		//Processor feeder = format.getFeeder("/home/sylvain/Workspaces/BeepBeep/beepbeep-sensor-events/Source/data/aruba/data", new PrintStream(os_err));
 		
 		/* Keep only motion sensors */
 		/*Fork fork = new Fork();
@@ -79,21 +85,31 @@ public class CountSimultaneousMotionSensors
 			new FunctionTree(Equals.instance, new Constant(format.getOnConstant()),
 					format.stateString())));
 		connect(feeder, slice);
-		ApplyFunction values = new ApplyFunction(new FunctionTree(Maps.Keys.instance,
-					new Maps.FilterMap(new FunctionTree(Equals.instance, StreamVariable.Y, new Constant(Boolean.TRUE)))));
+		ApplyFunction values = new ApplyFunction(new FunctionTree(Size.instance, new FunctionTree(Maps.Keys.instance,
+					new Maps.FilterMap(new FunctionTree(Equals.instance, StreamVariable.Y, new Constant(Boolean.TRUE))))));
 		connect(slice, values);
 		/*ApplyFunction pairs = new ApplyFunction(new FunctionTree(new Lists.Product(), StreamVariable.X, StreamVariable.X));
 		connect(values, pairs);*/
 		/*Sets.Union in_set = new Sets.Union();
 		connect(pairs, in_set);
 		*/
-		
+		Fork f = new Fork();
+		connect(values, f);
+		TurnInto one = new TurnInto(1);
+		connect(f, 0, one, 0);
+		Cumulate sum = new Cumulate(Numbers.addition);
+		connect(one, sum);
+		UpdateTableStream ts = new UpdateTableStream("t", "n");
+		connect(sum, 0, ts, 0);
+		connect(f, 1, ts, 1);
 		Pump p = new Pump();
-		connect(values, p);
-		//KeepLast last = new KeepLast();
-		//connect(p, last);
+		connect(ts, p);
+		KeepLast last = new KeepLast();
+		connect(p, last);
+		PrintGnuPlot plot = new PrintGnuPlot(new Scatterplot().withPoints(false));
+		connect(last, plot);
 		Print print = new Print(new PrintStream(os)).setSeparator("\n");
-		connect(p, print);
+		connect(plot, print);
 		
 		/* Run the pipeline. */
 		p.run();
