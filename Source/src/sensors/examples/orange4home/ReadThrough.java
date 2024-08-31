@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.casas.aruba;
+package sensors.examples.orange4home;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +44,8 @@ import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.mtnp.plot.gnuplot.Scatterplot;
 import sensors.EventFormat;
 import sensors.LogRepository;
+import sensors.orange4home.Orange4HomeFormat;
+import sensors.orange4home.Orange4HomeLogRepository;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -51,46 +53,26 @@ import static ca.uqac.lif.cep.Connector.connect;
  * Keeps the count of how many motion sensors are simultaneously ON at any
  * moment, and displays the result in a scatterplot.
  */
-public class CountSimultaneousMotionSensors
+public class ReadThrough
 {
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new ArubaLogRepository();
+	protected static final LogRepository fs = new Orange4HomeLogRepository();
 	
 	/* The adapter for the event format. */
-	protected static final EventFormat format = new ArubaFormat();
+	protected static final EventFormat format = new Orange4HomeFormat();
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		fs.open();
-		InputStream is = fs.readFrom("data");
-		OutputStream os = fs.writeTo("pairs-num.txt");
+		InputStream is = fs.readFrom("o4h_all_events.csv");
+		OutputStream os = fs.writeTo("read.txt");
 		Processor feeder = format.getFeeder(is);
 
-		Slice slice = new Slice(format.sensorId(), new ApplyFunction(
-			new FunctionTree(Equals.instance, new Constant(format.getOnConstant()),
-					format.stateString())));
-		connect(feeder, slice);
-		ApplyFunction values = new ApplyFunction(new FunctionTree(Size.instance, new FunctionTree(Maps.Keys.instance,
-					new Maps.FilterMap(new FunctionTree(Equals.instance, StreamVariable.Y, new Constant(Boolean.TRUE))))));
-		connect(slice, values);
-
-		Fork f = new Fork();
-		connect(values, f);
-		TurnInto one = new TurnInto(1);
-		connect(f, 0, one, 0);
-		Cumulate sum = new Cumulate(Numbers.addition);
-		connect(one, sum);
-		UpdateTableStream ts = new UpdateTableStream("t", "n");
-		connect(sum, 0, ts, 0);
-		connect(f, 1, ts, 1);
+		
 		Pump p = new Pump();
-		connect(ts, p);
-		KeepLast last = new KeepLast();
-		connect(p, last);
-		PrintGnuPlot plot = new PrintGnuPlot(new Scatterplot().withPoints(false));
-		connect(last, plot);
+		connect(feeder, p);
 		Print print = new Print(new PrintStream(os)).setSeparator("\n");
-		connect(plot, print);
+		connect(p, print);
 		
 		/* Run the pipeline. */
 		p.run();

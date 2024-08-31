@@ -33,10 +33,10 @@ import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.util.Strings;
+import sensors.IndexTupleFeeder;
 import sensors.ReadLinesStatus;
 import sensors.casas.CasasTxtFormat;
 import sensors.casas.DateToTimestampCasas;
-import sensors.casas.IndexTupleFeeder;
 
 /**
  * Format specific to the CASAS datasets of type "Aruba".

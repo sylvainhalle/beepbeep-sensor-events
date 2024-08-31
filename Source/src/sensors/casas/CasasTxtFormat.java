@@ -29,6 +29,7 @@ import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
 import sensors.EventFormat;
+import sensors.IndexTupleFeeder;
 
 public abstract class CasasTxtFormat implements EventFormat
 {

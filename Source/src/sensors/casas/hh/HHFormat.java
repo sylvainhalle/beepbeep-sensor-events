@@ -31,10 +31,10 @@ import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
+import sensors.IndexTupleFeeder;
 import sensors.ReadLinesStatus;
 import sensors.casas.CasasTxtFormat;
 import sensors.casas.DateToTimestampCasas;
-import sensors.casas.IndexTupleFeeder;
 
 /**
  * Format specific to the CASAS datasets of type "HH" (e.g.<!-- hh115 -->).
@@ -132,6 +132,7 @@ public class HHFormat extends CasasTxtFormat
 		return g;
 	}
 	
+	@Override
 	public GroupProcessor getFeeder(String filename, PrintStream os) throws IOException
 	{
 		InputStream is = new FileInputStream(filename);
