@@ -24,6 +24,7 @@ import java.io.PrintStream;
 
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
@@ -130,7 +131,10 @@ public class ArubaFormat extends CasasTxtFormat
 			ReadLines r = new ReadLines(is);
 			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE, TXT_TIME,	TXT_SENSOR, TXT_STATE).setSeparator("\\s");
 			Connector.connect(r, f);
-			g.associateOutput(0, f, 0);
+			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
+			Connector.connect(f, clean);
+			g.addProcessors(r, f, clean);
+			g.associateOutput(0, clean, 0);
 		}
 		return g;
 	}
@@ -143,9 +147,51 @@ public class ArubaFormat extends CasasTxtFormat
 			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
 			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE,	TXT_TIME, TXT_SENSOR, TXT_STATE).setSeparator("\\s");
 			Connector.connect(r, f);
-			g.associateOutput(0, f, 0);
+			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
+			Connector.connect(f, clean);
+			g.addProcessors(r, f, clean);
+			g.associateOutput(0, clean, 0);
 		}
 		return g;
+	}
+	
+	/**
+	 * Cleans the "state" attribute of tuples read from the input file. It turns
+	 * out that on 2010-12-13 in the log, motion sensors intermittently emit
+	 * incorrectly formatted values, with the expected "ON" and "OFF" replaced
+	 * by strings like "ONc", "OFF5cc" or "OFcF". This lasts for about 10 hours,
+	 * after which values resume to correct strings until the end of the log. 
+	 * This function removes the extra "c" and "5" characters from those strings.
+	 */
+	protected static class CleanStateString extends UnaryFunction<Tuple,Tuple>
+	{
+		/**
+		 * A single publicly visible instance of the function.
+		 */
+		public static final CleanStateString instance = new CleanStateString();
+
+		/**
+		 * Creates an instance of the function.
+		 */
+		protected CleanStateString()
+		{
+			super(Tuple.class, Tuple.class);
+		}
+
+		@Override
+		public Tuple getValue(Tuple t)
+		{
+			String state = (String) t.get(TXT_STATE);
+			state = state.replaceAll("c", "");
+			if (state.matches("[A-Z]"))
+			{
+				// Don't remove the "5" digit from numerical values!
+				state = state.replaceAll("5", "");
+			}
+			t.put(TXT_STATE, state);
+			return t;
+		}
+		
 	}
 	
 	protected static class PlacementFunction extends UnaryFunction<Tuple,String>

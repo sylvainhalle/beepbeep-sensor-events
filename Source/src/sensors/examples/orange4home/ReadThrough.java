@@ -32,6 +32,7 @@ import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.mtnp.PrintGnuPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableStream;
+import ca.uqac.lif.cep.tmf.FilterOn;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
@@ -67,10 +68,13 @@ public class ReadThrough
 		InputStream is = fs.readFrom("o4h_all_events.csv");
 		OutputStream os = fs.writeTo("read.txt");
 		Processor feeder = format.getFeeder(is);
-
-		
+		FilterOn fil = new FilterOn(new FunctionTree(
+				Equals.instance, 
+				format.sensorId(), 
+				new Constant(format.createId("office", "tv", "", "status"))));
+		connect(feeder, fil);
 		Pump p = new Pump();
-		connect(feeder, p);
+		connect(fil, p);
 		Print print = new Print(new PrintStream(os)).setSeparator("\n");
 		connect(p, print);
 		
