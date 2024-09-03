@@ -93,7 +93,7 @@ public static void main(String[] args) throws FileSystemException, IOException
 	
 	
 	/* Prepare to read from an offline log. */
-	LogRepository fs = new HHLogRepository().open();
+	LogRepository fs = new HHLogRepository("hh115").open();
 	InputStream is = fs.readFrom("casas-rawdata.txt");
 	ReadLines reader = new ReadLines(is);
 	PrintStream os = new PrintStream(fs.writeTo("Threshold.txt"));

@@ -64,7 +64,7 @@ public class PresenceHeatMap
 {
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new HHFormat();
-	protected static final LogRepository fs = new HHLogRepository();
+	protected static final LogRepository fs = new HHLogRepository("hh115");
 
 	
 	public static void main(String[] args) throws FileSystemException, IOException

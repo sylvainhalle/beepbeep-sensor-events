@@ -45,7 +45,7 @@ import sensors.casas.hh.HHLogRepository;
 public class CountSwappedEvents
 {
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new HHLogRepository();
+	protected static final LogRepository fs = new HHLogRepository("hh115");
 	
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new HHFormat();

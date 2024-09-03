@@ -51,14 +51,9 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
-import sensors.MultiDaySource;
-import sensors.nears.NearsJsonFormat;
-import sensors.nears.NearsLogRepository;
-import sensors.nears.NearsMultiDaySource;
 import sensors.orange4home.Orange4HomeFormat;
 import sensors.orange4home.Orange4HomeLogRepository;
 

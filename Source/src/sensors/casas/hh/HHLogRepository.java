@@ -25,19 +25,14 @@ import sensors.LogRepository;
 
 /**
  * A file system that is open directly on the local folder where the data file
- * for the Casas "HH" dataset resides.
+ * for the Casas "HH" datasets reside.
  */
 public class HHLogRepository extends LogRepository
 {
 	/**
-	 * The folder name where the data file is located.
+	 * The (root) folder name where the data file is located.
 	 */
-	protected static final String FOLDER = "data/casas-data";
-
-	public HHLogRepository()
-	{
-		super(FOLDER);
-	}
+	protected static final String FOLDER = "data";
 
 	public HHLogRepository(String sub_folder)
 	{
