@@ -76,7 +76,7 @@
       <name>BeepBeep 3</name>
       <classname>ca.uqac.lif.cep.Processor</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3/releases/download/v0.11.2/beepbeep-3-0.11.2.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3/releases/download/v0.11.3/beepbeep-3-0.11.3.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -84,7 +84,7 @@
       <name>BeepBeep 3 Complex palette</name>
       <classname>ca.uqac.lif.cep.complex.RangeCep</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/complex-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/complex-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -92,7 +92,7 @@
       <name>BeepBeep 3 FSM palette</name>
       <classname>ca.uqac.lif.cep.fsm.MooreMachine</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/fsm-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/fsm-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -100,7 +100,7 @@
       <name>BeepBeep 3 Graphviz palette</name>
       <classname>ca.uqac.lif.cep.graphviz.ToDot</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/graphviz-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/graphviz-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -108,7 +108,7 @@
       <name>BeepBeep 3 JSON palette</name>
       <classname>ca.uqac.lif.json.JsonElement</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/json-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/json-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -116,7 +116,7 @@
       <name>BeepBeep 3 MTNP palette</name>
       <classname>ca.uqac.lif.cep.mtnp.DrawPlot</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/mtnp-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/mtnp-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -124,7 +124,7 @@
       <name>BeepBeep 3 signal palette</name>
       <classname>ca.uqac.lif.cep.signal.Threshold</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/signal-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/signal-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -132,7 +132,7 @@
       <name>BeepBeep 3 tuples palette</name>
       <classname>ca.uqac.lif.cep.tuples.Tuple</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8/tuples-0.8.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-palettes/releases/download/v0.8.1/tuples-0.8.1.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
@@ -140,7 +140,7 @@
       <name>BeepBeep 3 Groovy bridge</name>
       <classname>beepbeep.groovy</classname>
       <files>
-        <jar>https://github.com/liflab/beepbeep-3-groovy-bridge/releases/download/v0.11.2/beepbeep-groovy-0.11.2.jar</jar>
+        <jar>https://github.com/liflab/beepbeep-3-groovy-bridge/releases/download/v0.11.3/beepbeep-groovy-0.11.3.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
