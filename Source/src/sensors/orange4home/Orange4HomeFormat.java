@@ -266,7 +266,7 @@ public class Orange4HomeFormat implements EventFormat
 		s = s.replaceAll("presence_couch", "couch_presence");
 		s = s.replaceAll("_plug", "plug");
 		s = s.replaceAll("_setpoint", "setpoint");
-		s = s.replaceAll("_total", "total");
+		s = s.replaceAll("_total$", "total");
 		s = s.replaceAll("_mode", "mode");
 		s = s.replaceAll("_ext", "ext");
 		s = s.replaceAll("_instantaneous", "instantaneous");

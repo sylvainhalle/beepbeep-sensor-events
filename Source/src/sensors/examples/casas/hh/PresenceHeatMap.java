@@ -71,7 +71,7 @@ public class PresenceHeatMap
 	{
 		/* Define the input and output file. */
 		fs.open();
-		InputStream is = fs.readFrom("casas-rawdata.txt");
+		InputStream is = fs.readFrom("hh115.rawdata.txt");
 		Processor feeder = format.getFeeder(is);
 		OutputStream os = fs.writeTo("PresenceHeatMap.txt");
 		

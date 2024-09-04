@@ -33,6 +33,7 @@ import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.tuples.TupleFixed;
 import ca.uqac.lif.cep.util.Strings;
 import sensors.IndexTupleFeeder;
 import sensors.ReadLinesStatus;
@@ -188,10 +189,9 @@ public class ArubaFormat extends CasasTxtFormat
 				// Don't remove the "5" digit from numerical values!
 				state = state.replaceAll("5", "");
 			}
-			t.put(TXT_STATE, state);
-			return t;
-		}
-		
+			return new TupleFixed(new String[] {TXT_INDEX, TXT_DATE, TXT_TIME, TXT_LOCATION, TXT_SUBJECT, TXT_SENSOR, TXT_STATE},
+					new Object[] {t.get(TXT_INDEX), t.get(TXT_DATE), t.get(TXT_TIME), t.get(TXT_LOCATION), t.get(TXT_SUBJECT), t.get(TXT_SENSOR), state});
+		}		
 	}
 	
 	protected static class PlacementFunction extends UnaryFunction<Tuple,String>
