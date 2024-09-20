@@ -51,7 +51,9 @@ public abstract class CasasTxtFormat implements LabeledEventFormat
 																																					// detailed location in
 																																					// the CASAS dataset
 	
-	/* @ non_null @ */ public static final String TXT_INDEX = IndexTupleFeeder.INDEX_ATTRIBUTE; 
+	/* @ non_null @ */ public static final String TXT_INDEX = IndexTupleFeeder.INDEX_ATTRIBUTE;
+	
+	/* @ non_null @ */ public static final String TXT_MODEL = "model";
 	
 	/* @ non_null @ */ public static final String TXT_ACTIVITY = "activity"; // a field that is present only in the CASAS dataset 
 

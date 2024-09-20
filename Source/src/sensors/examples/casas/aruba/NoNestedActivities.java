@@ -23,32 +23,42 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Collection;
 
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.Constant;
+import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.Integrate;
 import ca.uqac.lif.cep.functions.StreamVariable;
+import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.cep.io.Print;
+import ca.uqac.lif.cep.tmf.FilterOn;
 import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
+import ca.uqac.lif.cep.tmf.Trim;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.MergeTuples;
 import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
+import ca.uqac.lif.cep.util.Booleans;
+import ca.uqac.lif.cep.util.Equals;
+import ca.uqac.lif.cep.util.Maps;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.EventFormat;
+import sensors.CurrentActivity;
 import sensors.LogRepository;
 import sensors.casas.aruba.ArubaFormat;
 import sensors.casas.aruba.ArubaLogRepository;
 
 /**
- * Lists all the sensors that produce an event in an activity.
+ * Fetches all activities that involve only temperature sensors in the Aruba
+ * dataset.
  */
-public class SensorsPerActivity
+public class NoNestedActivities
 {
 	/* The folder where the data files reside. */
 	protected static final LogRepository fs = new ArubaLogRepository();
@@ -60,33 +70,29 @@ public class SensorsPerActivity
 	{
 		fs.open();
 		InputStream is = fs.readFrom("data");
-		OutputStream os = fs.writeTo("acts.txt");
+		OutputStream os = fs.writeTo("nested.txt");
 		Processor feeder = format.getFeeder(is);
 		
-		/* Create a tuple with an extra attribute containing the currently ongoing
-		 * activity, if any. */
+		FilterOn fo = new FilterOn(new FunctionTree(Booleans.or, 
+				new FunctionTree(Equals.instance, new FetchAttribute(ArubaFormat.TXT_BEGINEND), new Constant("begin")),
+				new FunctionTree(Equals.instance, new FetchAttribute(ArubaFormat.TXT_BEGINEND), new Constant("end"))
+		));
+		connect(feeder, fo);
+		
 		Fork f = new Fork();
-		connect(feeder, f);
-		ApplyFunction to_f = new ApplyFunction(format.new GetUpdateActivity());
-		connect(f, 0, to_f, 0);
-		Integrate integ = new Integrate(format.new CurrentActivity());
-		connect(to_f, integ);
-		ApplyFunction added_tup = new ApplyFunction(new FunctionTree(new MergeTuples(2), StreamVariable.X, new FunctionTree(new ScalarIntoTuple("current"), StreamVariable.Y)));
-		connect(f, 1, added_tup, 0);
-		connect(integ, 0, added_tup, 1);
-		
-		Slice slice = new Slice(new FetchAttribute("current"), new GroupProcessor(1, 1) {{
-			ApplyFunction sensor = new ApplyFunction(format.sensorString());
-			Sets.PutInto put = new Sets.PutInto();
-			connect(sensor, put);
-			associateInput(sensor);
-			associateOutput(put);
-			addProcessors(sensor, put);
-		}});
-		connect(added_tup, slice);
-		
+		connect(fo, f);
+		Trim trim = new Trim(1);
+		connect(f, 1, trim, 0);
+		ApplyFunction eq = new ApplyFunction(new FunctionTree(Equals.instance, 
+				new FunctionTree(new FetchAttribute(ArubaFormat.TXT_BEGINEND), StreamVariable.X), 
+				new FunctionTree(new FetchAttribute(ArubaFormat.TXT_BEGINEND), StreamVariable.Y)));
+		connect(f, 0, eq, 0);
+		connect(trim, 0, eq, 1);
+		Cumulate all = new Cumulate(Booleans.or);
+		connect(eq, all);
+
 		Pump p = new Pump();
-		connect(slice, p);
+		connect(all, p);
 		KeepLast last = new KeepLast();
 		connect(p, last);
 		Print print = new Print(new PrintStream(os)).setSeparator("\n");
@@ -99,6 +105,30 @@ public class SensorsPerActivity
 		is.close();
 		os.close();
 		fs.close();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static class HasNoMotion extends UnaryFunction<Collection,Boolean>
+	{
+		public HasNoMotion()
+		{
+			super(Collection.class, Boolean.class);
+		}
+
+		@Override
+		public Boolean getValue(Collection x)
+		{
+			for (Object o : x)
+			{
+				if (o.toString().startsWith("M"))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		
 	}
 
 }

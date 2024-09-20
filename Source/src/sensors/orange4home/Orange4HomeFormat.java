@@ -35,6 +35,7 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.RaiseArity;
+import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
@@ -42,9 +43,11 @@ import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleMap;
 import ca.uqac.lif.cep.util.Numbers;
-import sensors.EventFormat;
 import sensors.IndexTupleFeeder;
+import sensors.LabeledEventFormat;
 import sensors.ReadLinesStatus;
+import sensors.CurrentActivity.UpdateActivity;
+import sensors.CurrentActivity.UpdateActivityFunction;
 
 /**
  * The name of the sensor is a sequence of words separated with underscores.
@@ -62,7 +65,7 @@ import sensors.ReadLinesStatus;
  * There is no such notion of "model", so this value is the empty string in
  * all events.
  */
-public class Orange4HomeFormat implements EventFormat
+public class Orange4HomeFormat implements LabeledEventFormat
 {
 	/**
 	 * The date formatter used to parse the date string.
@@ -98,6 +101,11 @@ public class Orange4HomeFormat implements EventFormat
 	 * The name of attribute "state" in a tuple.
 	 */
 	public static final String STATE = "state";
+
+	/**
+	 * The name of attribute "activity" in a tuple.
+	 */
+	public static final String ACTIVITY = "current";
 
 	/**
 	 * The builder creating objects identifying a sensor's uniquely defined
@@ -142,6 +150,12 @@ public class Orange4HomeFormat implements EventFormat
 	public Function stateString()
 	{
 		return new FetchAttribute(STATE);
+	}
+
+	@Override
+	public Function activityString()
+	{
+		return new FetchAttribute(ACTIVITY);
 	}
 
 	@Override
@@ -283,9 +297,15 @@ public class Orange4HomeFormat implements EventFormat
 
 	public static class OrangeTupleFeeder extends SynchronousProcessor
 	{
+		protected String m_currentActivity;
+
+		protected long m_activityCount;
+
 		protected OrangeTupleFeeder()
 		{
 			super(1, 1);
+			m_currentActivity = "";
+			m_activityCount = 0;
 		}
 
 		@Override
@@ -298,13 +318,25 @@ public class Orange4HomeFormat implements EventFormat
 				return true;
 			}
 			String line = (String) inputs[0];
+			String[] parts = line.split(",");
 			if (line.contains("label,"))
 			{
-				// Ignore lines with activity labels
+				// Do not emit this line as an event, but rather update the label of
+				// the currently ongoing activity
+				String act_label = parts[2];
+				if (act_label.startsWith("STOP:"))
+				{
+					m_currentActivity = "";
+					m_activityCount++;
+				}
+				else
+				{
+					String[] act_parts = act_label.split(":");
+					m_currentActivity = act_parts[1];
+				}
 				m_inputCount++;
 				return true;
 			}
-			String[] parts = line.split(",");
 			TupleMap t = new TupleMap();
 			t.put(DATE_TIME, parts[0]);
 			t.put(STATE, parts[2]);
@@ -325,6 +357,7 @@ public class Orange4HomeFormat implements EventFormat
 			{
 				System.out.println("Weird format");
 			}
+			t.put(ACTIVITY, m_currentActivity + m_activityCount);
 			t.put(INDEX, m_inputCount++);
 			outputs.add(new Object[] {t});
 			return true;
@@ -334,6 +367,25 @@ public class Orange4HomeFormat implements EventFormat
 		public Processor duplicate(boolean with_state)
 		{
 			throw new UnsupportedOperationException("Duplication of this processor is not supported");
+		}
+	}
+
+	public class GetUpdateActivity extends UnaryFunction<Tuple,UpdateActivityFunction>
+	{
+		public GetUpdateActivity()
+		{
+			super(Tuple.class, UpdateActivityFunction.class);
+		}
+
+		@Override
+		public UpdateActivityFunction getValue(Tuple t)
+		{
+			String act = (String) t.get(ACTIVITY);
+			if (act == null || act.isBlank())
+			{
+				return new UpdateActivity("");
+			}
+			return new UpdateActivity(act);
 		}
 	}
 }

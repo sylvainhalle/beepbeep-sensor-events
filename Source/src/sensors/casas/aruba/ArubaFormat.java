@@ -35,6 +35,9 @@ import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleFixed;
 import ca.uqac.lif.cep.util.Strings;
+import sensors.CurrentActivity.NoUpdateActivity;
+import sensors.CurrentActivity.UpdateActivity;
+import sensors.CurrentActivity.UpdateActivityFunction;
 import sensors.IndexTupleFeeder;
 import sensors.ReadLinesStatus;
 import sensors.casas.CasasTxtFormat;
@@ -145,7 +148,7 @@ public class ArubaFormat extends CasasTxtFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = new ReadLines(is);
-			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE, TXT_TIME,	TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE, TXT_TIME,	TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s+");
 			Connector.connect(r, f);
 			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
 			Connector.connect(f, clean);
@@ -155,13 +158,14 @@ public class ArubaFormat extends CasasTxtFormat
 		return g;
 	}
 	
+	@Override
 	public GroupProcessor getFeeder(String filename, PrintStream os) throws IOException
 	{
 		InputStream is = new FileInputStream(filename);
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
-			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE,	TXT_TIME, TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE,	TXT_TIME, TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s+");
 			Connector.connect(r, f);
 			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
 			Connector.connect(f, clean);
@@ -232,32 +236,6 @@ public class ArubaFormat extends CasasTxtFormat
 		}
 	}
 	
-	public class CurrentActivity
-	{
-		protected String m_activity;
-		
-		public CurrentActivity(String current)
-		{
-			super();
-			m_activity = current;
-		}
-		
-		public CurrentActivity()
-		{
-			this("");
-		}
-		
-		public void setActivity(String a)
-		{
-			m_activity = a;
-		}
-		
-		public String getActivity()
-		{
-			return m_activity;
-		}
-	}
-	
 	public class GetUpdateActivity extends UnaryFunction<Tuple,UpdateActivityFunction>
 	{
 		public GetUpdateActivity()
@@ -280,45 +258,5 @@ public class ArubaFormat extends CasasTxtFormat
 			}
 			return new UpdateActivity(act);
 		}
-	}
-	
-	public abstract class UpdateActivityFunction extends UnaryFunction<CurrentActivity,String>
-	{
-		public UpdateActivityFunction()
-		{
-			super(CurrentActivity.class, String.class);
-		}
-	}
-	
-	public class UpdateActivity extends UpdateActivityFunction
-	{
-		protected final String m_to;
-		
-		public UpdateActivity(String to)
-		{
-			super();
-			m_to = to;
-		}
-
-		@Override
-		public String getValue(CurrentActivity a)
-		{
-			a.setActivity(m_to);
-			return m_to;
-		}		
-	}
-	
-	public class NoUpdateActivity extends UpdateActivityFunction
-	{
-		public NoUpdateActivity()
-		{
-			super();
-		}
-
-		@Override
-		public String getValue(CurrentActivity a)
-		{
-			return a.getActivity();
-		}		
 	}
 }

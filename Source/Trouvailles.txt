@@ -1,0 +1,30 @@
+Aruba
+=====
+
+On December 13th, 2010, motion sensors intermittently emit incorrectly formatted values, with the expected "ON" and "OFF" replaced by strings like "ONc", "OFF5cc" or "OFcF". This lasts for about 10 hours, after which values resume to correct strings until the end of the log.
+
+On 2011-05-10, a sensor named c (which does not follow the naming conventions used throughout the dataset) emits an event for the only time in the entire log.
+
+Almost all motion and door contact sensors violate the on/off or open/closed cycle at least a few times. A total of 128 violations out of 1.6 million events.
+
+Stuttering temp: temp sensors are supposed to only report temperature when it changes. Are there successive values
+
+HH115
+=====
+
+Almost all motion and door contact sensors violate the on/off or open/closed cycle at least a few times. For example sensor MA008 at one point emits two successive OFF events separated by about 15 minutes. This does not make sense given that the documentation mentions "1.25 seconds after it no longer observes motion the sensor will send OFF.". Condition violated 82 times in 1.8 million events.
+
+Temperature sensors are expected to send a new event only when the temperature changes. Yet there are 22 occurrences (across 6 different sensors) that report two successive temperature readings with the same value.
+
+5 sensors have their battery level fall below 20%, for a total of 8 events.
+
+HH130
+=====
+According to the documentation, ZigBee heartbeat messages are expected to be sent every 30 minutes or so by every sensor. We observe that 15 sensors violate this condition and have sent heartbeats separated by more than 60 minutes more than once. At least three sensors have heartbeats separated by 59 days, many others have heartbeats separated by several hours several times throughout the log.
+
+Orange4Home
+===========
+
+- 3 gaps of about 60 hours each.
+- Presence detected simultaneously in the living room and in the office. Those two rooms are not adjacent, and are not even located on the same floor.
+- The on/off lifecycle is violated 14 times out of about 41,000 toggle events. Most of them are two successive OFF events. Always switches, never doors.
