@@ -24,12 +24,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.Integrate;
+import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
+import ca.uqac.lif.cep.tmf.Slice;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
+import ca.uqac.lif.cep.tuples.MergeTuples;
+import ca.uqac.lif.cep.tuples.ScalarIntoTuple;
+import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
@@ -50,25 +59,38 @@ public class SensorsPerActivity
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		fs.open();
-		InputStream is = fs.readFrom("data-10000");
+		InputStream is = fs.readFrom("data");
 		OutputStream os = fs.writeTo("acts.txt");
 		Processor feeder = format.getFeeder(is);
 		
+		/* Create a tuple with an extra attribute containing the currently ongoing
+		 * activity, if any. */
 		Fork f = new Fork();
 		connect(feeder, f);
 		ApplyFunction to_f = new ApplyFunction(format.new GetUpdateActivity());
 		connect(f, 0, to_f, 0);
 		Integrate integ = new Integrate(format.new CurrentActivity());
 		connect(to_f, integ);
-		ApplyFunction added_tup = new ApplyFunction();
-		connect(added_tup);
+		ApplyFunction added_tup = new ApplyFunction(new FunctionTree(new MergeTuples(2), StreamVariable.X, new FunctionTree(new ScalarIntoTuple("current"), StreamVariable.Y)));
+		connect(f, 1, added_tup, 0);
+		connect(integ, 0, added_tup, 1);
+		
+		Slice slice = new Slice(new FetchAttribute("current"), new GroupProcessor(1, 1) {{
+			ApplyFunction sensor = new ApplyFunction(format.sensorString());
+			Sets.PutInto put = new Sets.PutInto();
+			connect(sensor, put);
+			associateInput(sensor);
+			associateOutput(put);
+			addProcessors(sensor, put);
+		}});
+		connect(added_tup, slice);
 		
 		Pump p = new Pump();
-		connect(integ, p);
-		//KeepLast last = new KeepLast();
-		//connect(p, last);
+		connect(slice, p);
+		KeepLast last = new KeepLast();
+		connect(p, last);
 		Print print = new Print(new PrintStream(os)).setSeparator("\n");
-		connect(p, print);
+		connect(last, print);
 		
 		/* Run the pipeline. */
 		p.run();
