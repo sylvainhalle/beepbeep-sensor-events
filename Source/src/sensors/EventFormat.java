@@ -66,7 +66,7 @@ public interface EventFormat
 	 * @return The date object. The date may be {@code null} if the input
 	 * string does not have the expected format.
 	 */
-	public Date parseDate(String s);
+	/*@ null @*/ public Date parseDate(String s);
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the timestamp in an
@@ -74,7 +74,7 @@ public interface EventFormat
 	 * Unix timestamp of that event.
 	 * @return The timestamp function
 	 */
-	public Function timestamp();
+	/*@ non_null @*/ public Function timestamp();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the state
@@ -82,7 +82,7 @@ public interface EventFormat
 	 * return a string corresponding to the sensor's current state. 
 	 * @return The state function
 	 */
-	public Function stateString();
+	/*@ non_null @*/ public Function stateString();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the location
@@ -90,7 +90,7 @@ public interface EventFormat
 	 * sensor's location. 
 	 * @return The location function
 	 */
-	public Function locationString();
+	/*@ non_null @*/ public Function locationString();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the subject
@@ -98,7 +98,7 @@ public interface EventFormat
 	 * sensor's subject. 
 	 * @return The subject function
 	 */
-	public Function subjectString();
+	/*@ non_null @*/ public Function subjectString();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the model
@@ -106,7 +106,7 @@ public interface EventFormat
 	 * sensor's model. 
 	 * @return The model function
 	 */
-	public Function modelString();
+	/*@ non_null @*/ public Function modelString();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the sensor name
@@ -114,28 +114,28 @@ public interface EventFormat
 	 * sensor's name. 
 	 * @return The sensor function
 	 */
-	public Function sensorString();
+	/*@ non_null @*/ public Function sensorString();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches an object that
 	 * uniquely identifies the placement of a sensor event in an environment.
 	 * @return The placement function
 	 */
-	public Function sensorPlacement();
+	/*@ non_null @*/ public Function sensorPlacement();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches an object that
 	 * uniquely identifies a sensor event in an environment.
 	 * @return The ID function
 	 */
-	public Function sensorId();
+	/*@ non_null @*/ public Function sensorId();
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches the event's index in
 	 * the original source.
 	 * @return The index function
 	 */
-	public Function index();
+	/*@ non_null @*/ public Function index();
 	
 	/**
 	 * Creates an object that uniquely identifies the placement of a device event

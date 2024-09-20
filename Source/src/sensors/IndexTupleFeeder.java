@@ -35,12 +35,18 @@ public class IndexTupleFeeder extends TupleFeeder
 	public static final String INDEX_ATTRIBUTE = "index";
 	
 	/**
+	 * The original attributes of the tuple.
+	 */
+	protected final String[] m_attributes;
+	
+	/**
 	 * Creates a tuple feeder.
 	 * @param attributes The attributes to create for each tuple
 	 */
 	public IndexTupleFeeder(String ... attributes)
 	{
 		super();
+		m_attributes = attributes;
 		String[] atts = new String[attributes.length + 1];
 		atts[0] = INDEX_ATTRIBUTE;
 		for (int i = 0; i < attributes.length; i++)
@@ -60,11 +66,18 @@ public class IndexTupleFeeder extends TupleFeeder
 			return true;
 		}
 		String[] parts = token.split(m_separator);
-		String[] ins = new String[parts.length + 1];
+		String[] ins = new String[m_attributes.length + 1];
 		ins[0] = Long.toString(m_inputCount++);
-		for (int i = 0; i < parts.length; i++)
+		for (int i = 0; i < m_attributes.length; i++)
 		{
-			ins[i + 1] = parts[i];
+			if (i < parts.length)
+			{
+				ins[i + 1] = parts[i];
+			}
+			else
+			{
+				ins[i + 1] = "";
+			}
 		}
 		outputs.add(new Object[]{m_builder.createTupleFromString(ins)});
 		return true;

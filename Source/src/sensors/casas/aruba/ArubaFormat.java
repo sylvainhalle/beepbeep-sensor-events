@@ -56,6 +56,11 @@ public class ArubaFormat extends CasasTxtFormat
 	/* @ non_null @ */ public static final String TXT_TIME = "time";
 	
 	/**
+	 * Name of the attribute in tuples determining if an activity begins or ends.
+	 */
+	/* @ non_null @ */ public static final String TXT_BEGINEND = "beginend";
+	
+	/**
 	 * The builder creating objects identifying a sensor's uniquely defined
 	 * location.
 	 */
@@ -112,6 +117,16 @@ public class ArubaFormat extends CasasTxtFormat
 	{
 		return new FetchAttribute(TXT_SENSOR);
 	}
+	
+	/**
+	 * In the Aruba dataset, the activity is made of the last two columns
+	 * (activity name plus begin/end).
+	 */
+	@Override
+	public Function activityString()
+	{
+		return new FunctionTree(Strings.concat, new FetchAttribute(TXT_ACTIVITY), new FetchAttribute(TXT_BEGINEND));
+	}
 
 	/**
 	 * In the HH dataset, the placement of a sensor is uniquely determined by the
@@ -130,7 +145,7 @@ public class ArubaFormat extends CasasTxtFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = new ReadLines(is);
-			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE, TXT_TIME,	TXT_SENSOR, TXT_STATE).setSeparator("\\s");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE, TXT_TIME,	TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s");
 			Connector.connect(r, f);
 			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
 			Connector.connect(f, clean);
@@ -146,7 +161,7 @@ public class ArubaFormat extends CasasTxtFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
-			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE,	TXT_TIME, TXT_SENSOR, TXT_STATE).setSeparator("\\s");
+			IndexTupleFeeder f = new IndexTupleFeeder(TXT_DATE,	TXT_TIME, TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND).setSeparator("\\s");
 			Connector.connect(r, f);
 			ApplyFunction clean = new ApplyFunction(CleanStateString.instance);
 			Connector.connect(f, clean);
@@ -189,8 +204,8 @@ public class ArubaFormat extends CasasTxtFormat
 				// Don't remove the "5" digit from numerical values!
 				state = state.replaceAll("5", "");
 			}
-			return new TupleFixed(new String[] {TXT_INDEX, TXT_DATE, TXT_TIME, TXT_LOCATION, TXT_SUBJECT, TXT_SENSOR, TXT_STATE},
-					new Object[] {t.get(TXT_INDEX), t.get(TXT_DATE), t.get(TXT_TIME), t.get(TXT_LOCATION), t.get(TXT_SUBJECT), t.get(TXT_SENSOR), state});
+			return new TupleFixed(new String[] {TXT_INDEX, TXT_DATE, TXT_TIME, TXT_LOCATION, TXT_SUBJECT, TXT_SENSOR, TXT_STATE, TXT_ACTIVITY, TXT_BEGINEND},
+					new Object[] {t.get(TXT_INDEX), t.get(TXT_DATE), t.get(TXT_TIME), t.get(TXT_LOCATION), t.get(TXT_SUBJECT), t.get(TXT_SENSOR), state, t.get(TXT_ACTIVITY), t.get(TXT_BEGINEND)});
 		}		
 	}
 	
@@ -215,5 +230,95 @@ public class ArubaFormat extends CasasTxtFormat
 			// TODO
 			return null;
 		}
+	}
+	
+	public class CurrentActivity
+	{
+		protected String m_activity;
+		
+		public CurrentActivity(String current)
+		{
+			super();
+			m_activity = current;
+		}
+		
+		public CurrentActivity()
+		{
+			this("");
+		}
+		
+		public void setActivity(String a)
+		{
+			m_activity = a;
+		}
+		
+		public String getActivity()
+		{
+			return m_activity;
+		}
+	}
+	
+	public class GetUpdateActivity extends UnaryFunction<Tuple,UpdateActivityFunction>
+	{
+		public GetUpdateActivity()
+		{
+			super(Tuple.class, UpdateActivityFunction.class);
+		}
+
+		@Override
+		public UpdateActivityFunction getValue(Tuple t)
+		{
+			String act = (String) t.get(TXT_ACTIVITY);
+			if (act == null || act.isBlank())
+			{
+				return new NoUpdateActivity();
+			}
+			String stop = (String) t.get(TXT_BEGINEND);
+			if (stop.compareTo("end") == 0)
+			{
+				return new UpdateActivity("");
+			}
+			return new UpdateActivity(act);
+		}
+	}
+	
+	public abstract class UpdateActivityFunction extends UnaryFunction<CurrentActivity,String>
+	{
+		public UpdateActivityFunction()
+		{
+			super(CurrentActivity.class, String.class);
+		}
+	}
+	
+	public class UpdateActivity extends UpdateActivityFunction
+	{
+		protected final String m_to;
+		
+		public UpdateActivity(String to)
+		{
+			super();
+			m_to = to;
+		}
+
+		@Override
+		public String getValue(CurrentActivity a)
+		{
+			a.setActivity(m_to);
+			return m_to;
+		}		
+	}
+	
+	public class NoUpdateActivity extends UpdateActivityFunction
+	{
+		public NoUpdateActivity()
+		{
+			super();
+		}
+
+		@Override
+		public String getValue(CurrentActivity a)
+		{
+			return a.getActivity();
+		}		
 	}
 }

@@ -45,20 +45,20 @@ public class HHFormat extends CasasTxtFormat
 	 * Name of the attribute in tuples holding both the date and time.
 	 */
 	/* @ non_null @ */ public static final String TXT_DATETIME = "datetime";
-	
+
 	/**
 	 * The builder creating objects identifying a sensor's uniquely defined
 	 * location.
 	 */
 	protected static final FixedTupleBuilder s_placementBuilder = new FixedTupleBuilder("location",	"subject", "model");
-	
+
 	/**
 	 * The builder creating objects identifying a sensor's unique ID.
 	 */
 	protected static final FixedTupleBuilder s_idBuilder = new FixedTupleBuilder("location", "subject", "model", "sensor");
-	
+
 	protected static final FixedTupleBuilder s_globalTupleBuilder = new FixedTupleBuilder(TXT_DATETIME,	TXT_SENSOR, TXT_LOCATION, TXT_SUBJECT, TXT_STATE, TXT_ACTIVITY);
-	
+
 	/**
 	 * In the HH dataset, the first field in an event corresponds to the
 	 * date in the form "yyyy-MM-dd HH:mm:ss.SSSSSX". The strings is converted
@@ -70,7 +70,7 @@ public class HHFormat extends CasasTxtFormat
 		return new FunctionTree(DateToTimestampCasas.instance, new FetchAttribute(TXT_DATETIME));
 	}
 
-	
+
 	/**
 	 * In the HH dataset, the placement of a sensor can be uniquely determined
 	 * by the combination of three attributes in an event: {@code location},
@@ -118,7 +118,7 @@ public class HHFormat extends CasasTxtFormat
 	{
 		return s_idBuilder.createTuple(location, subject, model, sensor);
 	}
-	
+
 	@Override
 	public GroupProcessor getFeeder(InputStream is)
 	{
@@ -131,7 +131,7 @@ public class HHFormat extends CasasTxtFormat
 		}
 		return g;
 	}
-	
+
 	@Override
 	public GroupProcessor getFeeder(String filename, PrintStream os) throws IOException
 	{

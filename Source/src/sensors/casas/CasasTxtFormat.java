@@ -28,10 +28,10 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Strings;
-import sensors.EventFormat;
+import sensors.LabeledEventFormat;
 import sensors.IndexTupleFeeder;
 
-public abstract class CasasTxtFormat implements EventFormat
+public abstract class CasasTxtFormat implements LabeledEventFormat
 {
 	/**
 	 * The date formatter used to parse the date string.
@@ -134,6 +134,12 @@ public abstract class CasasTxtFormat implements EventFormat
 	public Function index()
 	{
 		return new FunctionTree(Numbers.numberCast, new FetchAttribute(TXT_INDEX));
+	}
+	
+	@Override
+	public Function activityString()
+	{
+		return new FetchAttribute(TXT_ACTIVITY);
 	}
 
 	/**

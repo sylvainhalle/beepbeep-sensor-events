@@ -15,4 +15,22 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.examples.casas.aruba;
+package sensors;
+
+import ca.uqac.lif.cep.functions.Function;
+
+/**
+ * Extension to the {@link EventFormat} interface for datasets where activities
+ * are labeled.
+ * 
+ * @author Sylvain Hallé
+ */
+public interface LabeledEventFormat extends EventFormat
+{
+	/**
+	 * Returns the BeepBeep {@link Function} that fetches the activity
+	 * of a sensor event. 
+	 * @return The activity function
+	 */
+	/*@ non_null @*/ public Function activityString();
+}
