@@ -59,7 +59,7 @@ import static ca.uqac.lif.cep.Connector.connect;
 public class CountSimultaneousPresenceSensors
 {
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new HHLogRepository("hh115");
+	protected static final LogRepository fs = new HHLogRepository("hh130");
 
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new HHFormat();
@@ -67,8 +67,8 @@ public class CountSimultaneousPresenceSensors
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		fs.open();
-		InputStream is = fs.readFrom("hh115.rawdata.txt");
-		OutputStream os = fs.writeTo("pairs-num.txt");
+		InputStream is = fs.readFrom("hh130.rawdata.txt");
+		OutputStream os = fs.writeTo("SimultaneousSensors.txt");
 		Processor feeder = format.getFeeder(is);
 
 		/* Filter presence sensors */
@@ -79,8 +79,8 @@ public class CountSimultaneousPresenceSensors
 				new FunctionTree(Equals.instance, new Constant(format.getOnConstant()),
 						format.stateString())));
 		connect(feeder, slice);
-		ApplyFunction values = new ApplyFunction(/*new FunctionTree(Size.instance, */ new FunctionTree(Maps.Keys.instance,
-				new Maps.FilterMap(new FunctionTree(Equals.instance, StreamVariable.Y, new Constant(Boolean.TRUE))))); //);
+		ApplyFunction values = new ApplyFunction(new FunctionTree(Size.instance, new FunctionTree(Maps.Keys.instance,
+				new Maps.FilterMap(new FunctionTree(Equals.instance, StreamVariable.Y, new Constant(Boolean.TRUE))))));
 		connect(slice, values);
 
 		/*Fork f = new Fork();

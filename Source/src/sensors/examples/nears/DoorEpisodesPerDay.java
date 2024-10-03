@@ -49,13 +49,13 @@ import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.cep.util.Booleans.And;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.DateFunction;
 import sensors.EventFormat;
 import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
 
 /**
@@ -107,10 +107,10 @@ public class DoorEpisodesPerDay
 	{
 
 		/* Define the range of days to process. */
-		int first_day = 1, last_day = 7;
+		int first_day = 1, last_day = 126;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0102").open();
+		LogRepository fs = new NearsLogRepository("0102").open();
 		OutputStream os = fs.writeTo("DoorEpisodesPerDay.txt");
 		MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
 
@@ -133,11 +133,12 @@ public class DoorEpisodesPerDay
 		connect(is_clap, OUTPUT, f_is_clap, BOTTOM);
 		
 		Slice per_day = new Slice(new FunctionTree(DateFunction.dayOfYear,
-				new FunctionTree(DateToTimestampNears.instance, format.timestamp())),
+				format.timestamp()),
 				new GroupProcessor(1, 1) {{
 					FindDoorEpisodes fe = new FindDoorEpisodes();
 					Sets.PutInto put = new Sets.PutInto();
 					connect(fe, put);
+					addProcessors(fe, put);
 					associateInput(fe).associateOutput(put);
 				}});
 
@@ -195,7 +196,7 @@ public class DoorEpisodesPerDay
 					new Processor[] {
 							new GroupProcessor(1, 1) {{
 								ApplyFunction hr = new ApplyFunction(new FunctionTree(DateFunction.timeOfDay,
-										new FunctionTree(format.timestamp())));
+										format.timestamp()));
 								Cumulate min = new Cumulate(Numbers.minimum);
 								connect(hr, min);
 								addProcessors(hr, min);

@@ -64,8 +64,8 @@ public class MaxUpdateInterval
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		LogRepository fs = new HHLogRepository("hh115").open();
-		InputStream is = fs.readFrom("hh115.rawdata.txt");
+		LogRepository fs = new HHLogRepository("hh130").open();
+		InputStream is = fs.readFrom("hh130.rawdata.txt");
 		OutputStream os = fs.writeTo("MaxUpdateInterval.txt");
 		Processor feeder = format.getFeeder(is);
 		

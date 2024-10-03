@@ -62,7 +62,7 @@ import static ca.uqac.lif.cep.Connector.connect;
 public class CountSimultaneousPresenceSensors
 {
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new NearsLogRepository("0105");
+	protected static final LogRepository fs = new NearsLogRepository("0034");
 	
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new NearsJsonFormat();

@@ -44,14 +44,14 @@ public class DaySplit
 	protected static EventFormat format = new NearsJsonFormat();
 	
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new NearsLogRepository();
+	protected static final LogRepository fs = new NearsLogRepository("0034");
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input file and output directory. */
-		String file_number = "0102";
+		String file_number = "0034";
 		fs.open();
-		InputStream is = fs.readFrom("NH-" + file_number + "-sorted.json");
+		InputStream is = fs.readFrom("nears-hub-" + file_number + "-sorted.json");
 		fs.mkdir(file_number);
 		fs.chdir(file_number);
 		

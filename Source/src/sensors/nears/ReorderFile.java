@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.nears;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -27,9 +27,9 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.fs.FileSystemException;
-import sensors.nears.JsonFeeder;
-import sensors.nears.NearsJsonFormat;
-import sensors.nears.NearsLogRepository;
+import sensors.EventFormat;
+import sensors.LogRepository;
+import sensors.OrderTimestamps;
 
 /**
  * From a JSON file, create a new JSON file where events are physically
@@ -45,14 +45,14 @@ public class ReorderFile
 	protected static EventFormat format = new NearsJsonFormat();
 	
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new NearsLogRepository();
+	protected static final LogRepository fs = new NearsLogRepository("0034");
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
 		fs.open();
-		InputStream is = fs.readFrom("NH-0102.json");
-		OutputStream os = fs.writeTo("NH-0102-sorted.json");
+		InputStream is = fs.readFrom("nears-hub-0034.json");
+		OutputStream os = fs.writeTo("nears-hub-0034-sorted.json");
 		
 		/* Create the pipeline. */
 		JsonFeeder feeder = new JsonFeeder(is);
