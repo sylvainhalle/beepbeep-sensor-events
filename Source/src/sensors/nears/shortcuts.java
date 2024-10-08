@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.casas.hh;
+package sensors.nears;
 
 import java.io.IOException;
 
@@ -25,7 +25,23 @@ import ca.uqac.lif.cep.functions.FunctionTree;
 
 public class shortcuts extends sensors.casas.shortcuts
 {
-	protected static final HHFormat s_format = new HHFormat();
+	protected static final NearsJsonFormat s_format = new NearsJsonFormat();
+	
+	public static class Group extends ca.uqac.lif.cep.GroupProcessor
+	{
+		public Group()
+		{
+			super();
+		}
+	}
+	
+	public static class Maps extends beepbeep.groovy.Maps
+	{
+		private Maps()
+		{
+			super();
+		}
+	}
 	
 	/**
 	 * Creates a processor that read events from a file in a given format. The
@@ -68,5 +84,14 @@ public class shortcuts extends sensors.casas.shortcuts
 		return new FunctionTree(s_format.index(), liftFunction(o));
 	}
 	
+	public static Function State()
+	{
+		return s_format.stateString();
+	}
+	
+	public static Function State(Object o)
+	{
+		return new FunctionTree(s_format.stateString(), liftFunction(o));
+	}
 	
 }

@@ -43,27 +43,20 @@ public class shortcuts extends sensors.casas.shortcuts
 		}
 	}
 	
+	/**
+	 * Creates a processor that read events from a file in a given format. The
+	 * resulting processor will either read from the standard input if the
+	 * filename is "-", or from a file with the given name.
+	 * @param format The format of the events
+	 * @param args The command-line arguments
+	 * @return The processor
+	 * @throws IOException If an error occurs while reading the file or the
+	 * standard input
+	 * @see sensors.shortcuts#createSource(EventFormat, String[])
+	 */
 	public static Processor Read(String[] args) throws IOException
 	{
-		boolean show_progress = false;
-		String filename = "-";
-		for (int i = 0; i < args.length; i++)
-		{
-			String arg = args[i];
-			if (arg.compareTo("--show-progress") == 0 || arg.compareTo("-p") == 0)
-			{
-				show_progress = true;
-			}
-			else
-			{
-				filename = args[i];
-			}
-		}
-		if (filename.compareTo("-") == 0)
-		{
-			return s_format.getFeeder(System.in);
-		}
-		return s_format.getFeeder(filename, show_progress ? System.err : null);
+		return sensors.shortcuts.createSource(s_format, args);
 	}
 	
 	public static Function Timestamp()
