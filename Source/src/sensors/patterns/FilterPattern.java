@@ -15,33 +15,33 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.patterns;
 
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
-import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.Processor;
+import ca.uqac.lif.cep.tmf.Filter;
 import ca.uqac.lif.cep.tmf.Fork;
-import ca.uqac.lif.cep.tmf.Trim;
 
 /**
- * Creates a processor chain that evaluates a function on every pair of
- * successive events. The chain is represented graphically as:
+ * A 1:1 processor chain that retains events in a stream at indices
+ * where another processor chain <i>P</i> produces the value <em>true</em>
+ * (&top;). The chain is represented graphically as:
  * <p>
- * <img src="{@docRoot}/doc-files/SuccessivePattern.png" alt="Pattern" />
+ * <img src="{@docRoot}/doc-files/FilterPattern.png" alt="Pattern" />
  */
-public class SuccessivePattern extends GroupProcessor
+public class FilterPattern extends GroupProcessor
 {
-	public SuccessivePattern(Function f)
+	public FilterPattern(Processor p)
 	{
 		super(1, 1);
 		Fork fork = new Fork();
-		Trim t = new Trim(1);
-		Connector.connect(fork, 1, t, 0);
-		ca.uqac.lif.cep.functions.ApplyFunction af = new ca.uqac.lif.cep.functions.ApplyFunction(f);
-		Connector.connect(fork, 0, af, 0);
-		Connector.connect(t, 0, af, 1);
-		addProcessors(fork, t, af);
+		Filter fil = new Filter();
+		Connector.connect(fork, 0, fil, 0);
+		Connector.connect(fork, 1, p, 0);
+		Connector.connect(p, 0, fil, 1);
+		addProcessors(fork, fil, p);
 		associateInput(fork);
-		associateOutput(af);
+		associateOutput(fil);
 	}
 }

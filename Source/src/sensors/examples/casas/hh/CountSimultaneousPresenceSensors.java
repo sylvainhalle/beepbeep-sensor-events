@@ -33,6 +33,7 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Maps;
+import ca.uqac.lif.cep.util.Size;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;

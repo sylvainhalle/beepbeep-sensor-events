@@ -35,8 +35,14 @@ import ca.uqac.lif.cep.SynchronousProcessor;
  */
 public class UnpackMap extends SynchronousProcessor
 {
+	/**
+	 * A comparator that can compare any two objects.
+	 */
 	protected static final GenericComparator s_comparator = new GenericComparator();
 	
+	/**
+	 * Creates a new instance of the processor.
+	 */
 	public UnpackMap()
 	{
 		super(1, 1);

@@ -15,36 +15,38 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.patterns;
 
 import beepbeep.groovy.Numbers;
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
-import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.Cumulate;
-import ca.uqac.lif.cep.functions.IfThenElse;
 import ca.uqac.lif.cep.functions.TurnInto;
-import ca.uqac.lif.cep.tmf.Fork;
 
-public class CountPattern extends GroupProcessor
+/**
+ * A pattern that simply emits an increasing sequence of numbers, starting at
+ * 1, upon every input event. Graphically, this pattern can be represented as
+ * follows:
+ * <p>
+ * <img src="{@docRoot}/doc-files/CounterPattern.png" alt="Processor graph">
+ * @author Sylvain Hallé
+ */
+public class CounterPattern extends GroupProcessor
 {
-	public CountPattern(Processor p)
+	public CounterPattern()
 	{
 		super(1, 1);
-		Fork fork = new Fork(3);
-		Connector.connect(p, fork);
-		ca.uqac.lif.cep.functions.ApplyFunction ite = new ca.uqac.lif.cep.functions.ApplyFunction(IfThenElse.instance);
-		Connector.connect(fork, 0, ite, 0);
 		TurnInto one = new TurnInto(1);
-		Connector.connect(fork, 1, one, 0);
-		Connector.connect(one, 0, ite, 1);
-		TurnInto zero = new TurnInto(0);
-		Connector.connect(fork, 2, zero, 0);
-		Connector.connect(zero, 0, ite, 2);
 		Cumulate sum = new Cumulate(Numbers.addition);
-		Connector.connect(ite, sum);
-		addProcessors(p, fork, ite, one, zero, sum);
-		associateInput(p);
+		Connector.connect(one, sum);
+		addProcessors(one, sum);
+		associateInput(one);
 		associateOutput(sum);
+	}
+	
+	@Override
+	public CounterPattern duplicate(boolean with_state)
+	{
+		return new CounterPattern();
 	}
 }
