@@ -76,9 +76,6 @@ public class MotionSensorLifecycle
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		/* Define the range of days to process. */
-		int first_day = 1, last_day = 120;
-
 		/* Define the input and output file. */
 		fs.open();
 		InputStream is = fs.readFrom("casas-rawdata.txt");

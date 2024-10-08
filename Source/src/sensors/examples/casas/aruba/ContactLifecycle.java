@@ -22,8 +22,6 @@ import static ca.uqac.lif.cep.Connector.INPUT;
 import static ca.uqac.lif.cep.Connector.OUTPUT;
 import static ca.uqac.lif.cep.Connector.TOP;
 import static ca.uqac.lif.cep.Connector.connect;
-import static ca.uqac.lif.cep.util.Booleans.land;
-import static ca.uqac.lif.cep.util.Booleans.lnot;
 import static ca.uqac.lif.cep.util.Booleans.lor;
 import static ca.uqac.lif.cep.util.Equals.eq;
 
@@ -51,18 +49,11 @@ import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Numbers;
-import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
-import sensors.MultiDaySource;
 import sensors.casas.aruba.ArubaFormat;
 import sensors.casas.aruba.ArubaLogRepository;
-import sensors.nears.NearsJsonFormat;
-import sensors.nears.NearsLogRepository;
-import sensors.nears.NearsMultiDaySource;
-import sensors.orange4home.Orange4HomeFormat;
-import sensors.orange4home.Orange4HomeLogRepository;
 
 /**
  * Checks that each contact sensor follows its expected lifecycle, and reports
@@ -91,7 +82,6 @@ public class ContactLifecycle
 		Processor feeder = format.getFeeder(is);
 
 		/* Create the pipeline. */
-		//JsonLineFeeder feeder = new JsonLineFeeder(fs.readFrom("../OnOffEpisodes_raw.txt"));
 		Pump p = new Pump();
 		connect(feeder, p);
 		Fork f0 = new Fork();

@@ -28,16 +28,10 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.io.Print;
-import ca.uqac.lif.cep.tmf.Filter;
-import ca.uqac.lif.cep.tmf.Fork;
-import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
-import ca.uqac.lif.cep.util.Bags;
 import ca.uqac.lif.cep.util.Equals;
-import ca.uqac.lif.cep.util.Lists;
 import ca.uqac.lif.cep.util.Maps;
-import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
@@ -64,7 +58,6 @@ public class SimultaneousMotionSensorsPairs
 		fs.open();
 		InputStream is = fs.readFrom("data");
 		OutputStream os = fs.writeTo("pairs.txt");
-		OutputStream os_err = fs.writeTo("err.txt");
 		Processor feeder = format.getFeeder(is);
 		
 		/* Keep only motion sensors */

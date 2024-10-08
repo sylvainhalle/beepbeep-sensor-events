@@ -72,9 +72,6 @@ public class ContactLifecycle
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		/* Define the range of days to process. */
-		int first_day = 1, last_day = 120;
-
 		/* Define the input and output file. */
 		FileSystem fs = new NearsLogRepository("0102").open();
 		OutputStream os = fs.writeTo("ContactLifecycle.txt");
