@@ -18,7 +18,10 @@
 package sensors;
 
 import java.time.Instant;
-import java.time.temporal.ChronoField;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 
 import beepbeep.groovy.Numbers;
 import ca.uqac.lif.cep.functions.Constant;
@@ -57,15 +60,17 @@ public class Timestamps
 		@Override
 		public T getValue(Number x)
 		{
-			return processInstant(Instant.ofEpochSecond(x.longValue()));
+			Instant instant = Instant.ofEpochMilli(x.longValue());
+			LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+			return processInstant(dateTime);
 		}
 
 		/**
 		 * Processes an {@link Instant} object.
-		 * @param ins The instant to process
+		 * @param d The instant to process
 		 * @return The result of the processing
 		 */
-		protected abstract T processInstant(Instant ins);
+		protected abstract T processInstant(LocalDateTime d);
 	}
 
 	/**
@@ -82,9 +87,9 @@ public class Timestamps
 		}
 
 		@Override
-		public Number processInstant(Instant ins)
+		public Number processInstant(LocalDateTime d)
 		{
-			return ins.getLong(ChronoField.YEAR);
+			return d.getYear();
 		}
 	}
 
@@ -105,9 +110,12 @@ public class Timestamps
 		}
 
 		@Override
-		public String processInstant(Instant ins)
+		public String processInstant(LocalDateTime d)
 		{
-			return ins.getLong(ChronoField.YEAR) + "-" + String.format("%02d", ins.getLong(ChronoField.ALIGNED_WEEK_OF_YEAR));
+			int year = d.getYear();
+			WeekFields weekFields = WeekFields.of(Locale.getDefault());
+			int week_nb = d.get(weekFields.weekOfWeekBasedYear());
+			return String.format("%d-%02d", year, week_nb);
 		}
 	}
 	

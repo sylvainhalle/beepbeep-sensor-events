@@ -103,9 +103,11 @@ public class HHFormat extends CasasTxtFormat
 	@Override
 	public Function sensorId()
 	{
-		return new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"),
+		/*return new FunctionTree(new MergeScalars("location", "subject", "model", "sensor"),
 				new FetchAttribute(TXT_LOCATION), new FetchAttribute(TXT_SUBJECT),
 				modelString(), new FetchAttribute(TXT_SENSOR));
+				*/
+		return new FetchAttribute(TXT_SENSOR);
 	}
 
 	/**

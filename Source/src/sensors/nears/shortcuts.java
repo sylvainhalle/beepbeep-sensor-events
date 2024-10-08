@@ -27,22 +27,6 @@ public class shortcuts extends sensors.casas.shortcuts
 {
 	protected static final NearsJsonFormat s_format = new NearsJsonFormat();
 	
-	public static class Group extends ca.uqac.lif.cep.GroupProcessor
-	{
-		public Group()
-		{
-			super();
-		}
-	}
-	
-	public static class Maps extends beepbeep.groovy.Maps
-	{
-		private Maps()
-		{
-			super();
-		}
-	}
-	
 	/**
 	 * Creates a processor that read events from a file in a given format. The
 	 * resulting processor will either read from the standard input if the

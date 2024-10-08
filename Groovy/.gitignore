@@ -1,0 +1,10 @@
+# Ignore any output files produced by the scripts
+*.csv
+*.txt
+*.gp
+*.png
+*.pdf
+gvy
+*~
+\#*
+!Readme.md

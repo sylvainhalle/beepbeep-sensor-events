@@ -55,11 +55,12 @@ public class BoxAndWhiskers extends UnaryFunction<Collection,Number[]>
 		List<Double> number_list = new ArrayList<>();
 		for (Object o : c)
 		{
-			if (!(o instanceof Number))
+			Double n = toNumber(o);
+			if (n == null)
 			{
 				throw new IllegalArgumentException("The collection must contain only numbers");
 			}
-			number_list.add(((Number) o).doubleValue());
+			number_list.add(n);
 		}
 		Collections.sort(number_list);
 		Number[] out = new Number[5];
@@ -106,5 +107,30 @@ public class BoxAndWhiskers extends UnaryFunction<Collection,Number[]>
 			double upperValue = sorted_list.get(upperIndex);
 			return lowerValue + (rank - lowerIndex) * (upperValue - lowerValue);
 		}
+	}
+	
+	/**
+	 * Converts an object to a number. The object can be a Number or a String.
+	 * @param o The object
+	 * @return The number, or <tt>null</tt> if the object cannot be converted
+	 */
+	protected static Double toNumber(Object o)
+	{
+		if (o instanceof Number)
+		{
+			return ((Number) o).doubleValue();
+		}
+		if (o instanceof String)
+		{
+			try
+			{
+				return Double.parseDouble((String) o);
+			}
+			catch (NumberFormatException e)
+			{
+				return null;
+			}
+		}
+		return null;
 	}
 }

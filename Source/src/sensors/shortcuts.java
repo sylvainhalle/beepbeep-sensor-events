@@ -32,6 +32,7 @@ import sensors.patterns.LocatePattern;
 import sensors.patterns.PlotPattern;
 import sensors.patterns.PullPrintln;
 import sensors.patterns.PullWrite;
+import sensors.patterns.SliceByPattern;
 import sensors.patterns.SuccessivePattern;
 
 /**
@@ -145,6 +146,11 @@ public class shortcuts extends beepbeep.groovy
 	public static PullWrite WriteBinary()
 	{
 		return new PullWrite();
+	}
+	
+	public static PrettyPrint PrettyPrint()
+	{
+		return new PrettyPrint();
 	}
 
 	/* --- Processors --- */
@@ -268,6 +274,11 @@ public class shortcuts extends beepbeep.groovy
 	{
 		return new CounterPattern();
 	}
+	
+	public static Processor SliceBy(Object f, Object p)
+	{
+		return new SliceByPattern(liftFunction(f), liftProcessor(p));
+	}
 
 	/* --- Functions --- */
 
@@ -349,5 +360,24 @@ public class shortcuts extends beepbeep.groovy
 	public static Function Hours(Object o)
 	{
 		return new Timestamps.Hours(liftFunction(o));
+	}
+	
+	/**
+	 * Creates a function that extracts the year-week pair from a timestamp.
+	 * @return The function instance
+	 */
+	public static Function GetYearWeek()
+	{
+		return new Timestamps.GetYearWeek();
+	}
+	
+	public static Function GetYearWeek(Object o)
+	{
+		return new FunctionTree(new Timestamps.GetYearWeek(), liftFunction(o));
+	}
+	
+	public static Function StartsWith(Object x, Object y)
+	{
+		return new FunctionTree(Strings.startsWith, liftFunction(x), liftFunction(y));
 	}
 }

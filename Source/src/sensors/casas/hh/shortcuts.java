@@ -68,5 +68,13 @@ public class shortcuts extends sensors.casas.shortcuts
 		return new FunctionTree(s_format.index(), liftFunction(o));
 	}
 	
+	public static Function State()
+	{
+		return s_format.stateString();
+	}
 	
+	public static Function State(Object o)
+	{
+		return new FunctionTree(s_format.stateString(), liftFunction(o));
+	}	
 }
