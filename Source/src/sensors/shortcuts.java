@@ -124,12 +124,24 @@ public class shortcuts extends beepbeep.groovy
 	 * @param p The 1:1 processor chain <i>P</i> producing the Boolean stream
 	 * used as the filtering criterion
 	 * @return The processor chain
+	 * @see FilterPattern
 	 */
 	public static Processor Filter(Processor p)
 	{
 		return new FilterPattern(p);
 	}
 
+	/**
+	 * Creates a 1:1 processor chain that retains events in a stream at indices
+	 * where another processor chain <i>P</i> produces the value <em>true</em>
+	 * (&top;). The chain is represented graphically as:
+	 * <p>
+	 * <img src="{@docRoot}/doc-files/FilterPattern.png" alt="Pattern" />
+	 * @param p The 1:1 function to be evaluated by <i>P</i> in order to produce
+	 * the Boolean stream used as the filtering criterion
+	 * @return The processor chain
+	 * @see FilterPattern
+	 */
 	public static Processor Filter(Function f)
 	{
 		return Filter(new ca.uqac.lif.cep.functions.ApplyFunction(f));
@@ -145,6 +157,7 @@ public class shortcuts extends beepbeep.groovy
 	 * @param f_delta The function to evaluate on the two events identified as
 	 * the start and the end of the episode
 	 * @return The processor chain
+	 * @see EpisodePattern
 	 */
 	public static Processor Episode(Function f_s, Function f_e, Function f_delta)
 	{
@@ -159,6 +172,7 @@ public class shortcuts extends beepbeep.groovy
 	 * <img src="{@docRoot}/doc-files/LocatePattern.png" alt="Pattern" />
 	 * @param p The 1:1 processor chain <i>P</i> producing the Boolean stream
 	 * @return The processor chain
+	 * @see LocatePattern
 	 */
 	public static Processor Locate(Processor p)
 	{
@@ -170,6 +184,7 @@ public class shortcuts extends beepbeep.groovy
 	 * <em>true</em> (&top;) when ingesting a given input stream.
 	 * @param p The 1:1 processor chain <i>P</i> producing the Boolean stream
 	 * @return The processor chain
+	 * @see CountIfPattern
 	 */
 	public static Processor CountIf(Processor p)
 	{
@@ -183,7 +198,7 @@ public class shortcuts extends beepbeep.groovy
 	 * a GnuPlot document. Graphically, this pattern can be represented as follows:
 	 * <p>
 	 * <img src="{@docRoot}/doc-files/PlotPattern.png" alt="Processor graph">
-	 * @author Sylvain Hallé
+	 * @see PlotPattern
 	 */
 	public static Processor Plot(List<String> names, GnuPlot pi, Processor x, Processor... ys)
 	{
@@ -199,6 +214,7 @@ public class shortcuts extends beepbeep.groovy
 	 * <img src="{@docRoot}/doc-files/SuccessivePattern.png" alt="Pattern" />
 	 * @param f The 2:1 function to evaluate 
 	 * @return The processor chain
+	 * @see SuccessivePattern
 	 */
 	public static Processor Successive(Function f)
 	{
@@ -212,6 +228,7 @@ public class shortcuts extends beepbeep.groovy
 	 * <p>
 	 * <img src="{@docRoot}/doc-files/CounterPattern.png" alt="Processor graph">
 	 * @return The processor chain
+	 * @see CounterPattern
 	 */
 	public static Processor Counter()
 	{
@@ -223,6 +240,7 @@ public class shortcuts extends beepbeep.groovy
 	/**
 	 * Creates a new instance of the {@link BoxAndWhiskers} function.
 	 * @return The function
+	 * @see sensors.BoxAndWhiskers
 	 */
 	public static Function BoxAndWhiskers()
 	{
@@ -230,32 +248,23 @@ public class shortcuts extends beepbeep.groovy
 	}
 
 	/**
-	 * Creates a function that transforms a number of minutes into a number of
-	 * milliseconds.
-	 * @param x The number of minutes
-	 * @return The number of milliseconds
+	 * Creates a function that flattens a collection of collections into a single
+	 * collection.
+	 * @see Flatten
+	 * @return The function instance
 	 */
-	public static Function Minutes(Object x)
-	{
-		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60000l));
-	}
-
-	/**
-	 * Creates a function that transforms a number of hours into a number of
-	 * milliseconds.
-	 * @param x The number of hours
-	 * @return The number of milliseconds
-	 */
-	public static Function Hours(Object x)
-	{
-		return new FunctionTree(Numbers.multiplication, liftFunction(x), liftFunction(60l * 60000l));
-	}
-
 	public static Function Flatten()
 	{
 		return Flatten.instance;
 	}
 
+	/**
+	 * Creates a function that flattens a specific collection of collections into
+	 * a single collection. 
+	 * @param o The collection
+	 * @return The function instance
+	 * @see Flatten
+	 */
 	public static Function Flatten(Object o)
 	{
 		return new FunctionTree(Flatten.instance, liftFunction(o));
@@ -265,6 +274,7 @@ public class shortcuts extends beepbeep.groovy
 	 * Creates a function that takes a map and outputs the collection of its
 	 * values.
 	 * @return The function instance
+	 * @see Maps.Values
 	 */
 	public static Function Values()
 	{
@@ -276,9 +286,34 @@ public class shortcuts extends beepbeep.groovy
 	 * of its values.
 	 * @param o The map
 	 * @return The function instance
+	 * @see Maps.Values
 	 */
 	public static Function Values(Object o)
 	{
 		return new FunctionTree(Maps.values, liftFunction(o));
+	}
+	
+	/**
+	 * Creates a function that transforms a number of minutes into a number of
+	 * milliseconds.
+	 * @param o The argument to the function
+	 * @return The function instance
+	 * @see Timestamps.Minutes
+	 */
+	public static Function Minutes(Object o)
+	{
+		return new Timestamps.Minutes(liftFunction(o));
+	}
+	
+	/**
+	 * Creates a function that transforms a number of hours into a number of
+	 * milliseconds.
+	 * @param o The argument to the function
+	 * @return The function instance
+	 * @see Timestamps.Hours
+	 */
+	public static Function Hours(Object o)
+	{
+		return new Timestamps.Hours(liftFunction(o));
 	}
 }
