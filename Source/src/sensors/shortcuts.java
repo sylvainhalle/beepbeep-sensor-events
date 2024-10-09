@@ -28,6 +28,7 @@ import sensors.patterns.CountIfPattern;
 import sensors.patterns.CounterPattern;
 import sensors.patterns.EpisodePattern;
 import sensors.patterns.FilterPattern;
+import sensors.patterns.IndexRangePattern;
 import sensors.patterns.LocatePattern;
 import sensors.patterns.PlotPattern;
 import sensors.patterns.PullPrintln;
@@ -245,6 +246,11 @@ public class shortcuts extends beepbeep.groovy
 		String[] a_names = new String[names.size()];
 		names.toArray(a_names);
 		return new PlotPattern(a_names, pi, x, ys);
+	}
+	
+	public static Processor IndexRange(int start, int end)
+	{
+		return new IndexRangePattern(start, end);
 	}
 
 	/**

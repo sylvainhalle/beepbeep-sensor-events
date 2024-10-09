@@ -82,4 +82,9 @@ public class shortcuts extends sensors.shortcuts
 	{
 		return new FunctionTree(s_format.stateString(), liftFunction(o));
 	}
+	
+	public static Function IsNumeric()
+	{
+		return s_format.isNumeric();
+	}
 }

@@ -23,6 +23,7 @@ import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.mtnp.PrintGnuPlot;
 import ca.uqac.lif.cep.mtnp.UpdateTableStream;
 import ca.uqac.lif.cep.tmf.Fork;
+import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.mtnp.plot.Plot.ImageType;
 import ca.uqac.lif.mtnp.plot.gnuplot.GnuPlot;
 
@@ -98,9 +99,14 @@ public class PlotPattern extends GroupProcessor
 			Connector.connect(ys[i], 0, uts, i + 1);
 			addProcessors(ys[i]);
 		}
+		// The KeepLast processor avoids generating a GnuPlot file for every
+		// intermediate state of the table; this has a HUGE impact on performance
+		KeepLast kl = new KeepLast();
+		addProcessors(kl);
+		Connector.connect(uts, kl);
 		PrintGnuPlot pgp = new PrintGnuPlot(m_plot, ImageType.PNG);
 		addProcessors(pgp);
-		Connector.connect(uts, pgp);
+		Connector.connect(kl, pgp);
 		associateInput(f);
 		associateOutput(pgp);
 	}

@@ -24,6 +24,7 @@ import java.util.Date;
 
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.Function;
+import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.tuples.Tuple;
 
 /**
@@ -136,6 +137,22 @@ public interface EventFormat
 	 * @return The index function
 	 */
 	/*@ non_null @*/ public Function index();
+	
+	/**
+	 * Returns the BeepBeep {@link Function} that checks if a sensor event is
+	 * numeric. The function must return a boolean value indicating whether the
+	 * sensor's state is numeric.
+	 * <p>
+	 * The default behavior is to simply look at an event's state (i.e. value)
+	 * and check if this value is a number. This method can be overridden in
+	 * subclasses to provide more sophisticated ways of determining if a sensor
+	 * produces numerical values.
+	 * @return The function
+	 */
+	/*@ non_null @*/ public default Function isNumeric()
+	{
+		return new FunctionTree(IsANumber.instance, stateString());
+	}
 	
 	/**
 	 * Creates an object that uniquely identifies the placement of a device event

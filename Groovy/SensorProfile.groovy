@@ -3,11 +3,11 @@
  */
 import static beepbeep.groovy.*
 import static sensors.shortcuts.*
-import static sensors.casas.hh.shortcuts.*
+import static sensors.casas.aruba.shortcuts.*
 
 (
   Read(args) |
-  Filter(StartsWith(SensorId(), "T")) |
+  Filter(IsNumeric()) |
   Slice(SensorId(), new Group() {{
     def s = in(ApplyFunction(State()))
     def p = Sets.PutInto()
