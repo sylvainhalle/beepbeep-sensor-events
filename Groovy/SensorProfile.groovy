@@ -9,10 +9,9 @@ import static sensors.casas.aruba.shortcuts.*
   Read(args) |
   Filter(IsNumeric()) |
   Slice(SensorId(), new Group() {{
-    def s = in(ApplyFunction(State()))
-    def p = Sets.PutInto()
-    def af = s | p | out(ApplyFunction(BoxAndWhiskers()))
-    addProcessors(s, p, af)
+    in(ApplyFunction(State())) |
+    Sets.PutInto() |
+    out(ApplyFunction(BoxAndWhiskers()))
   }}) |
   KeepLast() |
   ApplyFunction(PrettyPrint()) |
