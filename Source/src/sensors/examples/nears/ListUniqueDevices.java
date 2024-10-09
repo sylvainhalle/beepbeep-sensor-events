@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.util.Sets;
@@ -63,7 +64,9 @@ public class ListUniqueDevices
 		connect(pi, last);
 		
 		/* Connect the pipeline to an output and run. */
-		connect(last, new PrettyPrint(new PrintStream(os)));
+		ApplyFunction pp = new ApplyFunction(new PrettyPrint());
+		connect(last, pp);
+		connect(pp, new Print(new PrintStream(os)));
 		p.run();
 		
 		/* Clean up. */

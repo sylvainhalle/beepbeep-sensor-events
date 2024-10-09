@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
@@ -62,7 +63,9 @@ public class ListSensors
 						}}),
 				new KeepLast(),
 				new Pump());
-		connect(p, new PrettyPrint(new PrintStream(os)));
+		ApplyFunction pp = new ApplyFunction(new PrettyPrint());
+		connect(p, pp);
+		connect(pp, new Print(new PrintStream(os)));
 		
 		/* Run the pipeline. */
 		p.run();
