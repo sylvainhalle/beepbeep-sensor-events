@@ -18,6 +18,7 @@
 package sensors.patterns;
 
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.io.WriteOutputStream;
 import ca.uqac.lif.cep.tmf.Pump;
 
@@ -30,13 +31,16 @@ import ca.uqac.lif.cep.tmf.Pump;
  * except that it spares the user writing a Groovy script of a few keystrokes.
  * @author Sylvain Hallé
  */
-public class PullWrite extends ca.uqac.lif.cep.GroupProcessor 
+public class PullWrite extends GroupProcessor
 {
 	/**
 	 * The internal pump.
 	 */
 	private final Pump m_pump;
 
+	/**
+	 * Creates a new instance of the processor.
+	 */
 	public PullWrite()
 	{
 		super(1, 0);
@@ -45,13 +49,11 @@ public class PullWrite extends ca.uqac.lif.cep.GroupProcessor
 		Connector.connect(m_pump, pr);
 		associateInput(m_pump);
 	}
-
-	/**
-	 * Instructs the processor to start pulling events from its upstream
-	 * processor.
-	 */
-	public void run()
+	
+	@Override
+	public void start()
 	{
+		super.start();
 		m_pump.run();
 	}
 }

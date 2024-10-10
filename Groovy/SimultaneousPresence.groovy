@@ -6,9 +6,7 @@ import static beepbeep.groovy.*
 import static sensors.shortcuts.*
 import static sensors.casas.aruba.shortcuts.*
 
-(
-  Read(args) |
-  Slice(SensorId(), ApplyFunction(Equals("ON", State()))) |
-  ApplyFunction(Size(Maps.FilterMap(Equals(Y, true)))) |
-  Write()
-).run()
+Read(args) |
+Slice(SensorId(), ApplyFunction(Equals("ON", State()))) |
+ApplyFunction(Size(Maps.FilterMap(Equals(Y, true)))) |
+Write()

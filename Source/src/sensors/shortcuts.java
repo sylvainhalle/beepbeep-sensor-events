@@ -20,6 +20,7 @@ package sensors;
 import java.io.IOException;
 import java.util.List;
 
+import ca.uqac.lif.cep.CallAfterConnect;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
@@ -139,19 +140,56 @@ public class shortcuts extends beepbeep.groovy
 		}
 	}
 
-	public static PullPrintln Write()
+	public static StartAfterConnect Write()
 	{
-		return new PullPrintln();
+		return new StartAfterConnect(new PullPrintln());
 	}
 
-	public static PullWrite WriteBinary()
+	public static StartAfterConnect WriteBinary()
 	{
-		return new PullWrite();
+		return new StartAfterConnect(new PullWrite());
 	}
 	
 	public static PrettyPrint PrettyPrint()
 	{
 		return new PrettyPrint();
+	}
+	
+	/**
+	 * A {@link CallAfterConnect} object that starts a processor after it has
+	 * been connected to its input. In a Groovy script, this object spares the
+	 * user from manually calling the {@link Processor#start()} method after
+	 * connecting the last processor in the chain, in order for it to start
+	 * processing events.
+	 */
+	protected static class StartAfterConnect implements CallAfterConnect
+	{
+		/**
+		 * The processor to connect.
+		 */
+		private final Processor m_processor;
+		
+		/**
+		 * Creates a new instance of the call.
+		 * @param p The processor to connect
+		 */
+		public StartAfterConnect(Processor p)
+		{
+			super();
+			m_processor = p;
+		}
+		
+		@Override
+		public Processor getProcessor()
+		{
+			return m_processor;
+		}
+
+		@Override
+		public void call()
+		{
+			m_processor.start();
+		}
 	}
 
 	/* --- Processors --- */

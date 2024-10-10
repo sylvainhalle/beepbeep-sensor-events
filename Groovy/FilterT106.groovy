@@ -6,8 +6,6 @@ import static beepbeep.groovy.*
 import static sensors.shortcuts.*
 import static sensors.casas.hh.shortcuts.*
 
-(
-  Read(args) |
-  Filter(Equals(SensorId(), "T106")) |
-  Write()
-).run()
+Read(args) |
+Filter(Equals(SensorId(), "T106")) |
+Write()

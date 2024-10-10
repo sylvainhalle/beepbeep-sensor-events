@@ -18,6 +18,7 @@
 package sensors.patterns;
 
 import ca.uqac.lif.cep.Connector;
+import ca.uqac.lif.cep.GroupProcessor;
 
 /**
  * A {@link Println} processor that includes its own pump. Calling
@@ -28,7 +29,7 @@ import ca.uqac.lif.cep.Connector;
  * except that it spares the user writing a Groovy script of a few keystrokes.
  * @author Sylvain Hallé
  */
-public class PullPrintln extends ca.uqac.lif.cep.GroupProcessor
+public class PullPrintln extends GroupProcessor
 {
 	/**
 	 * The internal pump.
@@ -47,11 +48,8 @@ public class PullPrintln extends ca.uqac.lif.cep.GroupProcessor
 		associateInput(m_pump);
 	}
 
-	/**
-	 * Instructs the processor to start pulling events from its upstream
-	 * processor.
-	 */
-	public void run()
+	@Override
+	public void start()
 	{
 		m_pump.run();
 	}

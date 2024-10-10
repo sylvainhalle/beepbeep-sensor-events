@@ -9,13 +9,11 @@ import static sensors.casas.hh.shortcuts.*
 // The minimum duration of a gap; set as a constant that can be modified
 DURATION = Hours(1)
 
-(
-  Read(args) |
-  SliceBy(GetYearWeek(Timestamp(X)), 
-    CountIf(new Group() {{
-      in(Successive(Minus(Timestamp(Y), Timestamp(X)))) |
-      out(ApplyFunction(GreaterThan(X, DURATION)))
-      }})
-  ) |
-  Write()
-).run()
+Read(args) |
+SliceBy(GetYearWeek(Timestamp(X)), 
+CountIf(new Group() {{
+  in(Successive(Minus(Timestamp(Y), Timestamp(X)))) |
+  out(ApplyFunction(GreaterThan(X, DURATION)))
+  }})
+) |
+Write()
