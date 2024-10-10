@@ -323,6 +323,16 @@ public class shortcuts extends beepbeep.groovy
 	{
 		return new SliceByPattern(liftFunction(f), liftProcessor(p));
 	}
+	
+	public static Processor RemoveStutterTail()
+	{
+		return new RemoveStutterTail();
+	}
+	
+	public static Processor RemoveStutterHead()
+	{
+		return new RemoveStutterHead();
+	}
 
 	/* --- Functions --- */
 

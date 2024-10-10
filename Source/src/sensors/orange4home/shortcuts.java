@@ -27,6 +27,26 @@ public class shortcuts extends sensors.shortcuts
 {
 	protected static final Orange4HomeFormat s_format = new Orange4HomeFormat();
 	
+	/**
+	 * Constant representing the "open" state in this event format.
+	 */
+	public static final Object OPEN = s_format.getOpenConstant();
+	
+	/**
+	 * Constant representing the "closed" state in this event format.
+	 */
+	public static final Object CLOSED = s_format.getClosedConstant();
+	
+	/**
+	 * Constant representing the "on" state in this event format.
+	 */
+	public static final Object ON = s_format.getOnConstant();
+	
+	/**
+	 * Constant representing the "off" state in this event format.
+	 */
+	public static final Object OFF = s_format.getOffConstant();
+	
 	protected shortcuts()
 	{
 		super();

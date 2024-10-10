@@ -15,38 +15,32 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.casas.aruba;
+package sensors;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import sensors.LogRepository;
+import ca.uqac.lif.cep.functions.UnaryFunction;
 
 /**
- * A file system that is open directly on the local folder where the data file
- * for the Casas "HH" dataset resides.
+ * Checks if an object is null.
+ * @author Sylvain Hallé
  */
-public class ArubaLogRepository extends LogRepository
+public class IsNull extends UnaryFunction<Object,Boolean>
 {
 	/**
-	 * The folder name where the data file is located.
+	 * A single instance of this function.
 	 */
-	protected static final String FOLDER = "data/aruba2";
+	public static final IsNull instance = new IsNull();
 
-	public ArubaLogRepository()
+	/**
+	 * A protected constructor to enforce the singleton pattern.
+	 */
+	protected IsNull()
 	{
-		super(FOLDER);
+		super(Object.class, Boolean.class);
 	}
 
-	public ArubaLogRepository(String sub_folder)
+	@Override
+	public Boolean getValue(Object x)
 	{
-		super(FOLDER + "/" + sub_folder);
-	}
-
-	public InputStream readPart(String file, String start, String end) throws FileNotFoundException
-	{
-		InputStream is = new FileInputStream(file);
-		return is;
+		return x == null;
 	}
 }

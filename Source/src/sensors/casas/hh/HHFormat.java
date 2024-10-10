@@ -24,13 +24,16 @@ import java.io.PrintStream;
 
 import ca.uqac.lif.cep.Connector;
 import ca.uqac.lif.cep.GroupProcessor;
+import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.util.Strings;
 import sensors.IndexTupleFeeder;
 import sensors.ReadLinesStatus;
 import sensors.casas.CasasTxtFormat;
@@ -146,5 +149,15 @@ public class HHFormat extends CasasTxtFormat
 			g.associateOutput(0, f, 0);
 		}
 		return g;
+	}
+	
+	/**
+	 * In this dataset, a temperature event is spotted by the sensor's ID
+	 * starting with "T".
+	 */
+	@Override
+	public Function isTemperature()
+	{
+		return new FunctionTree(Strings.startsWith, new FunctionTree(stateString(), StreamVariable.X), new Constant("T"));
 	}
 }

@@ -13,6 +13,7 @@ import ca.uqac.lif.cep.fsm.TransitionOtherwise;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.ContextAssignment;
 import ca.uqac.lif.cep.functions.ContextVariable;
+import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.FilterOn;
@@ -25,6 +26,7 @@ import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
+import sensors.IsNull;
 import sensors.LogRepository;
 import sensors.casas.aruba.ArubaFormat;
 import sensors.casas.aruba.ArubaLogRepository;
@@ -60,7 +62,10 @@ public class ContactEpisodes
 		Slice slice = new Slice(format.sensorId(),
 				new GroupProcessor(1, 1) {{
 					EpisodeMachine em = new EpisodeMachine();
-					Sets.PutInto put = new Sets.PutInto();
+					//Sets.PutInto put = new Sets.PutInto();
+					//FilterOn fo = new FilterOn(new FunctionTree(Booleans.not, IsNull.instance));
+					//connect(em, fo);
+					Cumulate put = new Cumulate(Numbers.minimum);
 					connect(em, put);
 					addProcessors(em, put);
 					associateInput(em).associateOutput(put);
@@ -86,8 +91,6 @@ public class ContactEpisodes
 		public EpisodeMachine()
 		{
 			super(1, 1);
-			addSymbol(0, new Constant(null));
-			addSymbol(1, new Constant(null));
 			addSymbol(2, new FunctionTree(Numbers.subtraction, format.timestamp(), new ContextVariable("s")));
 			addTransition(0, new FunctionTransition(new FunctionTree(Equals.instance, format.stateString(), OPEN), 1, new ContextAssignment("s", format.timestamp())));
 			addTransition(1, new FunctionTransition(new FunctionTree(Equals.instance, format.stateString(), CLOSE), 2));

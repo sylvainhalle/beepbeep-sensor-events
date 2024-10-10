@@ -28,6 +28,26 @@ public class shortcuts extends sensors.casas.shortcuts
 	protected static final NearsJsonFormat s_format = new NearsJsonFormat();
 	
 	/**
+	 * Constant representing the "open" state in this event format.
+	 */
+	public static final Object OPEN = s_format.getOpenConstant();
+	
+	/**
+	 * Constant representing the "closed" state in this event format.
+	 */
+	public static final Object CLOSED = s_format.getClosedConstant();
+	
+	/**
+	 * Constant representing the "on" state in this event format.
+	 */
+	public static final Object ON = s_format.getOnConstant();
+	
+	/**
+	 * Constant representing the "off" state in this event format.
+	 */
+	public static final Object OFF = s_format.getOffConstant();
+	
+	/**
 	 * Creates a processor that read events from a file in a given format. The
 	 * resulting processor will either read from the standard input if the
 	 * filename is "-", or from a file with the given name.

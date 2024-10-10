@@ -35,6 +35,7 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.functions.RaiseArity;
+import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
@@ -42,6 +43,7 @@ import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
 import ca.uqac.lif.cep.tuples.TupleMap;
+import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Numbers;
 import sensors.IndexTupleFeeder;
 import sensors.LabeledEventFormat;
@@ -387,5 +389,15 @@ public class Orange4HomeFormat implements LabeledEventFormat
 			}
 			return new UpdateActivity(act);
 		}
+	}
+	
+	/**
+	 * In this dataset, a temperature event is spotted by the "sensor"
+	 * attribute of the tuple having the value "temperature".
+	 */
+	@Override
+	public Function isTemperature()
+	{
+		return new FunctionTree(Equals.instance, new FunctionTree(new FetchAttribute(SENSOR), StreamVariable.X), new Constant("temperature"));
 	}
 }

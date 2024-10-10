@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.json.JPathFunction;
@@ -35,6 +36,7 @@ import ca.uqac.lif.cep.json.StringValue;
 import ca.uqac.lif.cep.tuples.FixedTupleBuilder;
 import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.tuples.Tuple;
+import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.json.JsonElement;
 import ca.uqac.lif.json.JsonMap;
 import ca.uqac.lif.json.JsonParser;
@@ -356,5 +358,15 @@ public class NearsJsonFormat implements EventFormat
 		{
 			return null;
 		}
+	}
+	
+	/**
+	 * In this dataset, a temperature event is spotted by the "sensor"
+	 * attribute of the tuple having the value "temperature".
+	 */
+	@Override
+	public Function isTemperature()
+	{
+		return new FunctionTree(Equals.instance, new FunctionTree(StringValue.instance, new JPathFunction(JP_SENSOR)), new Constant("temperature"));
 	}
 }

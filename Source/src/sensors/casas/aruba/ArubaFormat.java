@@ -28,6 +28,7 @@ import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;
+import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 import ca.uqac.lif.cep.io.ReadLines;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
@@ -258,5 +259,15 @@ public class ArubaFormat extends CasasTxtFormat
 			}
 			return new UpdateActivity(act);
 		}
+	}
+
+	/**
+	 * In this dataset, a temperature event is spotted by the sensor's ID
+	 * starting with "T".
+	 */
+	@Override
+	public Function isTemperature()
+	{
+		return new FunctionTree(Strings.startsWith, new FunctionTree(stateString(), StreamVariable.X), new Constant("T"));
 	}
 }

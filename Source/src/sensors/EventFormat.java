@@ -155,6 +155,12 @@ public interface EventFormat
 	}
 	
 	/**
+	 * Returns the BeepBeep {@link Function} that checks if a sensor event is
+	 * a temperature reading.
+	 */
+	/*@ non_null @*/ public Function isTemperature();
+	
+	/**
 	 * Creates an object that uniquely identifies the placement of a device event
 	 * in an environment.
 	 * @param location The location of the sensor
