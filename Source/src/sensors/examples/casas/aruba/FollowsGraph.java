@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.examples.casas.hh;
+package sensors.examples.casas.aruba;
 
 import static ca.uqac.lif.cep.Connector.BOTTOM;
 import static ca.uqac.lif.cep.Connector.INPUT;
@@ -52,9 +52,8 @@ import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.HighlightedGraph;
 import sensors.LogRepository;
-import sensors.casas.hh.HHFormat;
-import sensors.casas.hh.HHLogRepository;
-
+import sensors.casas.aruba.ArubaFormat;
+import sensors.casas.aruba.ArubaLogRepository;
 
 /**
  * Draws a graph showing successive locations of motion sensor events.
@@ -80,15 +79,17 @@ import sensors.casas.hh.HHLogRepository;
  */
 public class FollowsGraph
 {
+	/* The folder where the data files reside. */
+	protected static final LogRepository fs = new ArubaLogRepository();
+	
 	/* The adapter for the event format. */
-	protected static final EventFormat format = new HHFormat();
+	protected static final EventFormat format = new ArubaFormat();
 
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-
-		LogRepository fs = new HHLogRepository("hh130").open();
-		InputStream is = fs.readFrom("hh130.rawdata.txt");
+		fs.open();
+		InputStream is = fs.readFrom("data");
 		OutputStream os = fs.writeTo("FollowsGraph.dot");
 		Processor feeder = format.getFeeder(is);
 
