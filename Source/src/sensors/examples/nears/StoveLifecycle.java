@@ -71,9 +71,6 @@ public class StoveLifecycle
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		/* Define the range of days to process. */
-		int first_day = 1, last_day = 120;
-
 		/* Define the input and output file. */
 		LogRepository fs = new NearsLogRepository("0105").open();
 		OutputStream os = fs.writeTo("StoveLifecycle.txt");
