@@ -46,7 +46,7 @@ import static sensors.EventFormat.evaluateUnary;
  * @author Sylvain Hallé
  */
 @SuppressWarnings("serial")
-public class House extends PrettyTreeMap<sensors.house.House.Location>
+public class House extends PrettyTreeMap<sensors.house.House.Location> implements Duplicable
 {
 	/**
 	 * A location is a map from subject names to subjects.
@@ -291,5 +291,21 @@ public class House extends PrettyTreeMap<sensors.house.House.Location>
 				}
 			}
 		}
+	}
+
+	@Override
+	public House duplicate()
+	{
+		return duplicate(false);
+	}
+
+	@Override
+	public House duplicate(boolean with_state)
+	{
+		if (with_state)
+		{
+			throw new UnsupportedOperationException("Cannot duplicate a house with state");
+		}
+		return new House();
 	}
 }

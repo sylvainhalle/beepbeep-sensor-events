@@ -32,10 +32,10 @@ import ca.uqac.lif.cep.util.Sets;
 import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
-import sensors.LogRepository;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
 import sensors.nears.NearsJsonFormat;
+import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
 
 import static ca.uqac.lif.cep.Connector.connect;
@@ -48,8 +48,8 @@ public class ListSensors
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new NearsMultiDaySource(fs);
+		FileSystem fs = new NearsLogRepository("0105").open();
+		MultiDaySource feeder = new NearsMultiDaySource(fs, 1, 36);
 		OutputStream os = fs.writeTo("ListSensors.txt");
 		
 		/* Create the pipeline. */

@@ -42,12 +42,9 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Trim;
-import ca.uqac.lif.cep.tuples.FetchAttribute;
-import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.cep.util.Booleans.Not;
 import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
-import ca.uqac.lif.cep.util.Strings.ToString;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.HighlightedGraph;
@@ -80,7 +77,7 @@ import sensors.casas.aruba.ArubaLogRepository;
 public class FollowsGraph
 {
 	/* The folder where the data files reside. */
-	protected static final LogRepository fs = new ArubaLogRepository();
+	protected static final LogRepository fs = new ArubaLogRepository(1);
 	
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new ArubaFormat();
@@ -138,7 +135,7 @@ public class FollowsGraph
 		public GetEdges()
 		{
 			super(1, 2);
-			ApplyFunction get_id = new ApplyFunction(new FunctionTree(ToString.instance, new FunctionTree(new MergeScalars("location"), new FetchAttribute("location"))));
+			ApplyFunction get_id = new ApplyFunction(format.sensorId());
 			associateInput(INPUT, get_id, INPUT);
 			Fork fork = new Fork(2);
 			connect(get_id, fork);

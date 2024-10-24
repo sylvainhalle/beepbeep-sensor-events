@@ -91,6 +91,14 @@ public class BoxAndWhiskers extends UnaryFunction<Collection,Number[]>
 		int size = sorted_list.size();
 		if (size == 0) return Double.NaN;
 
+		if (percentile == 100) {
+			// Return the exact maximum value for the 100th percentile
+			return sorted_list.get(size - 1);
+		} else if (percentile == 0) {
+			// Return the exact minimum value for the 0th percentile
+			return sorted_list.get(0);
+		}
+
 		// Use nearest rank method to calculate the percentile
 		double rank = percentile / 100 * (size - 1);
 		int lowerIndex = (int) Math.floor(rank);
@@ -108,7 +116,7 @@ public class BoxAndWhiskers extends UnaryFunction<Collection,Number[]>
 			return lowerValue + (rank - lowerIndex) * (upperValue - lowerValue);
 		}
 	}
-	
+
 	/**
 	 * Converts an object to a number. The object can be a Number or a String.
 	 * @param o The object

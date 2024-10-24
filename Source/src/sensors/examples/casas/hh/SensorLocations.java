@@ -40,42 +40,33 @@ import sensors.casas.hh.HHLogRepository;
 import static ca.uqac.lif.cep.Connector.connect;
 
 /**
- * Retrieves the list of all sensors, grouped by location and by subject.
- * <p>
- * The pipeline corresponding to this calculation is illustrated below:
- * <p>
- * <img src="{@docRoot}/doc-files/InventoryByLocation.png" alt="Pipeline" />
- * <p>
- * The result is a map from a location to another map from a subject to a
- * set of sensors. A possible (stylized) output of this pipeline is:
- * <p>
- * <img src="{@docRoot}/doc-files/InventoryByLocation_output.png" alt="Pipeline" />
+ * Retrieves the list of all sensors, grouped by ID, and collects all the
+ * locations for which the sensor is reported.
  * 
  * @author Sylvain Hallé
  */
-public class InventoryByLocation
+public class SensorLocations
 {
 	/* The adapter for the event format. */
 	protected static final EventFormat format = new HHFormat();
-	protected static final LogRepository fs = new HHLogRepository("hh115");
+	protected static final LogRepository fs = new HHLogRepository("hh130");
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
 		fs.open();
-		InputStream is = fs.readFrom("hh115.rawdata.txt");
+		InputStream is = fs.readFrom("hh130.rawdata.txt");
 		Processor feeder = format.getFeeder(is);
-		OutputStream os = fs.writeTo("ListSensorsByLocation.txt");
+		OutputStream os = fs.writeTo("SensorLocations.txt");
 		
 		/* Create the pipeline. */
 		Pump p = (Pump) connect(feeder,
-				new Slice(format.locationString(),
-						new Slice(format.subjectString(),
+				new Slice(format.sensorId(),
 								new GroupProcessor(1, 1) {{
-									ApplyFunction f = new ApplyFunction(format.sensorId());
+									ApplyFunction f = new ApplyFunction(format.locationString());
 									Processor p = connect(f, new Sets.PutInto());
 									addProcessors(f, p).associateInput(f).associateOutput(p);
-								}})),
+								}}),
 				new KeepLast(),
 				new Pump());
 		ApplyFunction pp = new ApplyFunction(new PrettyPrint());

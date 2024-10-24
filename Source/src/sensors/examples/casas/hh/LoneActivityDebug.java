@@ -25,11 +25,17 @@ import java.io.PrintStream;
 import ca.uqac.lif.cep.GroupProcessor;
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
+import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
+import ca.uqac.lif.cep.tmf.Window;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
+import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.util.Sets;
+import ca.uqac.lif.cep.functions.IdentityFunction;
+import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.EventFormat;
 import sensors.LogRepository;
@@ -40,44 +46,35 @@ import sensors.casas.hh.HHLogRepository;
 import static ca.uqac.lif.cep.Connector.connect;
 
 /**
- * Retrieves the list of all sensors, grouped by location and by subject.
- * <p>
- * The pipeline corresponding to this calculation is illustrated below:
- * <p>
- * <img src="{@docRoot}/doc-files/InventoryByLocation.png" alt="Pipeline" />
- * <p>
- * The result is a map from a location to another map from a subject to a
- * set of sensors. A possible (stylized) output of this pipeline is:
- * <p>
- * <img src="{@docRoot}/doc-files/InventoryByLocation_output.png" alt="Pipeline" />
+ * Retrieves the list of all sensors, grouped by ID, and collects all the
+ * locations for which the sensor is reported.
  * 
  * @author Sylvain Hallé
  */
-public class InventoryByLocation
+public class LoneActivityDebug
 {
 	/* The adapter for the event format. */
-	protected static final EventFormat format = new HHFormat();
+	protected static final HHFormat format = new HHFormat();
+	
 	protected static final LogRepository fs = new HHLogRepository("hh115");
+	
+	protected static final int m_windowWidth = 5;
+	
+	protected static final int m_threshold = 1;
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
 		fs.open();
-		InputStream is = fs.readFrom("hh115.rawdata.txt");
+		InputStream is = fs.readFrom("hh115.ann.txt");
 		Processor feeder = format.getFeeder(is);
-		OutputStream os = fs.writeTo("ListSensorsByLocation.txt");
+		OutputStream os = fs.writeTo("LoneActivities.txt");
 		
 		/* Create the pipeline. */
-		Pump p = (Pump) connect(feeder,
-				new Slice(format.locationString(),
-						new Slice(format.subjectString(),
-								new GroupProcessor(1, 1) {{
-									ApplyFunction f = new ApplyFunction(format.sensorId());
-									Processor p = connect(f, new Sets.PutInto());
-									addProcessors(f, p).associateInput(f).associateOutput(p);
-								}})),
-				new KeepLast(),
-				new Pump());
+		ApplyFunction f = new ApplyFunction(new FetchAttribute(HHFormat.TXT_ACTIVITY));
+		connect(feeder, f);
+		Pump p = new Pump();
+		connect(f, p);
 		ApplyFunction pp = new ApplyFunction(new PrettyPrint());
 		connect(p, pp);
 		connect(pp, new Print(new PrintStream(os)));

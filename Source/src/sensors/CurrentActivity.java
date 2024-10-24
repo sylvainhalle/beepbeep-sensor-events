@@ -17,9 +17,10 @@
  */
 package sensors;
 
+import ca.uqac.lif.cep.Duplicable;
 import ca.uqac.lif.cep.functions.UnaryFunction;
 
-public class CurrentActivity
+public class CurrentActivity implements Duplicable
 {
 	protected String m_activity;
 
@@ -85,5 +86,17 @@ public class CurrentActivity
 			a.setActivity(m_to);
 			return m_to;
 		}		
+	}
+
+	@Override
+	public CurrentActivity duplicate()
+	{
+		return duplicate(false);
+	}
+
+	@Override
+	public CurrentActivity duplicate(boolean with_state)
+	{
+		return new CurrentActivity(m_activity);
 	}
 }

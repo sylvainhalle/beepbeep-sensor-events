@@ -32,16 +32,16 @@ public class ArubaLogRepository extends LogRepository
 	/**
 	 * The folder name where the data file is located.
 	 */
-	protected static final String FOLDER = "data/aruba2";
+	protected static final String FOLDER = "data/aruba";
 
 	public ArubaLogRepository()
 	{
 		super(FOLDER);
 	}
-
-	public ArubaLogRepository(String sub_folder)
+	
+	public ArubaLogRepository(int index)
 	{
-		super(FOLDER + "/" + sub_folder);
+		super(FOLDER + (index == 1 ? "" : "2"));
 	}
 
 	public InputStream readPart(String file, String start, String end) throws FileNotFoundException

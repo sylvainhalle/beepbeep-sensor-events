@@ -119,7 +119,8 @@ public interface EventFormat
 	
 	/**
 	 * Returns the BeepBeep {@link Function} that fetches an object that
-	 * uniquely identifies the placement of a sensor event in an environment.
+	 * uniquely identifies the placement of a sensor event in an environment
+	 * (typically the location and subject).
 	 * @return The placement function
 	 */
 	/*@ non_null @*/ public Function sensorPlacement();
