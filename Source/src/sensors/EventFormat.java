@@ -227,13 +227,14 @@ public interface EventFormat
 	
 	/**
 	 * Gets a processor instance that can read events in the given format from
-	 * a file path, and optionally prints its progression into a print stream.
-	 * @param filename The filename to read from
+	 * one or more file paths, and optionally prints its progression into a
+	 * print stream.                                  n
 	 * @param out The print stream where status messages are to be sent
+	 * @param filenames The filenames to read from
 	 * @return A processor, which is expected to have an arity of 0:1
 	 * @throws IOException If something goes wrong ;-)
 	 */
-	public Processor getFeeder(String filename, PrintStream out) throws IOException;
+	public Processor getFeeder(PrintStream out, String ... filenames) throws IOException;
 	
 	/**
 	 * Evaluates an unary BeepBeep function.

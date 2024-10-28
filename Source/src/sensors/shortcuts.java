@@ -119,7 +119,7 @@ public class shortcuts extends beepbeep.groovy
 		{
 			return format.getFeeder(System.in);
 		}
-		return format.getFeeder(filename, show_progress ? System.err : null);
+		return format.getFeeder(show_progress ? System.err : null, filename);
 	}
 
 	public static SpliceSource readJsonStreamFrom(String ... filenames)

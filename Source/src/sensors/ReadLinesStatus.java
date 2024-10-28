@@ -23,18 +23,21 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Queue;
+import java.util.Scanner;
 
-import ca.uqac.lif.cep.io.ReadLines;
+import ca.uqac.lif.cep.ProcessorException;
+import ca.uqac.lif.cep.tmf.Source;
 
 /**
- * Variant of {@link ReadLines} that pretty-prints the status of lines read
- * into an output stream. This processor only works on files, not on other
- * streams (such as <tt>stdin</tt>), since it first scans the file in order
- * to count the total number of lines it contains.
+ * A processor that can read multiple files one after the other, and
+ * pretty-prints the status of lines read into an output stream. This processor
+ * only works on files, not on other streams (such as <tt>stdin</tt>), since it
+ * first scans the file in order to count the total number of lines it
+ * contains.
  * 
  * @author Sylvain Hallé
  */
-public class ReadLinesStatus extends ReadLines
+public class ReadLinesStatus extends Source
 {
 	/**
 	 * The total number of lines in the input file to read.
@@ -50,36 +53,86 @@ public class ReadLinesStatus extends ReadLines
 	 * The interval (in number of events) at which the progress bar is updated.
 	 */
 	protected final long m_updateInterval;
-
+	
+	/**
+	 * The name of the file(s) to read from.
+	 */
+	protected final String[] m_filenames;
+	
+	/**
+	 * The index of the current file being read.
+	 */
+	protected int m_currentFileIndex = 0;
+	
+	/**
+	 * The scanner used to read the current file.
+	 */
+	protected Scanner m_scanner;
+	
 	/**
 	 * Creates a new instance of the processor.
-	 * @param filename The name of the local file to read from
+	 * @param filenames The name(s) of the local file(s) to read from
 	 * @param ps The print stream where to display the progress bar
 	 * @throws IOException Thrown if the file does not exist
 	 */
-	public ReadLinesStatus(String filename, PrintStream ps) throws IOException
+	public ReadLinesStatus(PrintStream ps, String ... filenames) throws IOException
 	{
-		super(new File(filename));
-		m_totalLines = Files.lines(Paths.get(filename)).count();
+		super(1);
+		m_filenames = filenames;
+		long total_lines = 0;
+		for (String filename : filenames)
+		{
+			total_lines += Files.lines(Paths.get(filename)).count();
+		}
+		m_totalLines = total_lines;
 		m_printStream = ps;
-		m_updateInterval = 1; //m_totalLines / 1000;
+		m_updateInterval = m_totalLines / 1000;
+		m_scanner = null;
 	}
 
 	@Override
 	protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
 	{
-		boolean b = super.compute(inputs, outputs);
+		if (m_scanner == null || !m_scanner.hasNextLine())
+		{
+			if (!nextFile())
+			{
+				m_printStream.print("\r\033[K"); // Flush line
+				return false;
+			}
+		}
+		String line = m_scanner.nextLine();
 		if (m_inputCount % m_updateInterval == 0)
 		{
 			double progress = (double) m_inputCount / (double) m_totalLines;
 			printProgressBar(progress);
 		}
 		m_inputCount++;
-		if (!b)
+		outputs.add(new Object[] {line});
+		return true;
+	}
+	
+	protected boolean nextFile()
+	{
+		m_currentFileIndex++;
+		if (m_currentFileIndex >= m_filenames.length)
 		{
-			m_printStream.print("\r\033[K"); // Flush line
+			return false;
 		}
-		return b;
+		try
+		{
+			if (m_scanner != null)
+			{
+				m_scanner.close();
+			}
+			m_scanner = new Scanner(new File(m_filenames[m_currentFileIndex]));
+			return true;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	/**
@@ -88,6 +141,10 @@ public class ReadLinesStatus extends ReadLines
 	 */
 	protected void printProgressBar(double progress)
 	{
+		if (m_printStream == null)
+		{
+			return;
+		}
 		int width = 30;  // Width of the progress bar
 		int filled = (int) (progress * width);
 		int unfilled = width - filled;
@@ -103,5 +160,22 @@ public class ReadLinesStatus extends ReadLines
 		bar.append("]");
 		m_printStream.print("\r" + bar.toString() + " " + String.format("%d", (int) (progress * 100)) + "%");
 		m_printStream.flush();
+	}
+
+	@Override
+	public ReadLinesStatus duplicate(boolean with_state)
+	{
+		if (with_state)
+		{
+			throw new UnsupportedOperationException("Cannot duplicate with state");
+		}
+		try
+		{
+			return new ReadLinesStatus(m_printStream, m_filenames);
+		}
+		catch (IOException e)
+		{
+			throw new ProcessorException(e);
+		}
 	}
 }

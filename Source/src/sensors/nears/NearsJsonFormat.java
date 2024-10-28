@@ -252,9 +252,9 @@ public class NearsJsonFormat implements EventFormat
 	}
 	
 	@Override
-	public JsonLineFeeder getFeeder(String filename, PrintStream out) throws IOException
+	public JsonLineFeeder getFeeder(PrintStream out, String ... filenames) throws IOException
 	{
-		return new JsonLineFeeder(new FileInputStream(new File(filename)));
+		return new JsonLineFeeder(new FileInputStream(new File(filenames[0])));
 	}
 
 	/**

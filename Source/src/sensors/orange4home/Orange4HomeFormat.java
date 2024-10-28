@@ -17,7 +17,6 @@
  */
 package sensors.orange4home;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -263,12 +262,11 @@ public class Orange4HomeFormat implements LabeledEventFormat
 	}
 
 	@Override
-	public GroupProcessor getFeeder(String filename, PrintStream os) throws IOException
+	public GroupProcessor getFeeder(PrintStream os, String ... filenames) throws IOException
 	{
-		InputStream is = new FileInputStream(filename);
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
-			ReadLines r = os == null ? new ReadLines(is) : new ReadLinesStatus(filename, os);
+			ReadLinesStatus r = new ReadLinesStatus(os, filenames);
 			OrangeTupleFeeder f = new OrangeTupleFeeder();
 			Connector.connect(r, f);
 			g.associateOutput(0, f, 0);
