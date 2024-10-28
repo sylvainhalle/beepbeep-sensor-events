@@ -53,6 +53,7 @@ import sensors.EventFormat;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
 import sensors.examples.nears.PowerLaw.ExcursionEpisode;
+import sensors.house.PowerState;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
@@ -98,9 +99,9 @@ public class PowerLawPlot
 		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 		connect(f, 0, get_ts, 0);
 		// Branch 2: P/VI ratio
-		ApplyFunction to_f = new ApplyFunction(new PowerLaw.EventAsFunction());
+		ApplyFunction to_f = new ApplyFunction(new PowerState.EventAsFunction(format));
 		connect(f, 1, to_f, 0);
-		Integrate in = new Integrate(new PowerLaw.PowerState());
+		Integrate in = new Integrate(new PowerState());
 		connect(to_f, in);
 		ApplyFunction pvi = new ApplyFunction(new PowerLaw.PVIRatio());
 		connect(in, pvi);

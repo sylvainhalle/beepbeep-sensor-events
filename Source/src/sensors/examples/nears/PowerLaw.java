@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -51,6 +51,7 @@ import sensors.EventFormat;
 import sensors.MultiDaySource;
 import sensors.PrettyPrint;
 import sensors.examples.nears.PowerLaw.ExcursionEpisode;
+import sensors.house.PowerState;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsLogRepository;
 import sensors.nears.NearsMultiDaySource;
@@ -80,17 +81,17 @@ public class PowerLaw
 		FilterOn fil = new FilterOn(new FunctionTree(Booleans.or,
 				new FunctionTree(Booleans.or,
 						new FunctionTree(Equals.instance, format.sensorString(), new Constant("instant_current")),
-            new FunctionTree(Equals.instance, format.sensorString(), new Constant("instant_voltage"))),
+						new FunctionTree(Equals.instance, format.sensorString(), new Constant("instant_voltage"))),
 				new FunctionTree(Equals.instance, format.sensorString(), new Constant("instant_power"))));
 		connect(feeder, fil);
-		
+
 		Slice slice = new Slice(format.sensorPlacement(), new GroupProcessor(1, 1) {{
 			Fork f = new Fork();
 			// Branch 1: timestamp
 			ApplyFunction get_ts = new ApplyFunction(format.timestamp());
 			connect(f, 0, get_ts, 0);
 			// Branch 2: P/VI ratio
-			ApplyFunction to_f = new ApplyFunction(new EventAsFunction());
+			ApplyFunction to_f = new ApplyFunction(new PowerState.EventAsFunction(format));
 			connect(f, 1, to_f, 0);
 			Integrate in = new Integrate(new PowerState());
 			connect(to_f, in);
@@ -123,224 +124,6 @@ public class PowerLaw
 	}
 
 	/**
-	 * A composite object maintaining the latest values of current, voltage
-	 * and power for a sensor.
-	 */
-	protected static class PowerState implements Duplicable
-	{
-		/**
-		 * The current value of the sensor.
-		 */
-		protected double m_current = -1;
-
-		/**
-		 * The voltage value of the sensor.
-		 */
-		protected double m_voltage = -1;
-
-		/**
-		 * The power value of the sensor.
-		 */
-		protected double m_power = -1;
-
-		/**
-		 * Sets the current value of the sensor.
-		 * @param current The current value
-		 */
-		public void setCurrent(double current)
-		{
-			m_current = current;
-		}
-
-		/**
-		 * Sets the voltage value of the sensor.
-		 * @param voltage The voltage value
-		 */
-		public void setVoltage(double voltage)
-		{
-			m_voltage = voltage;
-		}
-
-		/**
-		 * Sets the power value of the sensor.
-		 * @param power The power value
-		 */
-		public void setPower(double power)
-		{
-			m_power = power;
-		}
-
-		/**
-		 * Gets the current value of the sensor.
-		 * @return The current value
-		 */
-		public double getCurrent()
-		{
-			return m_current;
-		}
-
-		/**
-		 * Gets the voltage value of the sensor.
-		 * @return The voltage value
-		 */
-		public double getVoltage()
-		{
-			return m_voltage;
-		}
-
-		/**
-		 * Gets the power value of the sensor.
-		 * @return The power value
-		 */
-		public double getPower()
-		{
-			return m_power;
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "I = " + m_current + ", V = " + m_voltage + ", P = " + m_power;
-		}
-
-		@Override
-		public PowerState duplicate()
-		{
-			return duplicate(false);
-		}
-
-		@Override
-		public PowerState duplicate(boolean with_state)
-		{
-			PowerState ps = new PowerState();
-			if (with_state)
-			{
-				ps.m_current = m_current;
-				ps.m_voltage = m_voltage;
-				ps.m_power = m_power;
-			}
-			return ps;
-		}
-	}
-
-	/**
-	 * A function that sets the power value in a {@link PowerState} object.
-	 */
-	protected static class SetPower extends UnaryFunction<PowerState,PowerState>
-	{
-		/**
-		 * The value to set.
-		 */
-		protected double m_value;
-
-		public SetPower(double value)
-		{
-			super(PowerState.class, PowerState.class);
-			m_value = value;
-		}
-
-		@Override
-		public PowerState getValue(PowerState x)
-		{
-			x.setPower(m_value);
-			return x;
-		}
-	}
-
-	/**
-	 * A function that sets the voltage value in a {@link PowerState} object.
-	 */
-	protected static class SetVoltage extends UnaryFunction<PowerState,PowerState>
-	{
-		/**
-		 * The value to set.
-		 */
-		protected double m_value;
-
-		public SetVoltage(double value)
-		{
-			super(PowerState.class, PowerState.class);
-			m_value = value;
-		}
-
-		@Override
-		public PowerState getValue(PowerState x)
-		{
-			x.setVoltage(m_value);
-			return x;
-		}
-	}
-
-	/**
-	 * A function that sets the current value in a {@link PowerState} object.
-	 */
-	protected static class SetCurrent extends UnaryFunction<PowerState,PowerState>
-	{
-		/**
-		 * The value to set.
-		 */
-		protected double m_value;
-
-		public SetCurrent(double value)
-		{
-			super(PowerState.class, PowerState.class);
-			m_value = value;
-		}
-
-		@Override
-		public PowerState getValue(PowerState x)
-		{
-			x.setCurrent(m_value);
-			return x;
-		}
-	}
-
-	/**
-	 * Converts a sensor event into a function that sets the current, voltage or
-	 * power value in a {@link PowerState} object.
-	 */
-	protected static class EventAsFunction extends UnaryFunction<Object,Function>
-	{
-		/**
-		 * Creates a new instance of the function.
-		 */
-		public EventAsFunction()
-		{
-			super(Object.class, Function.class);
-		}
-
-		@Override
-		public Function getValue(Object x)
-		{
-			String quantity;
-			double value;
-			{
-				Object[] out = new Object[1];
-				format.sensorString().evaluate(new Object[] {x}, out);
-				quantity = (String) out[0];
-			}
-			{
-				Object[] out = new Object[1];
-				format.stateString().evaluate(new Object[] {x}, out);
-				value = Double.parseDouble((String) out[0]);
-			}
-			if (quantity.equals("instant_current"))
-			{
-				return new SetCurrent(value);
-			}
-			if (quantity.equals("instant_voltage"))
-			{
-				return new SetVoltage(value);
-			}
-			if (quantity.equals("instant_power"))
-			{
-				return new SetPower(value);
-			}
-			throw new FunctionException("Unknown quantity: " + quantity);
-		}
-	}
-	
-	/**
 	 * For a given {@link PowerState}, computes the ratio P / (IV). This ratio
 	 * should be close to 1 if the power law is respected.
 	 */
@@ -350,7 +133,7 @@ public class PowerLaw
 		{
 			super(PowerState.class, Number.class);
 		}
-		
+
 		@Override
 		public Number getValue(PowerState x)
 		{
@@ -361,7 +144,7 @@ public class PowerLaw
 			return x.getPower() / (x.getCurrent() * x.getVoltage());
 		}
 	}
-	
+
 	public static class ExcursionEpisode extends SynchronousProcessor
 	{
 		protected long m_beginTs = -1;
