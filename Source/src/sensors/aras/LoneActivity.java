@@ -28,17 +28,24 @@ import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.functions.FunctionTree;
 import ca.uqac.lif.cep.io.Print;
+import ca.uqac.lif.cep.tmf.FilterOn;
+import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tmf.Window;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.util.Bags;
+import ca.uqac.lif.cep.util.Booleans;
 import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Maps;
+import ca.uqac.lif.cep.util.NthElement;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.functions.IdentityFunction;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.fs.FileSystemException;
+import sensors.patterns.CounterPattern;
+import sensors.patterns.SuccessivePattern;
 
 import static ca.uqac.lif.cep.Connector.connect;
 
@@ -52,52 +59,53 @@ public class LoneActivity
 {
 	/* The adapter for the event format. */
 	protected static final ArasFormat format = new ArasFormatHouseA();
-	
+
 	protected static final ArasLogRepository fs = new ArasLogRepository("House A");
-	
-	protected static final int s_windowWidth = 50;
-	
+
+	protected static final int s_windowWidth = 10;
+
 	protected static final int s_threshold = 1;
-	
+
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
 		/* Define the input and output file. */
 		fs.open();
-		Processor feeder = format.getFeeder(null, fs.getLogFiles());
+		Processor feeder = format.getRawFeeder(null, fs.getLogFiles());
 		OutputStream os = fs.writeTo("LoneActivities.txt");
-		
+
 		/* Create the pipeline. */
-		Pump p = (Pump) connect(feeder,
-				new GroupProcessor(1,1) {{
-					ApplyFunction f = new ApplyFunction(format.activityString(0));
-					Window win = new Window(new GroupProcessor(1, 1) {{
-						Slice s = new Slice(new IdentityFunction(1), new GroupProcessor(1, 1) {{
-							TurnInto one = new TurnInto(1);
-							Cumulate sum = new Cumulate(Numbers.addition);
-							connect(one, sum);
-							addProcessors(one, sum);
-							associateInput(one);
-							associateOutput(sum);
-						}});
-						addProcessors(s);
-						associateInput(s);
-						associateOutput(s);
-          }}, s_windowWidth);
-					connect(f, win);
-					ApplyFunction filter = new ApplyFunction(new Maps.FilterMap(new FunctionTree(Numbers.isLessOrEqual, StreamVariable.Y, new Constant(s_threshold))));
-					connect(win, filter);
-					ApplyFunction not_empty = new ApplyFunction(new FunctionTree(Equals.instance, new FunctionTree(Bags.getSize, Maps.values), new Constant(1)));
-					connect(filter, not_empty);
-					addProcessors(f, win, filter); //, not_empty);
-					associateInput(f);
-					associateOutput(filter);
-				}},
-				new Pump());
+		Fork fk = new Fork();
+		connect(feeder, fk);
+		CounterPattern cnt = new CounterPattern();
+		connect(fk, 0, cnt, 0);
+
+		ApplyFunction f = new ApplyFunction(new FetchAttribute(ArasFormat.P_ACTIVITY1));
+		connect(fk, 1, f, 0);
+		Window win = new Window(new Slice(new IdentityFunction(1), new GroupProcessor(1, 1) {{
+				TurnInto one = new TurnInto(1);
+				Cumulate sum = new Cumulate(Numbers.addition);
+				connect(one, sum);
+				addProcessors(one, sum);
+				associateInput(one);
+				associateOutput(sum);
+		}}), s_windowWidth);
+		connect(f, win);
+		ApplyFunction filter = new ApplyFunction(new Maps.FilterMap(new FunctionTree(Numbers.isLessOrEqual, StreamVariable.Y, new Constant(s_threshold))));
+		connect(win, filter);
+		ApplyFunction to_list = new ApplyFunction(new Bags.ToList(2));
+		connect(cnt, 0, to_list, 0);
+		connect(filter, 0, to_list, 1);
+		FilterOn not_empty = new FilterOn(new FunctionTree(Equals.instance, new FunctionTree(Bags.getSize, new FunctionTree(Maps.values, new NthElement(1))), new Constant(1)));
+		connect(to_list, not_empty);
+		SuccessivePattern succ = new SuccessivePattern(new FunctionTree(Booleans.and, new FunctionTree(new NthElement(1), StreamVariable.X), new FunctionTree(new NthElement(1), StreamVariable.Y)));
+		connect(not_empty, succ);
+		Pump p = new Pump();
+		connect(succ, p);
 		connect(p, new Print.Println(new PrintStream(os)));
-		
+
 		/* Run the pipeline. */
 		p.run();
-		
+
 		/* Close the resources. */
 		os.close();
 		fs.close();

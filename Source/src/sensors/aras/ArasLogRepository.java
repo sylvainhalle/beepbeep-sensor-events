@@ -42,7 +42,7 @@ public class ArasLogRepository extends LogRepository
 	public String[] getLogFiles() throws FileSystemException
 	{
 		List<String> list = new ArrayList<String>();
-		for (int i = 1; i < 50; i++)
+		for (int i = 1; i < 3; i++)
 		{
 			String filename = "DAY_" + i + ".txt";
 			if (!this.isFile(filename))

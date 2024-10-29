@@ -53,22 +53,22 @@ public class ReadLinesStatus extends Source
 	 * The interval (in number of events) at which the progress bar is updated.
 	 */
 	protected final long m_updateInterval;
-	
+
 	/**
 	 * The name of the file(s) to read from.
 	 */
 	protected final String[] m_filenames;
-	
+
 	/**
 	 * The index of the current file being read.
 	 */
-	protected int m_currentFileIndex = 0;
-	
+	protected int m_currentFileIndex;
+
 	/**
 	 * The scanner used to read the current file.
 	 */
 	protected Scanner m_scanner;
-	
+
 	/**
 	 * Creates a new instance of the processor.
 	 * @param filenames The name(s) of the local file(s) to read from
@@ -88,6 +88,7 @@ public class ReadLinesStatus extends Source
 		m_printStream = ps;
 		m_updateInterval = m_totalLines / 1000;
 		m_scanner = null;
+		m_currentFileIndex = -1;
 	}
 
 	@Override
@@ -97,7 +98,10 @@ public class ReadLinesStatus extends Source
 		{
 			if (!nextFile())
 			{
-				m_printStream.print("\r\033[K"); // Flush line
+				if (m_printStream != null)
+				{
+					m_printStream.print("\r\033[K"); // Flush line
+				}
 				return false;
 			}
 		}
@@ -111,10 +115,11 @@ public class ReadLinesStatus extends Source
 		outputs.add(new Object[] {line});
 		return true;
 	}
-	
+
 	protected boolean nextFile()
 	{
 		m_currentFileIndex++;
+		System.out.println(m_inputCount + "," + m_currentFileIndex);
 		if (m_currentFileIndex >= m_filenames.length)
 		{
 			return false;

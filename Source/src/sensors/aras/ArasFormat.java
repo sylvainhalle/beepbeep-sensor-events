@@ -17,6 +17,10 @@
  */
 package sensors.aras;
 
+import java.io.IOException;
+import java.io.PrintStream;
+
+import ca.uqac.lif.cep.Processor;
 import sensors.MultiResidentLabeledEventFormat;
 
 public abstract class ArasFormat implements MultiResidentLabeledEventFormat
@@ -77,4 +81,14 @@ public abstract class ArasFormat implements MultiResidentLabeledEventFormat
 	 * event.
 	 */
 	public static final String P_ACTIVITY2 = "activity2";
+	
+	/**
+	 * Gets a processor instance that produces "raw" (integrated) events from the
+	 * ARAS input files.
+	 * @param ps The print stream to which to write progress information
+	 * @param filenames The names of the input files
+	 * @return A processor instance
+	 * @throws IOException If an error occurs while reading the files
+	 */
+	public abstract Processor getRawFeeder(PrintStream ps, String ... filenames) throws IOException;
 }

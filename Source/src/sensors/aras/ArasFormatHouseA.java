@@ -58,7 +58,7 @@ public class ArasFormatHouseA extends ArasFormat
 	public static final String[] S_SENSORS = new String[] {
 			"Photocell", "Photocell", "IR", "Force Sensor", "Force Sensor", "Distance", "Distance", "Photocell", "Photocell", "Photocell", "Photocell", "Contact Sensor", "Contact Sensor", "Contact Sensor", "Sonar Distance", "Sonar Distance", "Distance", "Distance", "Temperature", "Force Sensor"
 	};
-	
+
 	/**
 	 * The subject corresponding to each of the first 20 columns of the
 	 * dataset.
@@ -66,7 +66,7 @@ public class ArasFormatHouseA extends ArasFormat
 	public static final String[] S_SUBJECT = new String[] {
 			"Wardrobe", "Convertible Couch", "TV receiver", "Couch", "Couch", "Chair", "Chair", "Fridge", "Kitchen Drawer", "Wardrobe", "Bathroom Cabinet", "House Door", "Bathroom Door", "Shower Cabinet Door", "Hall", "Kitchen", "Tap", "Water Closet", "Kitchen", "Bed"
 	};
-	
+
 	/**
 	 * The list of activities contained in the dataset. The string at index i is
 	 * the activity corresponding to the integer i in the log.
@@ -74,7 +74,7 @@ public class ArasFormatHouseA extends ArasFormat
 	public static final String[] S_ACTIVITIES = new String[] {
 			"Other", "Going Out", "Preparing Breakfast", "Having Breakfast", "Preparing Lunch", "Having Lunch", "Preparing Dinner", "Having Dinner", "Washing Dishes", "Having Snack", "Sleeping", "Watching TV", "Studying", "Having Shower", "Toileting", "Napping", "Using Internet", "Reading Book", "Laundry", "Shaving", "Brushing Teeth", "Talking on the Phone", "Listening to Music", "Cleaning", "Having Conversation", "Having Guest", "Changing Clothes"
 	};
-	
+
 	/**
 	 * The time at which the dataset is arbitrarily set to start. The Aras
 	 * dataset does not specify any date, but only seconds elapsed from an
@@ -204,7 +204,7 @@ public class ArasFormatHouseA extends ArasFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLines r = new ReadLines(is);
-			ArasMapFeeder f = new ArasMapFeeder();
+			ArasUnpackFeeder f = new ArasUnpackFeeder();
 			Connector.connect(r, f);
 			g.associateOutput(0, f, 0);
 		}
@@ -217,7 +217,20 @@ public class ArasFormatHouseA extends ArasFormat
 		GroupProcessor g = new GroupProcessor(0, 1);
 		{
 			ReadLinesStatus r = new ReadLinesStatus(os, filenames);
-			ArasMapFeeder f = new ArasMapFeeder();
+			ArasUnpackFeeder f = new ArasUnpackFeeder();
+			Connector.connect(r, f);
+			g.associateOutput(0, f, 0);
+		}
+		return g;
+	}
+
+	@Override
+	public GroupProcessor getRawFeeder(PrintStream os, String ... filenames) throws IOException
+	{
+		GroupProcessor g = new GroupProcessor(0, 1);
+		{
+			ReadLinesStatus r = new ReadLinesStatus(os, filenames);
+			ArasFeeder f = new ArasFeeder();
 			Connector.connect(r, f);
 			g.associateOutput(0, f, 0);
 		}
@@ -229,10 +242,50 @@ public class ArasFormatHouseA extends ArasFormat
 	{
 		return new FetchAttribute(index == 0 ? P_ACTIVITY1 : P_ACTIVITY2);
 	}
-	
-	public static class ArasMapFeeder extends SynchronousProcessor
+
+	/**
+	 * Reads text lines from an ARAS data file and produces a single "compound"
+	 * event containing all the sensor readings in that line.
+	 */
+	public static class ArasFeeder extends SynchronousProcessor
 	{
-		public ArasMapFeeder()
+		public ArasFeeder()
+		{
+			super(1, 1);
+		}
+
+		@Override
+		protected boolean compute(Object[] inputs, Queue<Object[]> outputs)
+		{
+			int in_c = m_inputCount++;
+			String[] parts = ((String) inputs[0]).split(" ");
+			TupleMap event = new TupleMap();
+			for (int i = 0; i < 20; i++)
+			{
+				event.put(S_NAMES[i], parts[i].compareTo("0") == 0 ? S_OFF : S_ON);
+			}
+			event.put(P_TIMESTAMP, START_TIME + (long) in_c * 1000);
+			event.put(P_ACTIVITY1, S_ACTIVITIES[Integer.parseInt(parts[20].trim()) - 1]);
+			event.put(P_ACTIVITY2, S_ACTIVITIES[Integer.parseInt(parts[21].trim()) - 1]);
+			outputs.add(new Object[] {event});
+			return true;
+		}
+
+		@Override
+		public ArasFeeder duplicate(boolean with_state)
+		{
+			throw new UnsupportedOperationException("This feeder cannot be duplicated");
+		}
+	}
+
+	/**
+	 * Reads text lines from an ARAS data file and unpacks them into individual
+	 * events for each sensor. In House A, there are 20 sensor readings in each
+	 * line, thus each line is unpacked into 20 events.
+	 */
+	public static class ArasUnpackFeeder extends SynchronousProcessor
+	{
+		public ArasUnpackFeeder()
 		{
 			super(1, 1);
 		}
@@ -262,7 +315,7 @@ public class ArasFormatHouseA extends ArasFormat
 		}
 
 		@Override
-		public ArasMapFeeder duplicate(boolean with_state)
+		public ArasUnpackFeeder duplicate(boolean with_state)
 		{
 			throw new UnsupportedOperationException("This feeder cannot be duplicated");
 		}
