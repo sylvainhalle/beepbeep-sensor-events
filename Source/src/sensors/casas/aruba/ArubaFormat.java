@@ -266,6 +266,6 @@ public class ArubaFormat extends CasasTxtFormat
 	@Override
 	public Function isTemperature()
 	{
-		return new FunctionTree(Strings.startsWith, new FunctionTree(stateString(), StreamVariable.X), new Constant("T"));
+		return new FunctionTree(Strings.startsWith, new FunctionTree(sensorId(), StreamVariable.X), new Constant("T"));
 	}
 }
