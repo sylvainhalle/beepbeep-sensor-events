@@ -36,7 +36,6 @@ import ca.uqac.lif.cep.tmf.Window;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.util.Bags;
 import ca.uqac.lif.cep.util.Booleans;
-import ca.uqac.lif.cep.util.Equals;
 import ca.uqac.lif.cep.util.Maps;
 import ca.uqac.lif.cep.util.NthElement;
 import ca.uqac.lif.cep.util.Numbers;
@@ -92,15 +91,19 @@ public class LoneActivity
 		connect(f, win);
 		ApplyFunction filter = new ApplyFunction(new Maps.FilterMap(new FunctionTree(Numbers.isLessOrEqual, StreamVariable.Y, new Constant(s_threshold))));
 		connect(win, filter);
+		SuccessivePattern succ = new SuccessivePattern(new FunctionTree(Booleans.and,
+				new FunctionTree(Numbers.isGreaterOrEqual, new FunctionTree(Bags.getSize, new FunctionTree(Maps.values, StreamVariable.X)), new Constant(1)),
+				new FunctionTree(Numbers.isGreaterOrEqual, new FunctionTree(Bags.getSize, new FunctionTree(Maps.values, StreamVariable.Y)), new Constant(1))
+				));
+		connect(filter, succ);
 		ApplyFunction to_list = new ApplyFunction(new Bags.ToList(2));
 		connect(cnt, 0, to_list, 0);
-		connect(filter, 0, to_list, 1);
-		FilterOn not_empty = new FilterOn(new FunctionTree(Equals.instance, new FunctionTree(Bags.getSize, new FunctionTree(Maps.values, new NthElement(1))), new Constant(1)));
+		connect(succ, 0, to_list, 1);
+		FilterOn not_empty = new FilterOn(new NthElement(1));
 		connect(to_list, not_empty);
-		SuccessivePattern succ = new SuccessivePattern(new FunctionTree(Booleans.and, new FunctionTree(new NthElement(1), StreamVariable.X), new FunctionTree(new NthElement(1), StreamVariable.Y)));
-		connect(not_empty, succ);
+
 		Pump p = new Pump();
-		connect(succ, p);
+		connect(not_empty, p);
 		connect(p, new Print.Println(new PrintStream(os)));
 
 		/* Run the pipeline. */

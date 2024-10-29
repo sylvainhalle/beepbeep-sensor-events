@@ -34,6 +34,7 @@ import ca.uqac.lif.cep.tmf.Fork;
 import ca.uqac.lif.cep.tmf.Pump;
 import ca.uqac.lif.cep.tmf.Slice;
 import ca.uqac.lif.cep.tmf.Window;
+import ca.uqac.lif.cep.tmf.WindowFunction;
 import ca.uqac.lif.cep.tuples.FetchAttribute;
 import ca.uqac.lif.cep.util.Bags;
 import ca.uqac.lif.cep.util.Booleans;
@@ -42,6 +43,7 @@ import ca.uqac.lif.cep.util.Maps;
 import ca.uqac.lif.cep.util.NthElement;
 import ca.uqac.lif.cep.util.Numbers;
 import ca.uqac.lif.cep.functions.IdentityFunction;
+import ca.uqac.lif.cep.functions.RaiseArity;
 import ca.uqac.lif.cep.functions.StreamVariable;
 import ca.uqac.lif.cep.functions.TurnInto;
 import ca.uqac.lif.fs.FileSystemException;
@@ -59,12 +61,12 @@ import static ca.uqac.lif.cep.Connector.connect;
  * 
  * @author Sylvain Hallé
  */
-public class LoneActivity
+public class LoneActivityAlt
 {
 	/* The adapter for the event format. */
 	protected static final HHFormat format = new HHFormat();
 
-	protected static final LogRepository fs = new HHLogRepository("hh130");
+	protected static final LogRepository fs = new HHLogRepository("hh115");
 
 	protected static final int s_windowWidth = 50;
 
@@ -74,7 +76,7 @@ public class LoneActivity
 	{
 		/* Define the input and output file. */
 		fs.open();
-		InputStream is = fs.readFrom("hh130.ann.txt");
+		InputStream is = fs.readFrom("hh115.ann.txt");
 		Processor feeder = format.getFeeder(is);
 		OutputStream os = fs.writeTo("LoneActivities.txt");
 
@@ -87,17 +89,11 @@ public class LoneActivity
 
 		ApplyFunction f = new ApplyFunction(new FetchAttribute(HHFormat.TXT_ACTIVITY));
 		connect(fk, 1, f, 0);
-		Window win = new Window(new Slice(new IdentityFunction(1), new GroupProcessor(1, 1) {{
-			TurnInto one = new TurnInto(1);
-			Cumulate sum = new Cumulate(Numbers.addition);
-			connect(one, sum);
-			addProcessors(one, sum);
-			associateInput(one);
-			associateOutput(sum);
-		}}), s_windowWidth);
+		WindowFunction win = new WindowFunction(new RaiseArity(3, new FunctionTree(Booleans.and,
+				new FunctionTree(Booleans.not, new FunctionTree(Equals.instance, StreamVariable.X, StreamVariable.Y)),
+				new FunctionTree(Booleans.not, new FunctionTree(Equals.instance, StreamVariable.Y, StreamVariable.Z))
+				)));
 		connect(f, win);
-		ApplyFunction filter = new ApplyFunction(new Maps.FilterMap(new FunctionTree(Numbers.isLessOrEqual, StreamVariable.Y, new Constant(s_threshold))));
-		connect(win, filter);
 		/*
 		SuccessivePattern succ = new SuccessivePattern(new FunctionTree(Booleans.and,
 				new FunctionTree(Equals.instance, new FunctionTree(Bags.getSize, new FunctionTree(Maps.values, StreamVariable.X)), new Constant(1)),
@@ -107,7 +103,7 @@ public class LoneActivity
 		*/
 		ApplyFunction to_list = new ApplyFunction(new Bags.ToList(2));
 		connect(cnt, 0, to_list, 0);
-		connect(filter, 0, to_list, 1);
+		connect(win, 0, to_list, 1);
 		//FilterOn not_empty = new FilterOn(new NthElement(1));
 		//connect(to_list, not_empty);
 
