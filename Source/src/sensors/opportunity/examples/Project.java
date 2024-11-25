@@ -26,25 +26,20 @@ import java.io.PrintStream;
 
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
-import ca.uqac.lif.cep.functions.Cumulate;
 import ca.uqac.lif.cep.io.Print;
 import ca.uqac.lif.cep.tmf.Fork;
-import ca.uqac.lif.cep.tmf.KeepLast;
 import ca.uqac.lif.cep.tmf.Pump;
-import ca.uqac.lif.cep.tmf.Trim;
-import ca.uqac.lif.cep.util.Booleans;
-import ca.uqac.lif.cep.util.Numbers;
+import ca.uqac.lif.cep.tuples.FetchAttribute;
+import ca.uqac.lif.cep.tuples.MergeScalars;
 import ca.uqac.lif.fs.FileSystemException;
 import sensors.LogRepository;
 import sensors.opportunity.OpportunityFormat;
 import sensors.opportunity.OpportunityLogRepository;
 
 /**
- * Determines if a log is such that all its events are ordered by timestamp.
- * The pipeline outputs a single Boolean value depending on whether this
- * condition is satisfied or not for a given log.
+ * Extracts the accelerometric data of a specific sensor.
  */
-public class MonotonicTimestamps
+public class Project
 {
 	/* The adapter for the event format. */
 	protected static OpportunityFormat format = new OpportunityFormat();
@@ -54,28 +49,30 @@ public class MonotonicTimestamps
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
+		String dataset_nb = "2"; // 1, 2, 3, or 4
+		String sensor_name = "KNIFE1";
+		
 		fs.open();
-		InputStream is = fs.readFrom("S4-ADL1.dat");
-		OutputStream os = fs.writeTo("ts.txt");
+		InputStream is = fs.readFrom("S" + dataset_nb +"-ADL1.dat");
+		OutputStream os = fs.writeTo("proj_" + sensor_name + ".csv");
 		Processor feeder = format.getRawFeeder(is);
 
-		ApplyFunction get_ts = new ApplyFunction(format.timestamp());
-		connect(feeder, get_ts);
-		Fork f1 = new Fork(2);
-		connect(get_ts, f1);
-		ApplyFunction gt = new ApplyFunction(Numbers.isLessOrEqual);
-		connect(f1, 0, gt, 0);
-		Trim t = new Trim(1);
-		connect(f1, 1, t, 0);
-		connect(t, 0, gt, 1);
-		Cumulate all = new Cumulate(Booleans.and);
-		connect(gt, all);
+		Fork f1 = new Fork(3);
+		connect(feeder, f1);
+		ApplyFunction x = new ApplyFunction(new FetchAttribute("Accelerometer " + sensor_name + " accX"));
+		connect(f1, 0, x, 0);
+		ApplyFunction y = new ApplyFunction(new FetchAttribute("Accelerometer " + sensor_name + " accY"));
+		connect(f1, 1, y, 0);
+		ApplyFunction z = new ApplyFunction(new FetchAttribute("Accelerometer " + sensor_name + " accZ"));
+		connect(f1, 2, z, 0);
+		ApplyFunction merge = new ApplyFunction(new MergeScalars("x", "y", "z"));
+		connect(x, 0, merge, 0);
+		connect(y, 0, merge, 1);
+		connect(z, 0, merge, 2);
 		Pump p = new Pump();
-		connect(all, p);
-		KeepLast kl = new KeepLast();
-		connect(p, kl);
+		connect(merge, p);
 		Print print = new Print.Println(new PrintStream(os));
-		connect(kl, print);
+		connect(p, print);
 		
 		/* Run the pipeline. */
 		p.run();
