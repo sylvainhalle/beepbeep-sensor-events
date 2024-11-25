@@ -15,42 +15,23 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors.aras;
+package sensors.opportunity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import ca.uqac.lif.fs.FileSystemException;
 import sensors.LogRepository;
 
 /**
  * A file system that is open directly on the local folder where the data files
- * for the Aras dataset reside.
+ * for the Opportunity datasets reside.
  */
-public class ArasLogRepository extends LogRepository
+public class OpportunityLogRepository extends LogRepository
 {
 	/**
 	 * The (root) folder name where the data file is located.
 	 */
-	protected static final String FOLDER = "data/aras";
+	protected static final String FOLDER = "data/opportunity/dataset";
 
-	public ArasLogRepository(String sub_folder)
+	public OpportunityLogRepository()
 	{
-		super(FOLDER + "/" + sub_folder);
-	}
-	
-	public String[] getLogFiles() throws FileSystemException
-	{
-		List<String> list = new ArrayList<String>();
-		for (int i = 1; i < 50; i++)
-		{
-			String filename = "DAY_" + i + ".txt";
-			if (!this.isFile(filename))
-			{
-				break;
-			}
-			list.add(m_root + "/" + filename);
-		}
-		return list.toArray(new String[list.size()]);
+		super(FOLDER);
 	}
 }
