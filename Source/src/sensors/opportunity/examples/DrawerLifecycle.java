@@ -39,7 +39,7 @@ import sensors.opportunity.OpportunityLogRepository;
 /**
  * Extracts the accelerometric data of a specific sensor.
  */
-public class Project
+public class DrawerLifecycle
 {
 	/* The adapter for the event format. */
 	protected static OpportunityFormat format = new OpportunityFormat();
@@ -49,8 +49,8 @@ public class Project
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
-		String dataset_nb = "3"; // 1, 2, 3, or 4
-		String sensor_name = "FRIDGE";
+		String dataset_nb = "2"; // 1, 2, 3, or 4
+		String sensor_name = "LOWERDRAWER";
 		
 		fs.open();
 		InputStream is = fs.readFrom("S" + dataset_nb +"-ADL1.dat");
@@ -59,14 +59,15 @@ public class Project
 
 		Fork f1 = new Fork(4);
 		connect(feeder, f1);
-		ApplyFunction x = new ApplyFunction(new FetchAttribute("REED SWITCH FRIDGE S3"));
+		ApplyFunction x = new ApplyFunction(new FetchAttribute("REED SWITCH LOWERDRAWER S3"));
 		connect(f1, 0, x, 0);
-		ApplyFunction y = new ApplyFunction(new FetchAttribute("REED SWITCH FRIDGE S2"));
+		ApplyFunction y = new ApplyFunction(new FetchAttribute("REED SWITCH LOWERDRAWER S2"));
 		connect(f1, 1, y, 0);
-		ApplyFunction z = new ApplyFunction(new FetchAttribute("REED SWITCH FRIDGE S1"));
+		ApplyFunction z = new ApplyFunction(new FetchAttribute("REED SWITCH LOWERDRAWER S1"));
 		connect(f1, 2, z, 0);
 		ApplyFunction t = new ApplyFunction(format.timestamp());
 		connect(f1, 3, t, 0);
+		
 		ApplyFunction merge = new ApplyFunction(new MergeScalars("x", "y", "z", "t"));
 		connect(x, 0, merge, 0);
 		connect(y, 0, merge, 1);

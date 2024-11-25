@@ -46,10 +46,14 @@ import sensors.opportunity.OpportunityLogRepository;
 import sensors.patterns.PlotPattern;
 
 /**
- * Calculates the speed deduced from the accelerometer data.
+ * Calculates the angular position deduced from the gyroscope data.
+ * Unfortunately, the dataset does not specify the units of the gyroscope
+ * values. We will assume that they are in mrad/s (since the documentation
+ * does indicate that the original value (whatever that is, we suspect
+ * rad/s) is multiplied by 1000.
  * @author Sylvain Hallé
  */
-public class CheckAccelerometer
+public class CheckGyroscope
 {
 	/* The adapter for the event format. */
 	protected static OpportunityFormat format = new OpportunityFormat();
@@ -61,21 +65,27 @@ public class CheckAccelerometer
 	{
 		boolean call_gp = true, integrate = false;;
 		
-		String dataset_nb = "2"; // 1, 2, 3, or 4
-		String sensor_name = "MILK";
-		String unit_type = "Accelerometer";
-		//String unit_type = "InertialMeasurementUnit";
+		String dataset_nb = "1"; // 1, 2, 3, or 4
+		String sensor_name = "BACK";
+		//String unit_type = "Accelerometer";
+		String unit_type = "InertialMeasurementUnit";
 
 		fs.open();
 		InputStream is = fs.readFrom("S" + dataset_nb +"-ADL1.dat");
-		OutputStream os = fs.writeTo(unit_type + "_" + dataset_nb + "_" + sensor_name + (call_gp ? ".png" : ".gp"));
+		OutputStream os = fs.writeTo(unit_type + "_gyro_" + dataset_nb + "_" + sensor_name + (call_gp ? ".png" : ".gp"));
 		Processor feeder = format.getRawFeeder(is);
 		PlotPattern plot = new PlotPattern(new String[] {"t", "x", "y", "z"},
 				new Scatterplot().withPoints(false).withLines(true),
 				new ApplyFunction(new FunctionTree(Numbers.division, format.timestamp(), new Constant(1000))),
-				new IntegrateAcceleration(unit_type + " " + sensor_name + " accX"),
-				new IntegrateAcceleration(unit_type + " " + sensor_name + " accY"),
-				new IntegrateAcceleration(unit_type + " " + sensor_name + " accZ"));
+				/*
+				new ApplyFunction(new FetchAttributeOrDefault(unit_type + " " + sensor_name + " gyroX", 0)),
+				new ApplyFunction(new FetchAttributeOrDefault(unit_type + " " + sensor_name + " gyroY", 0)),
+				new ApplyFunction(new FetchAttributeOrDefault(unit_type + " " + sensor_name + " gyroZ", 0))
+				*/
+				new IntegrateAcceleration(unit_type + " " + sensor_name + " gyroX"),
+				new IntegrateAcceleration(unit_type + " " + sensor_name + " gyroY"),
+				new IntegrateAcceleration(unit_type + " " + sensor_name + " gyroZ")
+				);
 		connect(feeder, plot);
 		ApplyFunction to_bytes = new ApplyFunction(ToBytes.instance);
 		connect(plot, to_bytes);
@@ -128,9 +138,13 @@ public class CheckAccelerometer
 					new FunctionTree(format.timestamp(), StreamVariable.Y)));
 			connect(trim, 0, duration, 0);
 			connect(fork2, 1, duration, 1);
-			ApplyFunction speed_delta = new ApplyFunction(new FunctionTree(Numbers.multiplication,
+			ApplyFunction speed_delta = new ApplyFunction(new FunctionTree(Numbers.division,
+					new FunctionTree(Numbers.multiplication,
 					StreamVariable.X, new FunctionTree(
-							new FetchAttributeOrDefault(sensor, 0), StreamVariable.Y)));
+							new FetchAttributeOrDefault(sensor, 0), StreamVariable.Y)),
+					new Constant(2 * Math.PI * 1000000f)));
+			// We divide by 2 * pi * 1M, since time is in ms and angular velocity is in mrad/s,
+			// in order to get the number of complete "turns".
 			connect(duration, 0, speed_delta, 0);
 			connect(fork1, 1, speed_delta, 1);
 			Cumulate integrate = new Cumulate(Numbers.addition);
