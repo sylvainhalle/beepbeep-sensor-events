@@ -59,7 +59,7 @@ public class Project
 
 		Fork f1 = new Fork(4);
 		connect(feeder, f1);
-		ApplyFunction x = new ApplyFunction(new FetchAttribute("REED SWITCH FRIDGE S3"));
+		ApplyFunction x = new ApplyFunction(new FetchAttribute("HL_Activity"));
 		connect(f1, 0, x, 0);
 		ApplyFunction y = new ApplyFunction(new FetchAttribute("REED SWITCH FRIDGE S2"));
 		connect(f1, 1, y, 0);
@@ -67,7 +67,7 @@ public class Project
 		connect(f1, 2, z, 0);
 		ApplyFunction t = new ApplyFunction(format.timestamp());
 		connect(f1, 3, t, 0);
-		ApplyFunction merge = new ApplyFunction(new MergeScalars("x", "y", "z", "t"));
+		ApplyFunction merge = new ApplyFunction(new MergeScalars("HL_Activity", "y", "z", "t"));
 		connect(x, 0, merge, 0);
 		connect(y, 0, merge, 1);
 		connect(z, 0, merge, 2);

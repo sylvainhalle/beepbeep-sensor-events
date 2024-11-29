@@ -1,6 +1,6 @@
 /*
     Processing of sensor events with BeepBeep
-    Copyright (C) 2023-2024 Sylvain Hallé
+    Copyright (C) 2023-2024 Sylvain Hallé, Rania Taleb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published
@@ -15,46 +15,31 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sensors;
+package sensors.kasteren.examples;
 
-/**
- * A utility class that associates an event to the timestamp it
- * contains. This allows the {@link TreeMap} to sort them.
- */
-public class TimedEvent implements Comparable<TimedEvent>
+import static ca.uqac.lif.cep.Connector.connect;
+
+import ca.uqac.lif.cep.io.Print;
+import ca.uqac.lif.cep.tmf.Pump;
+import sensors.kasteren.KasterenEventFormat;
+import sensors.kasteren.KasterenEventFormat.KasterenFeeder;
+
+public class OverlappingEpisodes
 {
-	protected final long m_timestamp;
 
-	protected final Object m_event;
-
-	public TimedEvent(long timestamp, Object e)
-	{
-		super();
-		m_timestamp = timestamp;
-		m_event = e;
-	}
+	protected static final KasterenEventFormat s_format = new KasterenEventFormat();
 	
-	public Object getEvent()
+	public static void main(String[] args)
 	{
-		return m_event;
-	}
-	
-	public long getTimestamp()
-	{
-		return m_timestamp;
+		KasterenFeeder feeder = s_format.getFeeder(null);
+		
+		Pump p = new Pump();
+		connect(feeder, p);
+		Print print = new Print.Println();
+		connect(p, print);
+		
+		p.run();
+
 	}
 
-	@Override
-	public int compareTo(TimedEvent e)
-	{
-		if (m_timestamp == e.m_timestamp)
-		{
-			return 0;
-		}
-		if (m_timestamp > e.m_timestamp)
-		{
-			return 1;
-		}
-		return -1;
-	}
 }
