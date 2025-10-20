@@ -33,13 +33,16 @@ import ca.uqac.lif.cep.tmf.Fork;
 
 public class CoOccurs extends GroupProcessor
 {
-	protected final long m_width;
+	protected final long m_width; // width of the window
 	
-	protected final Function m_functionTimestamp;
+	protected final Function m_functionTimestamp; // a function that extracts the timestamp from an event
 	
-	protected final Processor m_condition;
+	/*we shall define a few processors that evaluate different conditions on an input stream 
+	 * and produce their output as a stream of boolean values */
 	
-	protected final Processor[] m_conditions;
+	protected final Processor m_condition; // trigger processor returns TRUE at index i if a window of co-occurrence should occur around the event at i
+	
+	protected final Processor[] m_conditions; // these processors must detect the presence of each condition that must be observed within the co-occurrence window
 	
 	public CoOccurs(long width, Function f_ts, Processor w_cond, Processor ... conditions)
 	{

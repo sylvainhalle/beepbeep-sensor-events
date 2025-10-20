@@ -20,9 +20,11 @@ package sensors.house.examples;
 import static ca.uqac.lif.cep.Connector.connect;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.ApplyFunction;
 import ca.uqac.lif.cep.functions.Constant;
 import ca.uqac.lif.cep.functions.FunctionTree;
@@ -39,6 +41,8 @@ import sensors.MultiDaySource;
 import sensors.house.House;
 import sensors.nears.NearsJsonFormat;
 import sensors.nears.NearsMultiDaySource;
+import sensors.orange4home.Orange4HomeFormat;
+import sensors.orange4home.Orange4HomeLogRepository;
 
 /**
  * Calculates a stream of snapshots of the house's state using integration.
@@ -50,7 +54,11 @@ public class InstantSnapshot
 	/**
 	 *  The adapter for the event format.
 	 */
-	protected static final EventFormat format = new NearsJsonFormat();
+
+	protected static final LogRepository fs = new Orange4HomeLogRepository();
+	
+	/* The adapter for the event format. */
+	protected static final Orange4HomeFormat format = new Orange4HomeFormat();
 	
 	public static void main(String[] args) throws FileSystemException, IOException
 	{
@@ -58,9 +66,13 @@ public class InstantSnapshot
 		int first_day = 3, last_day = 3;
 
 		/* Define the input and output file. */
-		FileSystem fs = new LogRepository("0105").open();
-		MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
-		OutputStream os = fs.writeTo("InstantSnapshot.html");
+		//FileSystem fs = new LogRepository("data/0105").open();
+		//MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
+		fs.open();
+		InputStream is = fs.readFrom("o4h_all_events.csv");
+		Processor feeder = format.getFeeder(is);
+		OutputStream os = fs.writeTo("acts-dup.txt");
+		
 		
 		/* Create the pipeline. */
 		Pump p = new Pump();
@@ -69,7 +81,8 @@ public class InstantSnapshot
 		connect(p, filter);
 		ApplyFunction to_delta = new ApplyFunction(new House.EventToHouseDelta(format));
 		connect(filter, to_delta);
-		Integrate instant = new Integrate(new House());
+		Integrate instant = new Integrate(new House()); // integrate is a processor
+		//System.out.print(instant.toString());
 		connect(to_delta, instant);
 		connect(instant, new HtmlPrint(new PrintStream(os)));
 		p.run();

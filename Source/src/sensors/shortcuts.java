@@ -20,7 +20,7 @@ package sensors;
 import java.io.IOException;
 import java.util.List;
 
-import ca.uqac.lif.cep.CallAfterConnect;
+
 import ca.uqac.lif.cep.Processor;
 import ca.uqac.lif.cep.functions.Function;
 import ca.uqac.lif.cep.functions.FunctionTree;

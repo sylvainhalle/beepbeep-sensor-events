@@ -54,7 +54,10 @@ public class StoveFlowWhileOff
     int first_day = 4, last_day = 4;
 
     /* Define the input and output file. */
-    FileSystem fs = new LogRepository("0105").open();
+    FileSystem fs = new LogRepository("data/0105").open();
+    //System.out.println("Working directory: " + System.getProperty("user.dir"));
+    //System.out.println("Expected file path: " + new java.io.File("0105", "4.json").getAbsolutePath());
+  
     MultiDaySource feeder = new NearsMultiDaySource(fs, first_day, last_day);
     OutputStream os = fs.writeTo("InstantSnapshot.html");
     
@@ -69,6 +72,8 @@ public class StoveFlowWhileOff
     		new Maps.Get("stove_monitoring_devices_binder", new Device()), 
     		new FunctionTree(new Maps.Get("stove", new Subject()), 
     				new Maps.Get("kitchen", new Location()))));
+    
+    System.out.println(e1.toString());
     connect(house, e1);
     
     connect(e1, new HtmlPrint(new PrintStream(os)));

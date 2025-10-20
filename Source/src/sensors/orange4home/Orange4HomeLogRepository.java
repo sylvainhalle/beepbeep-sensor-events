@@ -32,7 +32,7 @@ public class Orange4HomeLogRepository extends LogRepository
 	/**
 	 * The folder name where the data file is located.
 	 */
-	protected static final String FOLDER = "data/orange4home";
+	protected static final String FOLDER = "data";
 
 	public Orange4HomeLogRepository()
 	{

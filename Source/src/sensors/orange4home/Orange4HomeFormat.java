@@ -146,6 +146,12 @@ public class Orange4HomeFormat implements LabeledEventFormat
 	{
 		return new FunctionTree(DateToTimestampOrange.instance, new FetchAttribute(DATE_TIME));
 	}
+	
+	@Override
+	public Function timestampString()
+	{
+	    return new FetchAttribute(DATE_TIME);
+	}
 
 	@Override
 	public Function stateString()

@@ -248,4 +248,6 @@ public interface EventFormat
 		f.evaluate(new Object[] {input}, outs);
 		return outs[0];
 	}
+
+	Function timestampString();
 }

@@ -29,7 +29,7 @@ public class NearsLogRepository extends LogRepository
 	 * The folder name where the data files are located. Make sure to change this
 	 * to the actual path on your computer!
 	 */
-	protected static final String FOLDER = "data/nears";
+	protected static final String FOLDER = "data";
 	
 	public NearsLogRepository()
 	{
